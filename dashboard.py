@@ -353,15 +353,16 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
 
         # Data quality warnings
-        quality_issues = step3[step3['DataQuality'].notna()]
-        if len(quality_issues) > 0:
-            st.markdown("### ⚠️ Data Quality Warnings")
-            for _, row in quality_issues.iterrows():
-                st.markdown(f"""
-                <div class="data-warning">
-                    <strong>{row['Airline']} → {row['LastStop']}</strong>: {row['DataQuality']}
-                </div>
-                """, unsafe_allow_html=True)
+        if 'DataQuality' in step3.columns:
+            quality_issues = step3[step3['DataQuality'].notna()]
+            if len(quality_issues) > 0:
+                st.markdown("### ⚠️ Data Quality Warnings")
+                for _, row in quality_issues.iterrows():
+                    st.markdown(f"""
+                    <div class="data-warning">
+                        <strong>{row['Airline']} → {row['LastStop']}</strong>: {row['DataQuality']}
+                    </div>
+                    """, unsafe_allow_html=True)
 
         # Top routes by density
         col1, col2 = st.columns(2)
