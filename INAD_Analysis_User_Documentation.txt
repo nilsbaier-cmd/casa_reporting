@@ -1,0 +1,735 @@
+================================================================================
+                    INAD ANALYSIS TOOL - USER DOCUMENTATION
+                           Enhanced Version 2.0
+================================================================================
+
+                              TABLE OF CONTENTS
+
+    1. Introduction and Purpose
+    2. The Three-Step Analysis Process
+    3. Understanding the Enhanced Features
+    4. The Dashboard Interface
+    5. Interpreting Results for Legal Review
+    6. Why the New Approach is More Robust
+    7. Configuration Parameters
+    8. Glossary of Terms
+
+================================================================================
+                        1. INTRODUCTION AND PURPOSE
+================================================================================
+
+WHAT IS THIS TOOL?
+
+The INAD Analysis Tool is designed to identify airlines and routes with
+systematically elevated rates of inadmissible passengers (INADs). Its purpose
+is to support legal review by distinguishing between:
+
+    - Isolated incidents that may not require action
+    - Systemic patterns that warrant investigation or enforcement
+
+The tool processes two data sources:
+    1. INAD records: Cases of passengers refused entry at Swiss borders
+    2. BAZL passenger data: Total passenger volumes by airline and route
+
+By comparing INAD counts against passenger volumes, we can identify which
+airlines or routes have disproportionately high INAD rates relative to their
+traffic, suggesting potential systemic issues with passenger screening.
+
+
+WHO SHOULD USE THIS DOCUMENTATION?
+
+This documentation is written for members of the legal team who will review
+the analysis results and make decisions about further investigation, warnings,
+or enforcement actions. Technical knowledge of statistics or programming is
+not required.
+
+
+================================================================================
+                    2. THE THREE-STEP ANALYSIS PROCESS
+================================================================================
+
+The analysis follows a progressive filtering approach, each step narrowing
+down the focus to identify the most significant cases.
+
+
+STEP 1: AIRLINE-LEVEL SCREENING (Prüfstufe 1)
+--------------------------------------------------------------------------------
+
+PURPOSE: Identify airlines with a meaningful number of INAD cases
+
+HOW IT WORKS:
+    - Count the total number of INADs for each airline in the semester
+    - Flag airlines with 6 or more INADs (configurable threshold)
+    - Airlines below this threshold are excluded from further analysis
+
+WHY 6 INADs?
+    - A small number of INADs (1-5) could easily be random occurrences
+    - Setting a minimum threshold ensures we focus on statistically
+      meaningful patterns rather than isolated incidents
+    - This threshold can be adjusted based on policy requirements
+
+EXAMPLE:
+    Airline LX: 105 INADs  → Passes Step 1 (≥6)
+    Airline XY:   3 INADs  → Does not pass (below threshold)
+
+
+STEP 2: ROUTE-LEVEL SCREENING (Prüfstufe 2)
+--------------------------------------------------------------------------------
+
+PURPOSE: From airlines identified in Step 1, identify specific routes with
+         elevated INAD counts
+
+HOW IT WORKS:
+    - For each airline that passed Step 1, count INADs by route (origin airport)
+    - Flag routes with 6 or more INADs
+    - Routes below this threshold are excluded from Step 3
+
+WHY ANALYZE BY ROUTE?
+    - An airline might have high total INADs but concentrated on one route
+    - This helps identify specific problem origins rather than penalizing
+      an airline's entire operation
+    - Example: An airline might have excellent compliance on most routes
+      but issues with passengers from one specific origin
+
+EXAMPLE:
+    LX → DUB (Dublin):     10 INADs  → Passes Step 2
+    LX → LHR (London):      7 INADs  → Passes Step 2
+    LX → CDG (Paris):       2 INADs  → Does not pass
+
+
+STEP 3: DENSITY ANALYSIS (Prüfstufe 3)
+--------------------------------------------------------------------------------
+
+PURPOSE: Compare INAD counts against passenger volumes to identify
+         disproportionately high rates
+
+HOW IT WORKS:
+    1. For each route from Step 2, retrieve the passenger count (PAX)
+    2. Calculate the INAD density: (INADs / PAX) × 1000
+       This gives INADs per 1,000 passengers
+    3. Calculate the threshold (average or median of all densities)
+    4. Flag routes above the threshold for legal review
+
+WHY USE DENSITY INSTEAD OF RAW COUNTS?
+    - Raw INAD counts favor large airlines unfairly
+    - A route with 20 INADs and 500,000 passengers (0.04‰) is performing
+      better than a route with 10 INADs and 20,000 passengers (0.50‰)
+    - Density provides a fair, relative comparison across different
+      traffic volumes
+
+EXAMPLE:
+    Route A: 10 INADs, 100,000 PAX → Density = 0.10‰
+    Route B:  8 INADs,  40,000 PAX → Density = 0.20‰
+
+    Route B has fewer INADs but a HIGHER density, indicating a more
+    significant issue relative to its traffic.
+
+
+================================================================================
+                   3. UNDERSTANDING THE ENHANCED FEATURES
+================================================================================
+
+The enhanced version introduces several improvements to make the analysis
+more reliable and actionable for legal review.
+
+
+3.1 ROBUST THRESHOLD CALCULATION
+--------------------------------------------------------------------------------
+
+PREVIOUS APPROACH:
+    Used simple arithmetic mean (average) to calculate the threshold
+
+PROBLEM:
+    The mean is highly sensitive to outliers. A single extreme value can
+    dramatically skew the threshold, leading to incorrect classifications.
+
+    Example from actual data (2016 H2):
+    One route had incomplete passenger data, showing only 51 passengers
+    but 7 INADs, creating an artificial density of 137‰. This single
+    outlier raised the average from ~0.1‰ to 22.9‰, making all other
+    routes appear to be performing well when they might not be.
+
+NEW APPROACH:
+    Uses MEDIAN as the default threshold calculation
+
+    - The median is the middle value when all densities are sorted
+    - It is not affected by extreme outliers
+    - One bad data point cannot skew the entire analysis
+
+    Alternative: TRIMMED MEAN
+    - Removes the top and bottom 10% of values before averaging
+    - Less extreme than median but still robust against outliers
+
+
+3.2 MINIMUM PASSENGER THRESHOLD
+--------------------------------------------------------------------------------
+
+PREVIOUS APPROACH:
+    All routes were included regardless of passenger volume
+
+PROBLEM:
+    Routes with very few passengers produce unreliable density calculations.
+    6 INADs on a route with only 100 passengers gives 60‰ density, but this
+    is statistically meaningless - it could easily be random variation.
+
+NEW APPROACH:
+    Routes with fewer than 5,000 passengers are marked as UNRELIABLE
+
+    - These routes are still shown but flagged with a warning
+    - They are excluded from threshold calculation
+    - Legal team can see them but should interpret with caution
+    - The 5,000 threshold is configurable based on policy needs
+
+
+3.3 PRIORITY CLASSIFICATION SYSTEM
+--------------------------------------------------------------------------------
+
+PREVIOUS APPROACH:
+    Routes were simply marked as "above average" or "below average"
+
+PROBLEM:
+    This binary classification doesn't distinguish between:
+    - Routes barely above average (minor concern)
+    - Routes significantly above average (major concern)
+    - Routes with data quality issues (uncertain)
+
+NEW APPROACH:
+    Four-tier priority classification:
+
+    🔴 HIGH PRIORITY
+       Requires immediate legal review
+       Criteria (ALL must be met):
+       - Density ≥ 1.5× the threshold
+       - Density ≥ 0.10‰ (absolute minimum)
+       - At least 10 INAD cases
+       - Reliable data (≥5,000 passengers)
+
+    🟠 WATCH LIST
+       Should be monitored; may escalate
+       Criteria:
+       - Density ≥ threshold
+       - Does not meet all HIGH PRIORITY criteria
+
+    🟢 CLEAR
+       No action required
+       Criteria:
+       - Density < threshold
+
+    ⚪ UNRELIABLE
+       Data quality concerns; interpret with caution
+       Criteria:
+       - Fewer than 5,000 passengers
+       - Or incomplete passenger data
+
+
+3.4 CONFIDENCE SCORING
+--------------------------------------------------------------------------------
+
+PREVIOUS APPROACH:
+    No indication of how reliable each result was
+
+PROBLEM:
+    A route with 6 INADs and 10,000 passengers has much less statistical
+    certainty than a route with 50 INADs and 200,000 passengers. Legal
+    team had no way to assess this.
+
+NEW APPROACH:
+    Each route receives a confidence score from 0-100%
+
+    Based on:
+    - INAD count (more cases = more confidence)
+    - Passenger volume (more passengers = more reliable denominator)
+
+    Interpretation:
+    - 0-30%:  Low confidence, treat results with caution
+    - 30-60%: Medium confidence, results are indicative
+    - 60-100%: High confidence, results are reliable
+
+    Higher confidence scores mean you can trust the density calculation
+    more when making legal decisions.
+
+
+3.5 DATA QUALITY CHECKS
+--------------------------------------------------------------------------------
+
+PREVIOUS APPROACH:
+    No validation of input data quality
+
+PROBLEM:
+    The 2016 H2 case showed that incomplete passenger data (only 1 month
+    recorded instead of 6) can produce wildly inaccurate results.
+
+NEW APPROACH:
+    Automatic data quality checks with warnings:
+
+    "Incomplete PAX data (2/6 months)"
+        - Passenger data exists for fewer than 4 of 6 months
+        - Density calculation may be inaccurate
+
+    "Low PAX volume (<5,000)"
+        - Total passengers too low for reliable statistics
+
+    "High variance in monthly PAX data"
+        - Unusual fluctuations in passenger numbers
+        - May indicate data recording issues
+
+    These warnings appear in the dashboard and are included in exports
+    so the legal team is aware of potential data issues.
+
+
+3.6 SYSTEMIC CASE DETECTION
+--------------------------------------------------------------------------------
+
+PREVIOUS APPROACH:
+    Each semester was analyzed independently
+
+PROBLEM:
+    A single semester's results might be a one-time anomaly. True systemic
+    issues would appear repeatedly across multiple time periods.
+
+NEW APPROACH:
+    Multi-semester analysis identifies SYSTEMIC cases:
+
+    Definition: A route is SYSTEMIC if it appears on the WATCH LIST or
+    HIGH PRIORITY in 2 or more consecutive semesters
+
+    Additional information provided:
+    - Total appearances across all semesters
+    - Maximum consecutive appearances
+    - Trend direction (IMPROVING or WORSENING)
+    - Percentage change in density over time
+
+    This helps legal team distinguish between:
+    - One-time issues (may not require action)
+    - Persistent patterns (stronger case for enforcement)
+
+
+3.7 REFUSAL CODE CATEGORIZATION
+--------------------------------------------------------------------------------
+
+PREVIOUS APPROACH:
+    Refusal codes were only used for filtering (excluding certain codes)
+
+NEW APPROACH:
+    Refusal codes are categorized and displayed for each flagged route:
+
+    Categories:
+    - Documentation: Missing or invalid travel documents
+    - Fraud: Forged or falsified documents
+    - Visa: Visa-related issues (expired, wrong type, overstay)
+    - Security: Security concerns, entry bans
+
+    This helps legal team understand the NATURE of the problem:
+    - Documentation issues might suggest training problems
+    - Fraud patterns might suggest organized crime
+    - Visa overstays might suggest specific origin issues
+
+
+================================================================================
+                       4. THE DASHBOARD INTERFACE
+================================================================================
+
+The dashboard provides six main tabs for navigating the analysis:
+
+
+TAB 1: OVERVIEW
+--------------------------------------------------------------------------------
+Purpose: Quick summary of the entire analysis
+
+Contains:
+- Summary metrics (total INADs, counts by priority level)
+- Priority distribution pie chart
+- Confidence score distribution
+- Data quality warnings
+- Top routes by density
+- Refusal category breakdown for flagged routes
+
+
+TAB 2: STEP 1 - AIRLINES
+--------------------------------------------------------------------------------
+Purpose: Review airline-level screening results
+
+Contains:
+- List of all airlines with INAD counts
+- Color-coded status (⚠️ Review / ✅ OK)
+- Summary statistics
+- Distribution histogram showing INAD spread
+
+
+TAB 3: STEP 2 - ROUTES
+--------------------------------------------------------------------------------
+Purpose: Review route-level screening results
+
+Contains:
+- List of all routes with INAD counts
+- Filter to airlines passing Step 1 only
+- Top airports by INAD count
+
+
+TAB 4: STEP 3 - PRIORITY ANALYSIS
+--------------------------------------------------------------------------------
+Purpose: Detailed priority classification with full metrics
+
+Contains:
+- Classification criteria explanation (expandable)
+- Complete route list with:
+  - Airline and destination
+  - INAD count and passenger volume
+  - Density value
+  - Confidence score
+  - Priority classification
+- Interactive scatter plot (density vs. passengers)
+- Summary of HIGH PRIORITY and WATCH LIST counts
+
+
+TAB 5: SYSTEMIC CASES
+--------------------------------------------------------------------------------
+Purpose: Identify persistent patterns across multiple semesters
+
+Contains:
+- Count of confirmed systemic cases
+- Routes flagged multiple times
+- Trend analysis (improving/worsening)
+- Historical chart of flagged routes over time
+- Individual route history viewer
+  - Select any route to see its performance across all semesters
+  - Density trend line
+  - INAD count bars
+
+
+TAB 6: LEGAL SUMMARY
+--------------------------------------------------------------------------------
+Purpose: Export-ready summary for legal team documentation
+
+Contains:
+- Analysis parameters used
+- List of HIGH PRIORITY routes with details
+- List of WATCH LIST routes with details
+- Data quality notes
+- Export buttons:
+  - HIGH PRIORITY routes (CSV)
+  - WATCH LIST routes (CSV)
+  - Full analysis (CSV)
+
+
+SIDEBAR CONFIGURATION
+--------------------------------------------------------------------------------
+The sidebar allows customization of analysis parameters:
+
+Data Configuration:
+- INAD file path
+- BAZL file path
+
+Time Period:
+- Semester selection dropdown
+
+Analysis Parameters:
+- Minimum INAD threshold (default: 6)
+- Minimum PAX for reliable data (default: 5,000)
+- Threshold calculation method (median/trimmed_mean/mean)
+- Minimum density for HIGH PRIORITY (default: 0.10‰)
+- HIGH PRIORITY multiplier (default: 1.5×)
+
+Filters:
+- Filter by specific airlines
+- Filter by specific airports
+
+
+================================================================================
+                  5. INTERPRETING RESULTS FOR LEGAL REVIEW
+================================================================================
+
+RECOMMENDED REVIEW PROCESS
+--------------------------------------------------------------------------------
+
+1. START WITH THE LEGAL SUMMARY TAB
+   - Review HIGH PRIORITY routes first
+   - These have the strongest statistical basis for action
+   - Note the confidence scores - higher is more reliable
+
+2. CHECK FOR SYSTEMIC CASES
+   - Routes appearing as systemic have persisted over time
+   - These represent the strongest cases for enforcement
+   - Review their trend - worsening trends are more concerning
+
+3. REVIEW WATCH LIST FOR CONTEXT
+   - These routes are above average but don't meet all HIGH criteria
+   - May escalate to HIGH PRIORITY next semester
+   - Consider for warning letters or monitoring
+
+4. NOTE DATA QUALITY WARNINGS
+   - Be cautious with UNRELIABLE classifications
+   - If a route has quality warnings, results may not support action
+   - Consider requesting better data before proceeding
+
+5. EXPORT FOR DOCUMENTATION
+   - Use export buttons to create records
+   - Include analysis parameters in your documentation
+
+
+WHAT EACH PRIORITY LEVEL MEANS FOR ACTION
+--------------------------------------------------------------------------------
+
+🔴 HIGH PRIORITY
+   Statistical basis: Strong
+   Recommended action: Formal investigation, potential warning or fine
+   Documentation: Include density, threshold comparison, confidence score
+
+🟠 WATCH LIST
+   Statistical basis: Moderate
+   Recommended action: Monitor, consider informal outreach
+   Documentation: Note for next semester review
+
+🟢 CLEAR
+   Statistical basis: Below threshold
+   Recommended action: No action required
+
+⚪ UNRELIABLE
+   Statistical basis: Insufficient data
+   Recommended action: Do not take enforcement action
+   Documentation: Note data quality issues
+
+
+IMPORTANT CAVEATS
+--------------------------------------------------------------------------------
+
+1. Statistical indicators are not proof
+   - High density indicates a pattern worth investigating
+   - Root cause analysis is still required before action
+
+2. Context matters
+   - Some origins may have inherently higher INAD rates
+   - Consider geopolitical factors, visa regimes, etc.
+
+3. Data limitations
+   - Passenger data may be incomplete for some routes
+   - Always check data quality warnings
+
+4. Threshold is relative
+   - Being above the median means above half of peers
+   - It does not mean the absolute rate is necessarily problematic
+
+
+================================================================================
+               6. WHY THE NEW APPROACH IS MORE ROBUST
+================================================================================
+
+COMPARISON: OLD VS. NEW METHODOLOGY
+--------------------------------------------------------------------------------
+
+ISSUE 1: Outlier Sensitivity
+
+    OLD: One route with bad data could skew the entire semester's results
+
+    NEW: Median-based threshold ignores extreme values
+         Data quality checks flag suspicious data
+         Minimum PAX threshold excludes unreliable routes
+
+    RESULT: Analysis is stable and reproducible
+
+
+ISSUE 2: Binary Classification
+
+    OLD: Routes were either "above average" or "below average"
+         No distinction between marginally above and significantly above
+
+    NEW: Four-tier system with clear criteria
+         HIGH PRIORITY reserved for clearly significant cases
+         WATCH LIST for borderline cases
+         UNRELIABLE for data quality issues
+
+    RESULT: Proportionate response based on severity
+
+
+ISSUE 3: Single Semester View
+
+    OLD: Each semester analyzed in isolation
+         No way to identify persistent vs. one-time issues
+
+    NEW: Systemic case detection across all semesters
+         Trend analysis shows improvement or deterioration
+         Historical view for each route
+
+    RESULT: Better identification of truly systemic problems
+
+
+ISSUE 4: No Confidence Indication
+
+    OLD: All results presented with equal weight
+         No way to know how reliable a calculation was
+
+    NEW: Confidence scores based on sample size
+         Clear warnings for low-confidence results
+
+    RESULT: Legal team can prioritize high-confidence cases
+
+
+ISSUE 5: Hidden Data Problems
+
+    OLD: Data quality issues not detected or reported
+         Wrong conclusions from bad data
+
+    NEW: Automatic quality checks
+         Visible warnings in dashboard
+         Unreliable routes flagged separately
+
+    RESULT: Transparent about limitations
+
+
+STATISTICAL VALIDITY
+--------------------------------------------------------------------------------
+
+The new approach follows established statistical best practices:
+
+1. ROBUST STATISTICS
+   Using median instead of mean is a standard technique in statistics
+   when outliers may be present. It is used in scientific research,
+   financial analysis, and regulatory contexts worldwide.
+
+2. MINIMUM SAMPLE SIZE
+   The 5,000 passenger threshold ensures that density calculations
+   are based on sufficient data. With small samples, random variation
+   can produce misleading results.
+
+3. MULTI-PERIOD ANALYSIS
+   Looking at patterns across multiple semesters reduces the chance
+   of acting on random fluctuations. This is similar to how financial
+   regulators look at trends rather than single data points.
+
+4. CONFIDENCE INTERVALS
+   While not showing formal statistical confidence intervals, the
+   confidence score provides an intuitive measure of reliability
+   that helps non-statisticians interpret results appropriately.
+
+
+================================================================================
+                      7. CONFIGURATION PARAMETERS
+================================================================================
+
+All parameters can be adjusted in the dashboard sidebar. Here is what each
+parameter controls and recommended settings:
+
+
+MINIMUM INAD THRESHOLD (Default: 6)
+--------------------------------------------------------------------------------
+What it does: Sets the minimum number of INADs for Step 1 and Step 2
+Range: 1-20
+
+Recommendations:
+- 6: Standard setting, balances sensitivity and specificity
+- Lower (3-5): More sensitive, catches smaller patterns
+- Higher (8-10): More conservative, only flags clear patterns
+
+
+MINIMUM PAX FOR RELIABLE DATA (Default: 5,000)
+--------------------------------------------------------------------------------
+What it does: Routes with fewer passengers are marked UNRELIABLE
+Range: 1,000-20,000
+
+Recommendations:
+- 5,000: Standard setting, reasonable statistical basis
+- Lower: Include more routes but with less confidence
+- Higher: More conservative, only highest-confidence results
+
+
+THRESHOLD CALCULATION METHOD (Default: Median)
+--------------------------------------------------------------------------------
+Options:
+- Median: Middle value, most robust against outliers (RECOMMENDED)
+- Trimmed Mean: Removes top/bottom 10% then averages
+- Mean: Simple average (NOT RECOMMENDED - sensitive to outliers)
+
+
+MINIMUM DENSITY FOR HIGH PRIORITY (Default: 0.10‰)
+--------------------------------------------------------------------------------
+What it does: Even if above threshold, must exceed this absolute minimum
+Range: 0.05-0.30‰
+
+Recommendations:
+- 0.10‰: Standard setting
+- Lower: More routes qualify as HIGH PRIORITY
+- Higher: Only the most severe cases flagged
+
+
+HIGH PRIORITY MULTIPLIER (Default: 1.5×)
+--------------------------------------------------------------------------------
+What it does: Must be this multiple of threshold for HIGH PRIORITY
+Range: 1.0-3.0
+
+Recommendations:
+- 1.5×: Standard setting (50% above threshold)
+- Lower (1.2-1.3): More sensitive
+- Higher (2.0+): Only extreme cases flagged
+
+
+================================================================================
+                           8. GLOSSARY OF TERMS
+================================================================================
+
+BAZL
+    Bundesamt für Zivilluftfahrt (Swiss Federal Office of Civil Aviation)
+    Source of passenger volume data
+
+Confidence Score
+    A 0-100% score indicating how reliable the density calculation is
+    Based on INAD count and passenger volume
+
+Density (INAD-Dichtewert)
+    INADs per 1,000 passengers: (INAD count / PAX) × 1000
+    Expressed in per-mille (‰)
+
+HIGH PRIORITY
+    Routes requiring immediate legal review
+    Meet all criteria: high density, high INAD count, reliable data
+
+INAD (Inadmissible Passenger)
+    A passenger refused entry at the border
+    Various reasons: documentation, visa, security, etc.
+
+Last Stop
+    The final departure airport before arriving in Switzerland
+    Used to identify the origin of INAD cases
+
+Median
+    The middle value in a sorted list
+    Unlike the mean, it is not affected by extreme values
+
+PAX
+    Passengers (abbreviation used in aviation industry)
+
+Semester
+    Six-month period used for analysis
+    H1: January-June
+    H2: July-December
+
+Systemic Case
+    A route flagged in 2+ consecutive semesters
+    Indicates a persistent pattern rather than one-time issue
+
+Threshold
+    The density value used to separate "above average" from "below"
+    Calculated using median (default) of all reliable route densities
+
+Trimmed Mean
+    An average calculated after removing extreme values
+    More robust than simple mean, less robust than median
+
+UNRELIABLE
+    Classification for routes with insufficient data
+    Should not be used as basis for enforcement action
+
+WATCH LIST
+    Routes above threshold but not meeting all HIGH PRIORITY criteria
+    Should be monitored for potential escalation
+
+
+================================================================================
+                              END OF DOCUMENTATION
+================================================================================
+
+Document Version: 2.0
+Last Updated: December 2024
+Tool Version: Enhanced INAD Analysis Tool 2.0
+
+For technical support or questions about this documentation, contact the
+data analysis team.
