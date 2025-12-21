@@ -1,6 +1,6 @@
 ================================================================================
                     INAD ANALYSIS TOOL - USER DOCUMENTATION
-                           Enhanced Version 2.0
+                           Enhanced Version 2.1
 ================================================================================
 
                               TABLE OF CONTENTS
@@ -9,10 +9,11 @@
     2. The Three-Step Analysis Process
     3. Understanding the Enhanced Features
     4. The Dashboard Interface
-    5. Interpreting Results for Legal Review
-    6. Why the New Approach is More Robust
-    7. Configuration Parameters
-    8. Glossary of Terms
+    5. Multilingual Support
+    6. Interpreting Results for Legal Review
+    7. Why the New Approach is More Robust
+    8. Configuration Parameters
+    9. Glossary of Terms
 
 ================================================================================
                         1. INTRODUCTION AND PURPOSE
@@ -416,7 +417,13 @@ SIDEBAR CONFIGURATION
 --------------------------------------------------------------------------------
 The sidebar allows customization of analysis parameters:
 
+Language Selection:
+- 🌐 Language dropdown at top of sidebar
+- Choose between English, German (Deutsch), or French (Français)
+- All interface elements update immediately
+
 Data Configuration:
+- Upload files or use server files
 - INAD file path
 - BAZL file path
 
@@ -436,7 +443,80 @@ Filters:
 
 
 ================================================================================
-                  5. INTERPRETING RESULTS FOR LEGAL REVIEW
+                       5. MULTILINGUAL SUPPORT
+================================================================================
+
+The dashboard supports three languages to accommodate different users:
+
+
+AVAILABLE LANGUAGES
+--------------------------------------------------------------------------------
+
+🇬🇧 English (EN)
+   - Default language
+   - All interface elements, labels, and messages in English
+
+🇩🇪 Deutsch (DE)
+   - German translation
+   - Terminology adapted for Swiss German usage
+   - "Prüfstufe" terminology for analysis steps
+
+🇫🇷 Français (FR)
+   - French translation
+   - Complete interface translation
+
+
+HOW TO CHANGE LANGUAGE
+--------------------------------------------------------------------------------
+
+1. Look at the top of the sidebar (left side of the dashboard)
+2. Find the 🌐 Language section
+3. Click the dropdown menu
+4. Select your preferred language:
+   - 🇬🇧 English
+   - 🇩🇪 Deutsch
+   - 🇫🇷 Français
+5. The entire interface updates immediately
+
+
+WHAT IS TRANSLATED
+--------------------------------------------------------------------------------
+
+All user-facing elements are translated:
+
+- Page headers and titles
+- Sidebar section headers
+- Menu options and dropdowns
+- Button labels
+- Chart titles and axis labels
+- Tooltips and help text
+- Error messages and warnings
+- Table column headers
+- Export button labels
+- Footer information
+
+
+WHAT IS NOT TRANSLATED
+--------------------------------------------------------------------------------
+
+The following remain in their original form:
+
+- Airline codes (LX, BA, etc.) - these are international standards
+- Airport codes (ZRH, GVA, etc.) - IATA codes are universal
+- Technical terms in exports (column headers in CSV files)
+- Refusal codes (A1n, B1, etc.) - official code designations
+
+
+LANGUAGE PERSISTENCE
+--------------------------------------------------------------------------------
+
+- Your language choice is remembered during your session
+- If you reload the page, you may need to reselect your language
+- The default language is English
+
+
+================================================================================
+                  6. INTERPRETING RESULTS FOR LEGAL REVIEW
 ================================================================================
 
 RECOMMENDED REVIEW PROCESS
@@ -511,7 +591,7 @@ IMPORTANT CAVEATS
 
 
 ================================================================================
-               6. WHY THE NEW APPROACH IS MORE ROBUST
+               7. WHY THE NEW APPROACH IS MORE ROBUST
 ================================================================================
 
 COMPARISON: OLD VS. NEW METHODOLOGY
@@ -576,6 +656,18 @@ ISSUE 5: Hidden Data Problems
     RESULT: Transparent about limitations
 
 
+ISSUE 6: Language Barriers
+
+    OLD: English-only interface
+         Non-English speakers required translation assistance
+
+    NEW: Full multilingual support (EN/DE/FR)
+         Native language interface for all Swiss official languages
+         Immediate language switching
+
+    RESULT: Accessible to all team members
+
+
 STATISTICAL VALIDITY
 --------------------------------------------------------------------------------
 
@@ -603,7 +695,7 @@ The new approach follows established statistical best practices:
 
 
 ================================================================================
-                      7. CONFIGURATION PARAMETERS
+                      8. CONFIGURATION PARAMETERS
 ================================================================================
 
 All parameters can be adjusted in the dashboard sidebar. Here is what each
@@ -663,7 +755,7 @@ Recommendations:
 
 
 ================================================================================
-                           8. GLOSSARY OF TERMS
+                           9. GLOSSARY OF TERMS
 ================================================================================
 
 BAZL
@@ -727,9 +819,9 @@ WATCH LIST
                               END OF DOCUMENTATION
 ================================================================================
 
-Document Version: 2.0
+Document Version: 2.1
 Last Updated: December 2024
-Tool Version: Enhanced INAD Analysis Tool 2.0
+Tool Version: Enhanced INAD Analysis Tool 2.1 (with Multilingual Support)
 
 For technical support or questions about this documentation, contact the
 data analysis team.

@@ -2,6 +2,15 @@
 
 This guide explains how to deploy the INAD Analysis Dashboard to **Streamlit Community Cloud** for secure, cloud-based access.
 
+## ✨ Features
+
+- **Three-step INAD analysis** with priority classification
+- **Multilingual interface**: English, German (Deutsch), French (Français)
+- **Six analysis tabs**: Overview, Step 1-3, Systemic Cases, Legal Summary
+- **Interactive visualizations** with Plotly
+- **CSV exports** for legal documentation
+- **Systemic case detection** across multiple semesters
+
 ## 📋 Prerequisites
 
 1. **GitHub Account** ✅ (You already have this)
@@ -165,7 +174,7 @@ git push
 Common issues:
 - **Missing dependencies**: Check `requirements.txt`
 - **File not found**: Ensure `dashboard.py` is in the root directory
-- **Import errors**: Make sure `inad_analysis.py` is in the repository
+- **Import errors**: Make sure `inad_analysis.py` and `translations.py` are in the repository
 
 ### File Upload Size Limit
 
@@ -224,16 +233,36 @@ git status
 
 ---
 
+## 🌐 Language Support
+
+The dashboard supports three languages:
+
+- 🇬🇧 **English** (default)
+- 🇩🇪 **Deutsch** (German)
+- 🇫🇷 **Français** (French)
+
+### Changing Language
+
+1. Look at the top of the sidebar
+2. Find the 🌐 Language dropdown
+3. Select your preferred language
+4. The entire interface updates immediately
+
+All menus, labels, chart titles, tooltips, and messages are translated.
+
+---
+
 ## 📊 Workflow Summary
 
 ### Regular Usage (Every Semester)
 
 1. **Obtain new data files** from INAD/BAZL sources
 2. **Open your dashboard** at `https://your-app-url.streamlit.app`
-3. **Upload new files** via the sidebar
-4. **Select semester** in the dashboard
-5. **Review analysis** in the tabs
-6. **Export reports** as needed (CSV downloads)
+3. **Select your preferred language** (optional)
+4. **Upload new files** via the sidebar
+5. **Select semester** in the dashboard
+6. **Review analysis** in the tabs
+7. **Export reports** as needed (CSV downloads)
 
 ### Code Updates (Occasional)
 
