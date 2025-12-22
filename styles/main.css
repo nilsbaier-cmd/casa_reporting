@@ -1,0 +1,261 @@
+/*
+ * CASA Dashboard - Orion-Inspired Theme
+ * Modern, professional design with purple/blue gradients and orange accents
+ */
+
+/* ============================================
+   CSS VARIABLES
+   ============================================ */
+:root {
+    --color-primary: #6366F1;
+    --color-primary-light: #818CF8;
+    --color-primary-dark: #4F46E5;
+    --color-accent: #F97316;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-danger: #EF4444;
+    --priority-high: #EF4444;
+    --priority-watch: #F59E0B;
+    --priority-clear: #10B981;
+    --priority-unreliable: #94A3B8;
+    --bg-primary: #F8FAFC;
+    --bg-card: #FFFFFF;
+    --bg-sidebar: #1E293B;
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --text-inverse: #F8FAFC;
+    --border-light: #E2E8F0;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.stApp {
+    background: var(--bg-primary) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.main .block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 1400px !important;
+}
+
+/* ============================================
+   HEADERS
+   ============================================ */
+.main-header {
+    font-size: 2.25rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 0.5rem !important;
+    letter-spacing: -0.025em;
+}
+
+.sub-header {
+    font-size: 1rem !important;
+    color: var(--text-secondary) !important;
+    margin-bottom: 2rem !important;
+}
+
+.section-header {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 1rem !important;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-primary);
+    display: inline-block;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+[data-testid="stSidebar"] {
+    background: var(--bg-sidebar) !important;
+}
+
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] .stSelectbox label,
+[data-testid="stSidebar"] .stSlider label,
+[data-testid="stSidebar"] .stMultiSelect label,
+[data-testid="stSidebar"] .stTextInput label {
+    color: var(--text-inverse) !important;
+}
+
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: var(--text-inverse) !important;
+}
+
+[data-testid="stSidebar"] hr {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ============================================
+   METRICS
+   ============================================ */
+[data-testid="stMetric"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 1.25rem !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+[data-testid="stMetric"] label {
+    color: var(--text-secondary) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: var(--text-primary) !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0.5rem;
+    background: #F1F5F9;
+    padding: 0.5rem;
+    border-radius: var(--radius-lg);
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+    padding: 0.75rem 1.25rem !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+.stTabs [aria-selected="true"] {
+    background: var(--bg-card) !important;
+    color: var(--color-primary) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] {
+    display: none !important;
+}
+
+/* ============================================
+   DATA TABLES
+   ============================================ */
+.stDataFrame {
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden !important;
+}
+
+.stDataFrame th {
+    background: #F1F5F9 !important;
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+}
+
+.stDataFrame td {
+    color: var(--text-primary) !important;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.stButton > button {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.625rem 1.25rem !important;
+    font-weight: 500 !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.stButton > button:hover {
+    box-shadow: var(--shadow-md) !important;
+    opacity: 0.95;
+}
+
+.stDownloadButton > button {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-light) !important;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+.stSelectbox [data-baseweb="select"] > div {
+    background: var(--bg-card) !important;
+    border-color: var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+.stMultiSelect [data-baseweb="tag"] {
+    background: var(--color-primary) !important;
+    border-radius: 4px !important;
+}
+
+/* ============================================
+   CHARTS & MAPS
+   ============================================ */
+[data-testid="stDeckGlJsonChart"] {
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   EXPANDERS
+   ============================================ */
+.streamlit-expanderHeader {
+    background: #F1F5F9 !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 500 !important;
+}
+
+.streamlit-expanderContent {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
+    border-top: none !important;
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+.stAlert {
+    border-radius: var(--radius-lg) !important;
+    border: none !important;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .main-header { font-size: 1.75rem !important; }
+    [data-testid="stMetric"] [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
+}
