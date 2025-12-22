@@ -1,8 +1,4 @@
-"""
-CASA Dashboard Components
-
-Reusable UI components for the CASA Reporting Dashboard.
-"""
+"""CASA Dashboard Components"""
 
 from .globe import (
     create_globe_view,
@@ -13,7 +9,6 @@ from .globe import (
 )
 
 from .stat_cards import (
-    render_stat_card,
     render_priority_summary_cards,
     render_route_detail_card,
     render_globe_legend,
@@ -23,11 +18,10 @@ from .stat_cards import (
 
 __all__ = [
     'create_globe_view',
-    'create_comparison_view',
+    'create_comparison_view', 
     'get_route_statistics',
     'PRIORITY_COLORS',
     'COMPARISON_COLORS',
-    'render_stat_card',
     'render_priority_summary_cards',
     'render_route_detail_card',
     'render_globe_legend',

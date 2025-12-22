@@ -2,20 +2,17 @@
 """
 globe.py - Interactive Globe Visualization Component for CASA Dashboard
 
-Creates an interactive 3D globe view showing flight routes with:
+Creates an interactive map view showing flight routes with:
 - Priority-based coloring
-- Animated pulsing dots along arcs
+- Route arcs to Switzerland
 - Detailed tooltips
-- Historical comparison view
 
-Uses PyDeck (deck.gl wrapper) for Streamlit integration.
+Uses PyDeck with free CartoDB basemap (no API key required).
 """
 
 import pandas as pd
 import pydeck as pdk
 from typing import Dict, List, Optional, Tuple
-import math
-import time
 
 # Priority color mapping (RGBA)
 PRIORITY_COLORS = {
@@ -38,11 +35,12 @@ COMPARISON_COLORS = {
 # Switzerland destination color
 SWITZERLAND_COLOR = [99, 102, 241, 255]  # Indigo
 
-# Arc layer configuration
-ARC_CONFIG = {
-    'width_scale': 2,
-    'width_min_pixels': 1,
-    'width_max_pixels': 8,
+# Free basemap styles (no API key required)
+# Options: 'dark', 'light', 'road', 'satellite'
+BASEMAP_STYLES = {
+    'dark': 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    'light': 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    'voyager': 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
 }
 
 
@@ -55,12 +53,6 @@ def prepare_arc_data(df: pd.DataFrame) -> List[dict]:
     """
     Prepare data for arc layer visualization.
     All routes go to Switzerland.
-    
-    Args:
-        df: DataFrame with route data including coordinates
-    
-    Returns:
-        List of dicts for pydeck ArcLayer
     """
     arc_data = []
     
@@ -68,84 +60,37 @@ def prepare_arc_data(df: pd.DataFrame) -> List[dict]:
         if not row.get('has_coordinates', False):
             continue
         
-        # Get priority color
         priority = row.get('Priority', 'NO_DATA')
         color = get_priority_color(priority)
         
-        # Calculate arc width based on INAD count (scaled)
+        # Arc width based on INAD count
         inad_count = row.get('INAD', 1)
-        width = min(max(inad_count / 3, 1), 10)  # Scale between 1-10
+        width = min(max(inad_count / 2, 2), 12)
         
         arc_data.append({
-            'source_position': [row['origin_lon'], row['origin_lat']],
-            'target_position': [row['dest_lon'], row['dest_lat']],
+            'source_position': [float(row['origin_lon']), float(row['origin_lat'])],
+            'target_position': [float(row['dest_lon']), float(row['dest_lat'])],
             'source_color': color,
             'target_color': SWITZERLAND_COLOR,
             'width': width,
-            'airline': row.get('Airline', 'Unknown'),
-            'last_stop': row.get('LastStop', 'Unknown'),
-            'origin_city': row.get('origin_city', ''),
-            'origin_country': row.get('origin_country', ''),
-            'inad_count': inad_count,
-            'pax': row.get('PAX', 0),
-            'density': round(row.get('Density_permille', 0), 4),
+            'airline': str(row.get('Airline', 'Unknown')),
+            'last_stop': str(row.get('LastStop', 'Unknown')),
+            'origin_city': str(row.get('origin_city', '')),
+            'origin_country': str(row.get('origin_country', '')),
+            'inad_count': int(inad_count),
+            'pax': int(row.get('PAX', 0)),
+            'density': round(float(row.get('Density_permille', 0)), 4),
             'priority': priority,
-            'confidence': row.get('Confidence', 0),
-            'distance_km': round(row.get('distance_km', 0), 0) if row.get('distance_km') else 0,
+            'confidence': int(row.get('Confidence', 0)),
+            'distance_km': int(row.get('distance_km', 0)) if row.get('distance_km') else 0,
         })
     
     return arc_data
 
 
-def generate_animated_points(arc_data: List[dict], num_points_per_arc: int = 3) -> List[dict]:
-    """
-    Generate animated points along arcs for pulsing effect.
-    
-    Args:
-        arc_data: List of arc dictionaries
-        num_points_per_arc: Number of animated points per arc
-    
-    Returns:
-        List of point dictionaries for ScatterplotLayer
-    """
-    points = []
-    current_time = time.time()
-    
-    for arc in arc_data:
-        src = arc['source_position']
-        tgt = arc['target_position']
-        color = arc['source_color']
-        
-        # Generate points along the arc at different positions
-        for i in range(num_points_per_arc):
-            # Calculate position along arc (0 to 1)
-            # Use time-based offset for animation effect
-            base_t = (i + 1) / (num_points_per_arc + 1)
-            
-            # Simple linear interpolation (great circle handled by deck.gl)
-            lon = src[0] + base_t * (tgt[0] - src[0])
-            lat = src[1] + base_t * (tgt[1] - src[1])
-            
-            # Pulse size based on position (larger in middle)
-            pulse_factor = math.sin(base_t * math.pi)
-            
-            points.append({
-                'position': [lon, lat],
-                'color': color[:3] + [int(200 * pulse_factor)],  # Vary alpha
-                'radius': 3000 + 5000 * pulse_factor,  # Vary size
-                'airline': arc['airline'],
-                'last_stop': arc['last_stop'],
-            })
-    
-    return points
-
-
 def prepare_airport_markers(df: pd.DataFrame) -> Tuple[List[dict], dict]:
     """
     Prepare data for airport marker layers.
-    
-    Returns:
-        Tuple of (origin_markers, switzerland_marker)
     """
     from geography import SWITZERLAND
     
@@ -161,12 +106,11 @@ def prepare_airport_markers(df: pd.DataFrame) -> Tuple[List[dict], dict]:
             continue
         seen_origins.add(origin_key)
         
-        # Aggregate stats for this origin across all airlines
+        # Aggregate stats for this origin
         origin_df = df[df['LastStop'] == origin_key]
-        total_inad = origin_df['INAD'].sum() if 'INAD' in origin_df.columns else 0
-        total_pax = origin_df['PAX'].sum() if 'PAX' in origin_df.columns else 0
+        total_inad = int(origin_df['INAD'].sum()) if 'INAD' in origin_df.columns else 0
         
-        # Get worst priority for this origin
+        # Get worst priority
         priorities = origin_df['Priority'].unique() if 'Priority' in origin_df.columns else []
         worst_priority = 'CLEAR'
         for p in ['HIGH_PRIORITY', 'WATCH_LIST', 'UNRELIABLE']:
@@ -176,29 +120,22 @@ def prepare_airport_markers(df: pd.DataFrame) -> Tuple[List[dict], dict]:
         
         color = get_priority_color(worst_priority)
         
-        # Size based on total INAD (scaled)
-        size = min(max(total_inad * 800, 8000), 50000)
-        
         origin_markers.append({
-            'position': [row['origin_lon'], row['origin_lat']],
+            'position': [float(row['origin_lon']), float(row['origin_lat'])],
             'color': color,
-            'radius': size,
+            'radius': min(max(total_inad * 1000, 15000), 80000),
             'iata': origin_key,
-            'city': row.get('origin_city', ''),
-            'country': row.get('origin_country', ''),
-            'total_inad': int(total_inad),
-            'total_pax': int(total_pax),
+            'city': str(row.get('origin_city', '')),
+            'total_inad': total_inad,
             'priority': worst_priority,
-            'airlines': list(origin_df['Airline'].unique()) if 'Airline' in origin_df.columns else [],
         })
     
-    # Switzerland destination marker
+    # Switzerland marker
     switzerland_marker = {
         'position': [SWITZERLAND['lon'], SWITZERLAND['lat']],
         'color': SWITZERLAND_COLOR,
-        'radius': 40000,
+        'radius': 50000,
         'name': 'Switzerland',
-        'is_destination': True,
     }
     
     return origin_markers, switzerland_marker
@@ -207,15 +144,17 @@ def prepare_airport_markers(df: pd.DataFrame) -> Tuple[List[dict], dict]:
 def create_globe_view(df: pd.DataFrame,
                       height: int = 600,
                       show_labels: bool = True,
-                      show_animation: bool = True) -> pdk.Deck:
+                      show_animation: bool = True,
+                      basemap: str = 'dark') -> pdk.Deck:
     """
-    Create an interactive globe visualization.
+    Create an interactive map visualization.
     
     Args:
         df: DataFrame with route data (must have coordinate columns)
         height: Height of the visualization in pixels
         show_labels: Whether to show airport labels
-        show_animation: Whether to show animated points along arcs
+        show_animation: Not used (kept for compatibility)
+        basemap: 'dark', 'light', or 'voyager'
     
     Returns:
         pydeck.Deck object for rendering
@@ -224,16 +163,15 @@ def create_globe_view(df: pd.DataFrame,
     arc_data = prepare_arc_data(df)
     origin_markers, switzerland_marker = prepare_airport_markers(df)
     
-    # View centered on Europe/Switzerland with good coverage of routes
+    # View centered on Europe/Middle East to see routes to Switzerland
     view_state = pdk.ViewState(
-        latitude=40.0,
-        longitude=15.0,
-        zoom=2.0,
-        pitch=40,
+        latitude=42.0,
+        longitude=20.0,
+        zoom=3,
+        pitch=45,
         bearing=0,
     )
     
-    # Layers
     layers = []
     
     # Arc layer for routes
@@ -246,31 +184,12 @@ def create_globe_view(df: pd.DataFrame,
             get_source_color='source_color',
             get_target_color='target_color',
             get_width='width',
-            width_scale=ARC_CONFIG['width_scale'],
-            width_min_pixels=ARC_CONFIG['width_min_pixels'],
-            width_max_pixels=ARC_CONFIG['width_max_pixels'],
             pickable=True,
             auto_highlight=True,
-            get_tilt=15,  # Arc curvature
+            highlight_color=[255, 255, 0, 128],
+            great_circle=True,
         )
         layers.append(arc_layer)
-    
-    # Animated points along arcs (pulsing effect)
-    if show_animation and arc_data:
-        animated_points = generate_animated_points(arc_data, num_points_per_arc=2)
-        if animated_points:
-            pulse_layer = pdk.Layer(
-                'ScatterplotLayer',
-                data=animated_points,
-                get_position='position',
-                get_fill_color='color',
-                get_radius='radius',
-                radius_min_pixels=2,
-                radius_max_pixels=6,
-                pickable=False,
-                opacity=0.8,
-            )
-            layers.append(pulse_layer)
     
     # Origin airport markers
     if origin_markers:
@@ -280,27 +199,22 @@ def create_globe_view(df: pd.DataFrame,
             get_position='position',
             get_fill_color='color',
             get_radius='radius',
-            radius_scale=1,
-            radius_min_pixels=4,
-            radius_max_pixels=15,
             pickable=True,
             auto_highlight=True,
+            opacity=0.8,
             stroked=True,
-            get_line_color=[255, 255, 255, 180],
+            get_line_color=[255, 255, 255, 200],
             line_width_min_pixels=1,
         )
         layers.append(origin_layer)
     
-    # Switzerland destination marker (larger, highlighted)
+    # Switzerland destination marker
     dest_layer = pdk.Layer(
         'ScatterplotLayer',
         data=[switzerland_marker],
         get_position='position',
         get_fill_color='color',
         get_radius='radius',
-        radius_scale=1,
-        radius_min_pixels=10,
-        radius_max_pixels=25,
         pickable=True,
         stroked=True,
         get_line_color=[255, 255, 255, 255],
@@ -308,81 +222,36 @@ def create_globe_view(df: pd.DataFrame,
     )
     layers.append(dest_layer)
     
-    # Text label for Switzerland
-    if show_labels:
-        text_layer = pdk.Layer(
-            'TextLayer',
-            data=[{'position': [switzerland_marker['position'][0], switzerland_marker['position'][1] + 1.5],
-                   'text': '🇨🇭 Switzerland'}],
-            get_position='position',
-            get_text='text',
-            get_size=14,
-            get_color=[255, 255, 255, 255],
-            get_angle=0,
-            get_text_anchor='"middle"',
-            get_alignment_baseline='"center"',
-            billboard=True,
-        )
-        layers.append(text_layer)
+    # Get basemap style
+    map_style = BASEMAP_STYLES.get(basemap, BASEMAP_STYLES['dark'])
     
-    # Tooltip HTML template
-    tooltip_html = '''
-        <div style="
-            background: rgba(30, 41, 59, 0.95); 
-            padding: 12px 16px; 
-            border-radius: 10px; 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            min-width: 220px;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        ">
-            <div style="font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 10px; 
-                        display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 18px;">✈️</span>
-                {airline} → {last_stop}
+    # Tooltip
+    tooltip = {
+        'html': '''
+            <div style="font-family: Arial, sans-serif; padding: 8px;">
+                <b>{airline}</b> → <b>{last_stop}</b><br/>
+                <span style="color: #888;">{origin_city}, {origin_country}</span><br/><br/>
+                <b>INAD:</b> {inad_count}<br/>
+                <b>PAX:</b> {pax}<br/>
+                <b>Density:</b> {density}‰<br/>
+                <b>Distance:</b> {distance_km} km<br/>
+                <b>Confidence:</b> {confidence}%<br/><br/>
+                <b>Priority:</b> {priority}
             </div>
-            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">
-                {origin_city}, {origin_country}
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 13px;">
-                <div style="color: #94a3b8;">INAD:</div>
-                <div style="color: #f1f5f9; font-weight: 600;">{inad_count}</div>
-                <div style="color: #94a3b8;">PAX:</div>
-                <div style="color: #f1f5f9;">{pax:,}</div>
-                <div style="color: #94a3b8;">Density:</div>
-                <div style="color: #f1f5f9;">{density}‰</div>
-                <div style="color: #94a3b8;">Distance:</div>
-                <div style="color: #f1f5f9;">{distance_km:,} km</div>
-                <div style="color: #94a3b8;">Confidence:</div>
-                <div style="color: #f1f5f9;">{confidence}%</div>
-            </div>
-            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(148, 163, 184, 0.2);">
-                <span style="
-                    padding: 4px 10px; 
-                    border-radius: 12px; 
-                    font-size: 11px; 
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                ">
-                    {priority}
-                </span>
-            </div>
-        </div>
-    '''
+        ''',
+        'style': {
+            'backgroundColor': 'rgba(30, 41, 59, 0.95)',
+            'color': 'white',
+            'borderRadius': '8px',
+        }
+    }
     
     # Create deck
     deck = pdk.Deck(
         layers=layers,
         initial_view_state=view_state,
-        map_style='mapbox://styles/mapbox/dark-v10',
-        tooltip={
-            'html': tooltip_html,
-            'style': {
-                'backgroundColor': 'transparent',
-                'border': 'none',
-            }
-        },
+        map_style=map_style,
+        tooltip=tooltip,
         height=height,
     )
     
@@ -394,14 +263,6 @@ def create_comparison_view(current_df: pd.DataFrame,
                            height: int = 500) -> Tuple[pdk.Deck, dict]:
     """
     Create a comparison view showing changes between two semesters.
-    
-    Args:
-        current_df: Current semester data with coordinates
-        previous_df: Previous semester data with coordinates
-        height: Visualization height
-    
-    Returns:
-        Tuple of (pydeck.Deck, comparison_stats dict)
     """
     from geography import SWITZERLAND
     
@@ -432,21 +293,20 @@ def create_comparison_view(current_df: pd.DataFrame,
         
         route_key = (row['Airline'], row['LastStop'])
         
-        # Determine comparison status
         if route_key in new_routes:
             color = COMPARISON_COLORS['new']
             status = 'NEW'
         elif route_key in persistent_routes:
-            # Check if worsening or improving
+            # Check trend
             prev_row = previous_df[(previous_df['Airline'] == row['Airline']) & 
                                    (previous_df['LastStop'] == row['LastStop'])]
             if len(prev_row) > 0:
                 prev_density = prev_row.iloc[0].get('Density_permille', 0)
                 curr_density = row.get('Density_permille', 0)
-                if curr_density > prev_density * 1.1:  # >10% worse
+                if curr_density > prev_density * 1.1:
                     color = COMPARISON_COLORS['worsening']
                     status = 'WORSENING'
-                elif curr_density < prev_density * 0.9:  # >10% better
+                elif curr_density < prev_density * 0.9:
                     color = COMPARISON_COLORS['improving']
                     status = 'IMPROVING'
                 else:
@@ -456,23 +316,21 @@ def create_comparison_view(current_df: pd.DataFrame,
                 color = COMPARISON_COLORS['persistent']
                 status = 'PERSISTENT'
         else:
-            continue  # Skip non-flagged routes in comparison view
+            continue
         
         arc_data.append({
-            'source_position': [row['origin_lon'], row['origin_lat']],
-            'target_position': [row['dest_lon'], row['dest_lat']],
+            'source_position': [float(row['origin_lon']), float(row['origin_lat'])],
+            'target_position': [float(row['dest_lon']), float(row['dest_lat'])],
             'source_color': color,
             'target_color': SWITZERLAND_COLOR,
-            'width': 3,
-            'airline': row.get('Airline', 'Unknown'),
-            'last_stop': row.get('LastStop', 'Unknown'),
-            'origin_city': row.get('origin_city', ''),
+            'width': 4,
+            'airline': str(row.get('Airline', 'Unknown')),
+            'last_stop': str(row.get('LastStop', 'Unknown')),
+            'origin_city': str(row.get('origin_city', '')),
             'status': status,
-            'inad_count': row.get('INAD', 0),
-            'density': round(row.get('Density_permille', 0), 4),
         })
     
-    # Add resolved routes (from previous semester)
+    # Add resolved routes from previous semester
     for _, row in previous_df.iterrows():
         if not row.get('has_coordinates', False):
             continue
@@ -480,20 +338,17 @@ def create_comparison_view(current_df: pd.DataFrame,
         route_key = (row['Airline'], row['LastStop'])
         if route_key in resolved_routes:
             arc_data.append({
-                'source_position': [row['origin_lon'], row['origin_lat']],
-                'target_position': [row['dest_lon'], row['dest_lat']],
+                'source_position': [float(row['origin_lon']), float(row['origin_lat'])],
+                'target_position': [float(row['dest_lon']), float(row['dest_lat'])],
                 'source_color': COMPARISON_COLORS['resolved'],
-                'target_color': [16, 185, 129, 100],  # Faded green
-                'width': 2,
-                'airline': row.get('Airline', 'Unknown'),
-                'last_stop': row.get('LastStop', 'Unknown'),
-                'origin_city': row.get('origin_city', ''),
+                'target_color': [16, 185, 129, 100],
+                'width': 3,
+                'airline': str(row.get('Airline', 'Unknown')),
+                'last_stop': str(row.get('LastStop', 'Unknown')),
+                'origin_city': str(row.get('origin_city', '')),
                 'status': 'RESOLVED',
-                'inad_count': row.get('INAD', 0),
-                'density': round(row.get('Density_permille', 0), 4),
             })
     
-    # Create layers
     layers = []
     
     if arc_data:
@@ -505,10 +360,9 @@ def create_comparison_view(current_df: pd.DataFrame,
             get_source_color='source_color',
             get_target_color='target_color',
             get_width='width',
-            width_scale=2,
             pickable=True,
             auto_highlight=True,
-            get_tilt=15,
+            great_circle=True,
         )
         layers.append(arc_layer)
     
@@ -518,7 +372,7 @@ def create_comparison_view(current_df: pd.DataFrame,
         data=[{
             'position': [SWITZERLAND['lon'], SWITZERLAND['lat']],
             'color': SWITZERLAND_COLOR,
-            'radius': 40000,
+            'radius': 50000,
         }],
         get_position='position',
         get_fill_color='color',
@@ -530,35 +384,29 @@ def create_comparison_view(current_df: pd.DataFrame,
     layers.append(dest_layer)
     
     view_state = pdk.ViewState(
-        latitude=40.0,
-        longitude=15.0,
-        zoom=2.0,
-        pitch=40,
+        latitude=42.0,
+        longitude=20.0,
+        zoom=3,
+        pitch=45,
         bearing=0,
     )
     
-    tooltip_html = '''
-        <div style="background: rgba(30,41,59,0.95); padding: 12px; border-radius: 8px; font-family: sans-serif;">
-            <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 8px;">
-                {airline} → {last_stop}
-            </div>
-            <div style="color: #94a3b8; margin-bottom: 4px;">{origin_city}</div>
-            <div style="margin-top: 8px; padding: 4px 8px; border-radius: 4px; display: inline-block;
-                        font-size: 12px; font-weight: 600;">
-                {status}
-            </div>
-        </div>
-    '''
+    tooltip = {
+        'html': '<b>{airline}</b> → <b>{last_stop}</b><br/>{origin_city}<br/><b>{status}</b>',
+        'style': {
+            'backgroundColor': 'rgba(30, 41, 59, 0.95)',
+            'color': 'white',
+        }
+    }
     
     deck = pdk.Deck(
         layers=layers,
         initial_view_state=view_state,
-        map_style='mapbox://styles/mapbox/dark-v10',
-        tooltip={'html': tooltip_html},
+        map_style=BASEMAP_STYLES['dark'],
+        tooltip=tooltip,
         height=height,
     )
     
-    # Comparison stats
     stats = {
         'new_count': len(new_routes),
         'resolved_count': len(resolved_routes),
@@ -572,55 +420,18 @@ def create_comparison_view(current_df: pd.DataFrame,
 
 
 def get_route_statistics(df: pd.DataFrame) -> dict:
-    """
-    Calculate summary statistics for globe view sidebar.
-    """
+    """Calculate summary statistics for globe view."""
     if df.empty:
         return {}
     
     stats = {
         'total_routes': len(df),
-        'routes_with_coords': df['has_coordinates'].sum() if 'has_coordinates' in df.columns else 0,
-        'total_inad': df['INAD'].sum() if 'INAD' in df.columns else 0,
-        'total_pax': df['PAX'].sum() if 'PAX' in df.columns else 0,
+        'routes_with_coords': int(df['has_coordinates'].sum()) if 'has_coordinates' in df.columns else 0,
+        'total_inad': int(df['INAD'].sum()) if 'INAD' in df.columns else 0,
         'unique_origins': df['LastStop'].nunique() if 'LastStop' in df.columns else 0,
-        'unique_airlines': df['Airline'].nunique() if 'Airline' in df.columns else 0,
     }
     
-    # Priority breakdown
     if 'Priority' in df.columns:
-        priority_counts = df['Priority'].value_counts().to_dict()
-        stats['priority_breakdown'] = priority_counts
-    
-    # Top origins by INAD
-    if 'LastStop' in df.columns and 'INAD' in df.columns:
-        top_origins = df.groupby('LastStop')['INAD'].sum().nlargest(5).to_dict()
-        stats['top_origins'] = top_origins
-    
-    # Top countries
-    if 'origin_country' in df.columns:
-        country_counts = df.groupby('origin_country')['INAD'].sum().nlargest(10).to_dict()
-        stats['top_countries'] = country_counts
+        stats['priority_breakdown'] = df['Priority'].value_counts().to_dict()
     
     return stats
-
-
-if __name__ == "__main__":
-    # Test with sample data
-    test_data = pd.DataFrame([
-        {'Airline': 'TK', 'LastStop': 'IST', 'INAD': 15, 'PAX': 50000, 'Priority': 'HIGH_PRIORITY',
-         'Density_permille': 0.30, 'Confidence': 75, 'origin_lat': 41.28, 'origin_lon': 28.75,
-         'dest_lat': 46.82, 'dest_lon': 8.23, 'origin_city': 'Istanbul', 'origin_country': 'TR',
-         'has_coordinates': True, 'distance_km': 1740},
-        {'Airline': 'EK', 'LastStop': 'DXB', 'INAD': 8, 'PAX': 80000, 'Priority': 'WATCH_LIST',
-         'Density_permille': 0.10, 'Confidence': 85, 'origin_lat': 25.25, 'origin_lon': 55.37,
-         'dest_lat': 46.82, 'dest_lon': 8.23, 'origin_city': 'Dubai', 'origin_country': 'AE',
-         'has_coordinates': True, 'distance_km': 4800},
-    ])
-    
-    deck = create_globe_view(test_data)
-    print("Globe view created successfully")
-    print(f"Layers: {len(deck.layers)}")
-    
-    stats = get_route_statistics(test_data)
-    print(f"Stats: {stats}")
