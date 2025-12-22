@@ -164,6 +164,28 @@ def main():
 
     lang = st.session_state.lang
 
+    # Documentation Links
+    st.sidebar.markdown("---")
+    st.sidebar.markdown(f"### 📚 {t('documentation', lang)}")
+
+    # Determine which PDF to show based on language
+    doc_files = {
+        'en': 'INAD_Analysis_User_Documentation_v2.1.pdf',
+        'de': 'INAD_Analysis_User_Documentation_v2.1_DE.pdf',
+        'fr': 'INAD_Analysis_User_Documentation_v2.1_FR.pdf'
+    }
+
+    doc_file = doc_files.get(lang, doc_files['en'])
+    doc_url = f"https://github.com/nilsbaier-cmd/casa_reporting/raw/main/{doc_file}"
+
+    st.sidebar.markdown(
+        f'<a href="{doc_url}" target="_blank" style="text-decoration: none;">'
+        f'<div style="background-color: #3182CE; color: white; padding: 10px; '
+        f'border-radius: 5px; text-align: center; margin: 5px 0;">'
+        f'📄 {t("view_documentation", lang)}</div></a>',
+        unsafe_allow_html=True
+    )
+
     # Header
     st.markdown(f'<p class="main-header">✈️ {t("main_header", lang)}</p>', unsafe_allow_html=True)
     st.markdown(f'<p class="sub-header">{t("sub_header", lang)}</p>', unsafe_allow_html=True)

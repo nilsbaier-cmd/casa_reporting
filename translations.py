@@ -59,6 +59,11 @@ TRANSLATIONS = {
         "high_priority_multiplier": "HIGH PRIORITY Multiplier",
         "multiplier_help": "Must be this × threshold for HIGH PRIORITY",
 
+        # Documentation
+        "documentation": "Documentation",
+        "user_documentation": "User Documentation",
+        "view_documentation": "View Documentation",
+
         # Filters
         "filters": "Filters",
         "airlines": "Airlines",
@@ -248,6 +253,11 @@ TRANSLATIONS = {
         "high_priority_multiplier": "HOHE PRIORITÄT Multiplikator",
         "multiplier_help": "Muss das ×-fache des Schwellenwerts sein für HOHE PRIORITÄT",
 
+        # Documentation
+        "documentation": "Dokumentation",
+        "user_documentation": "Benutzerdokumentation",
+        "view_documentation": "Dokumentation anzeigen",
+
         # Filters
         "filters": "Filter",
         "airlines": "Fluggesellschaften",
@@ -436,6 +446,11 @@ TRANSLATIONS = {
         "min_density_help": "Doit dépasser cette densité pour PRIORITÉ HAUTE",
         "high_priority_multiplier": "Multiplicateur PRIORITÉ HAUTE",
         "multiplier_help": "Doit être ce × seuil pour PRIORITÉ HAUTE",
+
+        # Documentation
+        "documentation": "Documentation",
+        "user_documentation": "Documentation Utilisateur",
+        "view_documentation": "Voir la Documentation",
 
         # Filters
         "filters": "Filtres",
