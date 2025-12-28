@@ -12,7 +12,7 @@ export function Step1Airlines() {
   if (!step1Results) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        Upload both INAD and BAZL files to see results
+        Laden Sie INAD- und BAZL-Dateien hoch, um Ergebnisse zu sehen
       </div>
     );
   }
@@ -27,7 +27,7 @@ export function Step1Airlines() {
     },
     {
       key: 'inadCount',
-      header: 'INAD Count',
+      header: 'Anzahl INAD',
       sortable: true,
       align: 'right',
     },
@@ -37,7 +37,7 @@ export function Step1Airlines() {
       align: 'center',
       render: (row) => (
         <Badge variant={row.passesThreshold ? 'default' : 'secondary'}>
-          {row.passesThreshold ? 'Review' : 'OK'}
+          {row.passesThreshold ? 'Prüfen' : 'OK'}
         </Badge>
       ),
     },
@@ -46,20 +46,20 @@ export function Step1Airlines() {
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4">
-        <h3 className="font-semibold mb-2">Step 1: Airline Screening</h3>
+        <h3 className="font-semibold mb-2">Prüfstufe 1: Airline-Screening</h3>
         <p className="text-sm text-muted-foreground mb-3">
-          Identifies airlines with {config.minInad} or more INAD cases in the analysis period.
-          Airlines meeting this threshold proceed to route-level analysis.
+          Identifiziert Airlines mit mindestens {config.minInad} Einreiseverweigerungen im Analysezeitraum.
+          Airlines über diesem Schwellenwert werden in der Routen-Analyse weiter geprüft.
         </p>
         <div className="flex gap-4 text-sm">
           <span>
-            <strong>{summary.totalAirlines}</strong> airlines analyzed
+            <strong>{summary.totalAirlines}</strong> Airlines analysiert
           </span>
           <span>
-            <strong>{summary.passingAirlines}</strong> above threshold
+            <strong>{summary.passingAirlines}</strong> über Schwellenwert
           </span>
           <span>
-            <strong>{summary.totalInads}</strong> total INADs
+            <strong>{summary.totalInads}</strong> INADs total
           </span>
         </div>
       </div>
@@ -71,7 +71,7 @@ export function Step1Airlines() {
         rowClassName={(row) =>
           row.passesThreshold ? 'bg-orange-50/50' : ''
         }
-        emptyMessage="No airlines found in data"
+        emptyMessage="Keine Airlines in den Daten gefunden"
       />
     </div>
   );

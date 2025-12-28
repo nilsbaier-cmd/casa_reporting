@@ -1,49 +1,130 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { getStep1Summary } from '@/lib/analysis/step1';
 import { getStep3Summary } from '@/lib/analysis/step3';
+import {
+  Plane,
+  Users,
+  AlertTriangle,
+  Eye,
+  CheckCircle,
+  TrendingUp,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MetricCardProps {
   label: string;
   value: string | number;
   description?: string;
-  variant?: 'default' | 'warning' | 'danger' | 'success';
+  icon: React.ReactNode;
+  variant?: 'default' | 'warning' | 'danger' | 'success' | 'primary';
+  trend?: 'up' | 'down' | 'stable';
 }
 
-function MetricCard({ label, value, description, variant = 'default' }: MetricCardProps) {
-  const bgColors = {
-    default: 'bg-slate-50',
-    warning: 'bg-orange-50',
-    danger: 'bg-red-50',
-    success: 'bg-green-50',
+function MetricCard({
+  label,
+  value,
+  description,
+  icon,
+  variant = 'default',
+  trend,
+}: MetricCardProps) {
+  const variantStyles = {
+    default: {
+      container: 'bg-white border-neutral-200',
+      icon: 'bg-neutral-100 text-neutral-600',
+      value: 'text-neutral-900',
+      accent: 'bg-neutral-900',
+    },
+    warning: {
+      container: 'bg-amber-50 border-amber-200',
+      icon: 'bg-amber-100 text-amber-700',
+      value: 'text-amber-900',
+      accent: 'bg-amber-600',
+    },
+    danger: {
+      container: 'bg-red-50 border-red-200',
+      icon: 'bg-red-100 text-red-700',
+      value: 'text-red-900',
+      accent: 'bg-red-600',
+    },
+    success: {
+      container: 'bg-green-50 border-green-200',
+      icon: 'bg-green-100 text-green-700',
+      value: 'text-green-900',
+      accent: 'bg-green-600',
+    },
+    primary: {
+      container: 'bg-neutral-900 border-neutral-800',
+      icon: 'bg-red-600 text-white',
+      value: 'text-white',
+      accent: 'bg-red-600',
+    },
   };
 
-  const textColors = {
-    default: 'text-slate-900',
-    warning: 'text-orange-900',
-    danger: 'text-red-900',
-    success: 'text-green-900',
-  };
+  const styles = variantStyles[variant];
 
   return (
-    <Card className={bgColors[variant]}>
-      <CardContent className="pt-4">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <p className={`text-2xl font-bold ${textColors[variant]}`}>{value}</p>
+    <div
+      className={cn(
+        'relative border overflow-hidden group',
+        'animate-sem-fade-in opacity-0',
+        styles.container
+      )}
+    >
+      {/* Top accent line */}
+      <div className={cn('absolute top-0 left-0 right-0 h-1', styles.accent)} aria-hidden="true" />
+
+      <div className="p-5">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <div className={cn('p-2', styles.icon)}>
+            {icon}
+          </div>
+          {trend && (
+            <div className={cn(
+              'flex items-center gap-1 text-xs font-medium',
+              trend === 'up' ? 'text-red-600' : trend === 'down' ? 'text-green-600' : 'text-neutral-500'
+            )}>
+              <TrendingUp className={cn(
+                'w-3 h-3',
+                trend === 'down' && 'rotate-180'
+              )} />
+            </div>
+          )}
+        </div>
+
+        {/* Value */}
+        <p className={cn('text-3xl font-bold tracking-tight mb-1', styles.value)}>
+          {value}
+        </p>
+
+        {/* Label */}
+        <p className={cn(
+          'text-xs font-bold uppercase tracking-wider',
+          variant === 'primary' ? 'text-neutral-400' : 'text-neutral-500'
+        )}>
+          {label}
+        </p>
+
+        {/* Description */}
         {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className={cn(
+            'text-sm mt-2',
+            variant === 'primary' ? 'text-neutral-500' : 'text-neutral-600'
+          )}>
+            {description}
+          </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
 export function MetricsBar() {
   const { step1Results, step3Results, threshold } = useAnalysisStore();
 
-  // Don't render if no results
   if (!step1Results || !step3Results) {
     return null;
   }
@@ -52,45 +133,63 @@ export function MetricsBar() {
   const step3Summary = getStep3Summary(step3Results, threshold || 0);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      <MetricCard
-        label="Total INADs"
-        value={step1Summary.totalInads}
-        description="Included cases"
-      />
+    <div className="space-y-6">
+      {/* Section header */}
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-px bg-red-600" aria-hidden="true" />
+        <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+          Übersicht Kennzahlen
+        </h2>
+      </div>
 
-      <MetricCard
-        label="Airlines"
-        value={`${step1Summary.passingAirlines} / ${step1Summary.totalAirlines}`}
-        description="Above threshold"
-      />
+      {/* Metrics grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <MetricCard
+          label="Total INADs"
+          value={step1Summary.totalInads.toLocaleString('de-CH')}
+          description="Erfasste Fälle"
+          icon={<Plane className="w-5 h-5" />}
+          variant="primary"
+        />
 
-      <MetricCard
-        label="High Priority"
-        value={step3Summary.highPriority}
-        variant={step3Summary.highPriority > 0 ? 'danger' : 'default'}
-        description="Routes requiring action"
-      />
+        <MetricCard
+          label="Airlines"
+          value={`${step1Summary.passingAirlines}/${step1Summary.totalAirlines}`}
+          description="Über Schwellenwert"
+          icon={<Users className="w-5 h-5" />}
+        />
 
-      <MetricCard
-        label="Watch List"
-        value={step3Summary.watchList}
-        variant={step3Summary.watchList > 0 ? 'warning' : 'default'}
-        description="Routes to monitor"
-      />
+        <MetricCard
+          label="Hohe Priorität"
+          value={step3Summary.highPriority}
+          description="Handlung erforderlich"
+          icon={<AlertTriangle className="w-5 h-5" />}
+          variant={step3Summary.highPriority > 0 ? 'danger' : 'default'}
+        />
 
-      <MetricCard
-        label="Clear"
-        value={step3Summary.clear}
-        variant="success"
-        description="Routes below threshold"
-      />
+        <MetricCard
+          label="Beobachtung"
+          value={step3Summary.watchList}
+          description="Unter Überwachung"
+          icon={<Eye className="w-5 h-5" />}
+          variant={step3Summary.watchList > 0 ? 'warning' : 'default'}
+        />
 
-      <MetricCard
-        label="Threshold"
-        value={`${threshold?.toFixed(3) || 0}‰`}
-        description="Median density"
-      />
+        <MetricCard
+          label="Konform"
+          value={step3Summary.clear}
+          description="Unter Schwellenwert"
+          icon={<CheckCircle className="w-5 h-5" />}
+          variant="success"
+        />
+
+        <MetricCard
+          label="Schwellenwert"
+          value={`${threshold?.toFixed(3) || 0}‰`}
+          description="Median-Dichte"
+          icon={<TrendingUp className="w-5 h-5" />}
+        />
+      </div>
     </div>
   );
 }

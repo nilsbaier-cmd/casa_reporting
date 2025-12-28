@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================
+   SEM SWISS INSTITUTIONAL DESIGN SYSTEM
+   Inspired by Swiss International Typographic Style
+   ============================================ */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -44,82 +49,285 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* SEM Brand Colors - Swiss Precision */
+  --color-sem-red: #DC2626;
+  --color-sem-red-dark: #991B1B;
+  --color-sem-red-light: #FEE2E2;
+  --color-sem-black: #0A0A0A;
+  --color-sem-gray-900: #171717;
+  --color-sem-gray-700: #404040;
+  --color-sem-gray-500: #737373;
+  --color-sem-gray-300: #D4D4D4;
+  --color-sem-gray-100: #F5F5F5;
+  --color-sem-white: #FFFFFF;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  --radius: 0.25rem;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Pure Swiss Color Palette */
+  --background: #FAFAFA;
+  --foreground: #0A0A0A;
+  --card: #FFFFFF;
+  --card-foreground: #0A0A0A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A0A0A;
+
+  /* Primary: Swiss Red - bold and uncompromising */
+  --primary: #DC2626;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary: Warm gray for institutional feel */
+  --secondary: #F5F5F5;
+  --secondary-foreground: #171717;
+
+  /* Muted: Paper-like background */
+  --muted: #FAFAFA;
+  --muted-foreground: #525252;
+
+  /* Accent: Subtle warm highlight */
+  --accent: #FEF2F2;
+  --accent-foreground: #0A0A0A;
+
+  /* Destructive: Deep red for critical actions */
+  --destructive: #B91C1C;
+
+  /* Precise borders */
+  --border: #E5E5E5;
+  --input: #E5E5E5;
+  --ring: #DC2626;
+
+  /* Chart colors - Swiss-inspired palette */
+  --chart-1: #DC2626;
+  --chart-2: #171717;
+  --chart-3: #525252;
+  --chart-4: #A3A3A3;
+  --chart-5: #D4D4D4;
+
+  /* Sidebar */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0A0A0A;
+  --sidebar-primary: #DC2626;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FEF2F2;
+  --sidebar-accent-foreground: #0A0A0A;
+  --sidebar-border: #E5E5E5;
+  --sidebar-ring: #DC2626;
+
+  /* Status colors - Clear institutional signals */
+  --status-monitoring: #1D4ED8;
+  --status-warning: #D97706;
+  --status-sanction: #DC2626;
+  --status-clear: #16A34A;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Swiss Typography Hierarchy - Tight, Precise, Bold */
+  h1 {
+    @apply text-3xl font-bold tracking-tight text-foreground;
+    letter-spacing: -0.025em;
+  }
+  h2 {
+    @apply text-2xl font-bold tracking-tight text-foreground;
+    letter-spacing: -0.02em;
+  }
+  h3 {
+    @apply text-xl font-semibold text-foreground;
+    letter-spacing: -0.015em;
+  }
+  h4 {
+    @apply text-lg font-semibold text-foreground;
+    letter-spacing: -0.01em;
+  }
+
+  /* Focus states - Precise and visible */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+}
+
+/* Swiss Institutional Utilities */
+@layer utilities {
+  .sem-container {
+    @apply max-w-7xl mx-auto px-6 lg:px-8;
+  }
+
+  .sem-card {
+    @apply bg-white border border-neutral-200 shadow-sm;
+  }
+
+  .sem-section {
+    @apply py-12 md:py-16;
+  }
+
+  /* Status Badges - Document Stamp Aesthetic */
+  .sem-badge {
+    @apply inline-flex items-center px-2.5 py-1 text-xs font-bold uppercase tracking-wider border-2;
+  }
+
+  .sem-badge-monitoring {
+    @apply bg-blue-50 text-blue-900 border-blue-600;
+  }
+
+  .sem-badge-warning {
+    @apply bg-amber-50 text-amber-900 border-amber-600;
+  }
+
+  .sem-badge-sanction {
+    @apply bg-red-50 text-red-900 border-red-600;
+  }
+
+  .sem-badge-clear {
+    @apply bg-green-50 text-green-900 border-green-600;
+  }
+
+  /* Grid lines - Aviation inspired */
+  .sem-grid-overlay {
+    background-image:
+      linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Strong horizontal rules */
+  .sem-rule {
+    @apply h-px bg-neutral-900;
+  }
+
+  .sem-rule-red {
+    @apply h-1 bg-primary;
+  }
+
+  /* Document number styling */
+  .sem-doc-number {
+    @apply font-mono text-xs tracking-widest text-neutral-500 uppercase;
+  }
+}
+
+/* Custom Animations - Subtle and Institutional */
+@keyframes sem-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sem-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes sem-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-sem-fade-in {
+  animation: sem-fade-in 0.4s ease-out forwards;
+}
+
+.animate-sem-slide-in {
+  animation: sem-slide-in 0.4s ease-out forwards;
+}
+
+.animate-sem-scale-in {
+  animation: sem-scale-in 0.3s ease-out forwards;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Staggered animation delays */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* Table styling - Official document feel */
+.sem-table {
+  @apply w-full text-sm;
+}
+
+.sem-table thead {
+  @apply bg-neutral-900 text-white;
+}
+
+.sem-table th {
+  @apply px-4 py-3 text-left font-bold uppercase tracking-wider text-xs;
+}
+
+.sem-table td {
+  @apply px-4 py-3 border-b border-neutral-200;
+}
+
+.sem-table tbody tr:hover {
+  @apply bg-neutral-50;
+}
+
+/* Selection styling */
+::selection {
+  @apply bg-red-600 text-white;
+}
+
+/* Scrollbar styling - Minimal */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-neutral-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-neutral-400 rounded-sm;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-neutral-500;
 }

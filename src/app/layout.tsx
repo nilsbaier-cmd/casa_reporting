@@ -1,21 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/authContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "INAD Analysis Dashboard",
-  description: "Carrier Sanctions Reporting Tool - INAD Analysis",
+  title: "CASA Reporting Dashboard | SEM",
+  description: "Staatssekretariat für Migration - INAD & Passagier-Datenanalyse zur Überwachung von Luftverkehrsunternehmen",
+  keywords: ["SEM", "INAD", "Migration", "Luftverkehr", "Schweiz", "Sanktionen"],
+  authors: [{ name: "Staatssekretariat für Migration SEM" }],
+  robots: "noindex, nofollow",
 };
 
 export default function RootLayout({
@@ -24,10 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="de-CH">
+      <body className={`${inter.variable} font-sans antialiased`}>
         <AuthProvider>
           {children}
         </AuthProvider>

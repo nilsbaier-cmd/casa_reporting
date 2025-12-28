@@ -1,16 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 
 export interface Column<T> {
   key: keyof T | string;
@@ -36,14 +28,13 @@ export function DataTable<T>({
   columns,
   getRowKey,
   rowClassName,
-  emptyMessage = 'No data available',
+  emptyMessage = 'Keine Daten verfügbar',
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
-      // Cycle through: asc -> desc -> null
       if (sortDirection === 'asc') {
         setSortDirection('desc');
       } else if (sortDirection === 'desc') {
@@ -65,12 +56,10 @@ export function DataTable<T>({
       const aValue = (a as Record<string, unknown>)[sortKey];
       const bValue = (b as Record<string, unknown>)[sortKey];
 
-      // Handle null/undefined
       if (aValue == null && bValue == null) return 0;
       if (aValue == null) return 1;
       if (bValue == null) return -1;
 
-      // Compare values
       let comparison = 0;
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         comparison = aValue - bValue;
@@ -82,64 +71,81 @@ export function DataTable<T>({
     });
   }, [data, sortKey, sortDirection]);
 
-  const getSortIcon = (key: string) => {
-    if (sortKey !== key) return '↕';
-    if (sortDirection === 'asc') return '↑';
-    if (sortDirection === 'desc') return '↓';
-    return '↕';
+  const SortIcon = ({ columnKey }: { columnKey: string }) => {
+    if (sortKey !== columnKey) {
+      return <ChevronsUpDown className="w-4 h-4 text-neutral-400" />;
+    }
+    if (sortDirection === 'asc') {
+      return <ChevronUp className="w-4 h-4 text-red-600" />;
+    }
+    if (sortDirection === 'desc') {
+      return <ChevronDown className="w-4 h-4 text-red-600" />;
+    }
+    return <ChevronsUpDown className="w-4 h-4 text-neutral-400" />;
   };
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-center py-12 text-neutral-500">
         {emptyMessage}
       </div>
     );
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        {/* Header - Swiss institutional style with black background */}
+        <thead>
+          <tr className="bg-neutral-900 text-white">
             {columns.map((column) => (
-              <TableHead
+              <th
                 key={String(column.key)}
                 className={cn(
+                  'px-4 py-3 font-bold text-xs uppercase tracking-wider text-left',
                   column.align === 'right' && 'text-right',
                   column.align === 'center' && 'text-center',
                   column.className
                 )}
               >
                 {column.sortable ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="-ml-3 h-8 data-[state=open]:bg-accent"
+                  <button
                     onClick={() => handleSort(String(column.key))}
+                    className={cn(
+                      'flex items-center gap-2 hover:text-neutral-300 transition-colors',
+                      column.align === 'right' && 'ml-auto flex-row-reverse',
+                      column.align === 'center' && 'mx-auto'
+                    )}
+                    aria-label={`Sortieren nach ${column.header}`}
                   >
-                    {column.header}
-                    <span className="ml-2 text-muted-foreground">
-                      {getSortIcon(String(column.key))}
-                    </span>
-                  </Button>
+                    <span>{column.header}</span>
+                    <SortIcon columnKey={String(column.key)} />
+                  </button>
                 ) : (
                   column.header
                 )}
-              </TableHead>
+              </th>
             ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedData.map((row) => (
-            <TableRow
+          </tr>
+        </thead>
+
+        {/* Body */}
+        <tbody className="divide-y divide-neutral-200">
+          {sortedData.map((row, index) => (
+            <tr
               key={getRowKey(row)}
-              className={rowClassName?.(row)}
+              className={cn(
+                'hover:bg-neutral-50 transition-colors',
+                'animate-sem-fade-in opacity-0',
+                rowClassName?.(row)
+              )}
+              style={{ animationDelay: `${Math.min(index * 20, 300)}ms` }}
             >
               {columns.map((column) => (
-                <TableCell
+                <td
                   key={String(column.key)}
                   className={cn(
+                    'px-4 py-3',
                     column.align === 'right' && 'text-right',
                     column.align === 'center' && 'text-center',
                     column.className
@@ -148,12 +154,17 @@ export function DataTable<T>({
                   {column.render
                     ? column.render(row)
                     : String((row as Record<string, unknown>)[String(column.key)] ?? '')}
-                </TableCell>
+                </td>
               ))}
-            </TableRow>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
+
+      {/* Table footer with row count */}
+      <div className="px-4 py-3 bg-neutral-50 border-t border-neutral-200 text-xs text-neutral-500">
+        {data.length} {data.length === 1 ? 'Eintrag' : 'Einträge'} insgesamt
+      </div>
     </div>
   );
 }

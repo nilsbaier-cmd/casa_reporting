@@ -12,7 +12,7 @@ export function Step2Routes() {
   if (!step2Results) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        Upload both INAD and BAZL files to see results
+        Laden Sie INAD- und BAZL-Dateien hoch, um Ergebnisse zu sehen
       </div>
     );
   }
@@ -32,7 +32,7 @@ export function Step2Routes() {
     },
     {
       key: 'inadCount',
-      header: 'INAD Count',
+      header: 'Anzahl INAD',
       sortable: true,
       align: 'right',
     },
@@ -42,7 +42,7 @@ export function Step2Routes() {
       align: 'center',
       render: (row) => (
         <Badge variant={row.passesThreshold ? 'default' : 'secondary'}>
-          {row.passesThreshold ? 'Review' : 'OK'}
+          {row.passesThreshold ? 'Prüfen' : 'OK'}
         </Badge>
       ),
     },
@@ -51,20 +51,20 @@ export function Step2Routes() {
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4">
-        <h3 className="font-semibold mb-2">Step 2: Route Screening</h3>
+        <h3 className="font-semibold mb-2">Prüfstufe 2: Routen-Screening</h3>
         <p className="text-sm text-muted-foreground mb-3">
-          For airlines identified in Step 1, analyzes individual routes (airline + last stop airport).
-          Routes with {config.minInad} or more INADs proceed to density analysis.
+          Für Airlines aus Prüfstufe 1: Analyse einzelner Routen (Airline + Last Stop).
+          Routen mit mindestens {config.minInad} Einreiseverweigerungen werden in der Dichte-Analyse geprüft.
         </p>
         <div className="flex gap-4 text-sm">
           <span>
-            <strong>{summary.totalRoutes}</strong> routes analyzed
+            <strong>{summary.totalRoutes}</strong> Routen analysiert
           </span>
           <span>
-            <strong>{summary.passingRoutes}</strong> above threshold
+            <strong>{summary.passingRoutes}</strong> über Schwellenwert
           </span>
           <span>
-            <strong>{summary.totalInads}</strong> total INADs
+            <strong>{summary.totalInads}</strong> INADs total
           </span>
         </div>
       </div>
@@ -76,7 +76,7 @@ export function Step2Routes() {
         rowClassName={(row) =>
           row.passesThreshold ? 'bg-orange-50/50' : ''
         }
-        emptyMessage="No routes found in data"
+        emptyMessage="Keine Routen in den Daten gefunden"
       />
     </div>
   );

@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import {
   parseINADFile,
@@ -12,6 +9,7 @@ import {
   validateBAZLData,
 } from '@/lib/analysis';
 import { cn } from '@/lib/utils';
+import { Upload, FileCheck, FileX, Loader2, FileSpreadsheet, Plane } from 'lucide-react';
 
 interface FileDropZoneProps {
   label: string;
@@ -22,6 +20,7 @@ interface FileDropZoneProps {
   fileName: string | null;
   status: 'idle' | 'success' | 'error';
   statusMessage?: string;
+  icon: React.ReactNode;
 }
 
 function FileDropZone({
@@ -33,6 +32,7 @@ function FileDropZone({
   fileName,
   status,
   statusMessage,
+  icon,
 }: FileDropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -69,53 +69,105 @@ function FileDropZone({
   );
 
   return (
-    <Card
+    <div
       className={cn(
-        'transition-colors cursor-pointer',
-        isDragging && 'border-primary bg-primary/5',
-        status === 'success' && 'border-green-500 bg-green-50',
-        status === 'error' && 'border-red-500 bg-red-50'
+        'relative bg-white border-2 transition-all cursor-pointer group',
+        isDragging && 'border-red-600 bg-red-50',
+        status === 'idle' && !isDragging && 'border-neutral-200 hover:border-neutral-400',
+        status === 'success' && 'border-green-600 bg-green-50',
+        status === 'error' && 'border-red-600 bg-red-50'
       )}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{label}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <label className="block">
-          <input
-            type="file"
-            accept={accept}
-            onChange={handleFileInput}
-            className="hidden"
-            disabled={isLoading}
-          />
-          <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+      {/* Top accent bar */}
+      <div
+        className={cn(
+          'absolute top-0 left-0 right-0 h-1',
+          status === 'success' ? 'bg-green-600' : status === 'error' ? 'bg-red-600' : 'bg-neutral-900'
+        )}
+        aria-hidden="true"
+      />
+
+      <label className="block p-6 cursor-pointer">
+        <input
+          type="file"
+          accept={accept}
+          onChange={handleFileInput}
+          className="sr-only"
+          disabled={isLoading}
+          aria-describedby={`${label}-desc`}
+        />
+
+        <div className="flex items-start gap-4">
+          {/* Icon */}
+          <div
+            className={cn(
+              'p-3 transition-colors',
+              status === 'success'
+                ? 'bg-green-100 text-green-700'
+                : status === 'error'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200'
+            )}
+          >
             {isLoading ? (
-              <p className="text-muted-foreground">Processing...</p>
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : status === 'success' ? (
+              <FileCheck className="w-6 h-6" />
+            ) : status === 'error' ? (
+              <FileX className="w-6 h-6" />
+            ) : (
+              icon
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-neutral-900 mb-1">{label}</p>
+
+            {isLoading ? (
+              <p className="text-sm text-neutral-500">Wird verarbeitet...</p>
             ) : fileName ? (
               <div>
-                <p className="font-medium text-green-700">{fileName}</p>
+                <p
+                  className={cn(
+                    'text-sm font-medium truncate',
+                    status === 'success' ? 'text-green-700' : 'text-red-700'
+                  )}
+                >
+                  {fileName}
+                </p>
                 {statusMessage && (
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p
+                    id={`${label}-desc`}
+                    className={cn(
+                      'text-xs mt-1',
+                      status === 'success' ? 'text-green-600' : 'text-red-600'
+                    )}
+                  >
                     {statusMessage}
                   </p>
                 )}
               </div>
             ) : (
-              <div>
-                <p className="text-muted-foreground">{description}</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Drag & drop or click to select
+              <div id={`${label}-desc`}>
+                <p className="text-sm text-neutral-600">{description}</p>
+                <p className="text-xs text-neutral-400 mt-1">
+                  Datei hierher ziehen oder klicken
                 </p>
               </div>
             )}
           </div>
-        </label>
-      </CardContent>
-    </Card>
+
+          {/* Upload indicator */}
+          {!isLoading && !fileName && (
+            <Upload className="w-5 h-5 text-neutral-400 group-hover:text-neutral-600 transition-colors" />
+          )}
+        </div>
+      </label>
+    </div>
   );
 }
 
@@ -158,7 +210,7 @@ export function FileUpload() {
         }
       } catch (err) {
         setInadStatus('error');
-        const message = err instanceof Error ? err.message : 'Failed to parse INAD file';
+        const message = err instanceof Error ? err.message : 'Fehler beim Parsen der INAD-Datei';
         setInadMessage(message);
         setError(message);
       } finally {
@@ -189,7 +241,7 @@ export function FileUpload() {
         }
       } catch (err) {
         setBazlStatus('error');
-        const message = err instanceof Error ? err.message : 'Failed to parse BAZL file';
+        const message = err instanceof Error ? err.message : 'Fehler beim Parsen der BAZL-Datei';
         setBazlMessage(message);
         setError(message);
       } finally {
@@ -209,43 +261,51 @@ export function FileUpload() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Data Files</h2>
-        {(inadFileName || bazlFileName) && (
-          <Button variant="outline" size="sm" onClick={handleReset}>
-            Reset
-          </Button>
-        )}
-      </div>
+      {/* Reset button */}
+      {(inadFileName || bazlFileName) && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleReset}
+            className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 border border-neutral-300 hover:border-neutral-400 transition-colors"
+          >
+            Zurücksetzen
+          </button>
+        </div>
+      )}
 
+      {/* File upload zones */}
       <div className="grid md:grid-cols-2 gap-4">
         <FileDropZone
-          label="INAD Data"
-          description="Upload INAD Tabelle (.xlsx or .xlsm)"
+          label="INAD-Daten"
+          description="INAD-Tabelle hochladen (.xlsx oder .xlsm)"
           accept=".xlsx,.xlsm"
           onFileSelect={handleINADFile}
           isLoading={isLoadingInad}
           fileName={inadFileName}
           status={inadStatus}
           statusMessage={inadMessage}
+          icon={<Plane className="w-6 h-6" />}
         />
 
         <FileDropZone
-          label="BAZL Passenger Data"
-          description="Upload BAZL-Daten (.xlsx)"
+          label="BAZL-Passagierdaten"
+          description="BAZL-Daten hochladen (.xlsx)"
           accept=".xlsx"
           onFileSelect={handleBAZLFile}
           isLoading={isLoadingBazl}
           fileName={bazlFileName}
           status={bazlStatus}
           statusMessage={bazlMessage}
+          icon={<FileSpreadsheet className="w-6 h-6" />}
         />
       </div>
 
+      {/* Analysis indicator */}
       {isAnalyzing && (
-        <Alert>
-          <AlertDescription>Running analysis...</AlertDescription>
-        </Alert>
+        <div className="flex items-center gap-3 p-4 bg-neutral-100 border-l-4 border-neutral-900">
+          <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
+          <p className="text-sm font-medium text-neutral-700">Analyse wird durchgeführt...</p>
+        </div>
       )}
     </div>
   );
