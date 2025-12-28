@@ -2,6 +2,11 @@
 
 A React-based dashboard for analyzing INAD (Inadmissible Passenger) data for carrier sanctions reporting.
 
+## Live Dashboard
+
+- **URL**: https://casa-reporting.vercel.app
+- **Password**: `demo123`
+
 ## Features
 
 - **3-Step Analysis Process**
@@ -9,9 +14,19 @@ A React-based dashboard for analyzing INAD (Inadmissible Passenger) data for car
   - Step 2: Route Screening (≥6 INADs per route)
   - Step 3: Density Analysis with Priority Classification
 
+- **Semester Selection**
+  - Choose analysis period (e.g., 2024 H2 = July-December 2024)
+  - All semesters from 2010 to present available
+
+- **Priority Classification**
+  - **High Priority**: Density ≥ threshold × 1.5, ≥ 0.10‰, ≥ 10 INADs
+  - **Watch List**: Density ≥ threshold
+  - **Unreliable**: PAX < 5,000
+  - **Clear**: Below threshold
+
 - **Client-Side Excel Processing**
   - Upload INAD and BAZL Excel files directly in the browser
-  - No data sent to servers
+  - No data sent to servers (all processing happens locally)
 
 - **Modern UI**
   - Built with Next.js, shadcn/ui, and Tailwind CSS
@@ -21,6 +36,22 @@ A React-based dashboard for analyzing INAD (Inadmissible Passenger) data for car
 
 - **Password Protection**
   - Simple password-based access control
+
+## Changes from Streamlit Version
+
+This dashboard replaces the previous Python/Streamlit implementation with a modern React-based solution.
+
+| Feature | Old (Streamlit) | New (React) |
+|---------|-----------------|-------------|
+| Hosting | Streamlit Cloud | Vercel |
+| UI Framework | Streamlit | Next.js + shadcn/ui |
+| Data Processing | Server-side (Python) | Client-side (JavaScript) |
+| Tabs | 6 tabs | 3 tabs (Step 1, 2, 3) |
+| Languages | EN/DE/FR | English only |
+| Charts | Plotly | Tables only |
+| Always Online | No (cold start) | Yes |
+
+The old Streamlit code is preserved in the `streamlit-backup` branch.
 
 ## Getting Started
 
@@ -45,7 +76,7 @@ npm run start
 Create a `.env.local` file with:
 
 ```
-NEXT_PUBLIC_APP_PASSWORD=your_secure_password
+NEXT_PUBLIC_APP_PASSWORD=demo123
 ```
 
 ## Deployment on Vercel
@@ -67,6 +98,11 @@ The dashboard requires two Excel files:
   - Sheet: "BAZL-Daten"
   - Columns: Airline Code (IATA), Flughafen (IATA), Passagiere / Passagers, Jahr, Monat
 
+## Excluded Refusal Codes
+
+The following codes are excluded from INAD counts:
+`B1n`, `B2n`, `C4n`, `C5n`, `C8`, `D1n`, `D2n`, `E`, `F1n`, `G`, `H`, `I`
+
 ## Tech Stack
 
 - [Next.js 14](https://nextjs.org/) - React framework
@@ -74,3 +110,4 @@ The dashboard requires two Excel files:
 - [Tailwind CSS](https://tailwindcss.com/) - Styling
 - [Zustand](https://zustand-demo.pmnd.rs/) - State management
 - [SheetJS](https://sheetjs.com/) - Excel parsing
+- [Vercel](https://vercel.com/) - Hosting
