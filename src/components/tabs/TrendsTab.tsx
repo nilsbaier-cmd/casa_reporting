@@ -249,7 +249,7 @@ export function TrendsTab() {
                 tick={{ fontSize: 12, fill: '#737373' }}
               />
               <Tooltip
-                formatter={(value: number) => [value.toLocaleString('de-CH'), 'Passagiere']}
+                formatter={(value) => [(value as number).toLocaleString('de-CH'), 'Passagiere']}
                 contentStyle={{
                   backgroundColor: '#fff',
                   border: '1px solid #e5e5e5',
@@ -300,7 +300,7 @@ export function TrendsTab() {
                 tick={{ fontSize: 12, fill: '#737373' }}
               />
               <Tooltip
-                formatter={(value: number) => [value.toLocaleString('de-CH'), 'Einreiseverweigerungen']}
+                formatter={(value) => [(value as number).toLocaleString('de-CH'), 'Einreiseverweigerungen']}
                 contentStyle={{
                   backgroundColor: '#fff',
                   border: '1px solid #e5e5e5',
@@ -347,7 +347,7 @@ export function TrendsTab() {
                 domain={['auto', 'auto']}
               />
               <Tooltip
-                formatter={(value: number) => [value.toFixed(4) + '‰', 'Dichte']}
+                formatter={(value) => [(value as number).toFixed(4) + '‰', 'Dichte']}
                 contentStyle={{
                   backgroundColor: '#fff',
                   border: '1px solid #e5e5e5',
