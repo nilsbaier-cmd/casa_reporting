@@ -218,7 +218,7 @@ export function InadTab() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value) => [(value as number).toLocaleString('de-CH'), 'Fälle']}
+                  formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'Fälle']}
                   contentStyle={{
                     backgroundColor: '#fff',
                     border: '1px solid #e5e5e5',
@@ -281,7 +281,7 @@ export function InadTab() {
                     width={45}
                   />
                   <Tooltip
-                    formatter={(value) => [(value as number).toLocaleString('de-CH'), 'INAD-Fälle']}
+                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'INAD-Fälle']}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e5e5',
@@ -331,7 +331,7 @@ export function InadTab() {
                     width={45}
                   />
                   <Tooltip
-                    formatter={(value) => [(value as number).toLocaleString('de-CH'), 'INAD-Fälle']}
+                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'INAD-Fälle']}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e5e5',
@@ -382,7 +382,7 @@ export function InadTab() {
                 />
                 <Tooltip
                   formatter={(value, name, props) => [
-                    `${(value as number).toLocaleString('de-CH')} Fälle${(props as { payload: { excluded: boolean } }).payload.excluded ? ' (ausgeschlossen)' : ''}`,
+                    `${typeof value === 'number' ? value.toLocaleString('de-CH') : '–'} Fälle${(props as { payload: { excluded: boolean } }).payload.excluded ? ' (ausgeschlossen)' : ''}`,
                     'Anzahl',
                   ]}
                   contentStyle={{

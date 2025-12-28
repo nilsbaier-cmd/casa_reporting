@@ -181,7 +181,7 @@ export function PaxTab() {
                     width={45}
                   />
                   <Tooltip
-                    formatter={(value) => [(value as number).toLocaleString('de-CH'), 'Passagiere']}
+                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'Passagiere']}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e5e5',
@@ -232,7 +232,7 @@ export function PaxTab() {
                     width={45}
                   />
                   <Tooltip
-                    formatter={(value) => [(value as number).toLocaleString('de-CH'), 'Passagiere']}
+                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'Passagiere']}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e5e5',
