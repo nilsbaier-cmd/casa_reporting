@@ -218,7 +218,7 @@ export function InadTab() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => [value.toLocaleString('de-CH'), 'Fälle']}
+                  formatter={(value) => [(value as number).toLocaleString('de-CH'), 'Fälle']}
                   contentStyle={{
                     backgroundColor: '#fff',
                     border: '1px solid #e5e5e5',
