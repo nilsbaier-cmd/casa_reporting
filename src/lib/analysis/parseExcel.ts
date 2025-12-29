@@ -76,11 +76,61 @@ export async function parseINADFile(file: File): Promise<INADRecord[]> {
 }
 
 /**
+ * Build ICAO to IATA lookup maps from reference sheets in the workbook
+ */
+function buildIcaoToIataLookups(workbook: XLSX.WorkBook): {
+  airlineLookup: Map<string, string>;
+  airportLookup: Map<string, string>;
+} {
+  const airlineLookup = new Map<string, string>();
+  const airportLookup = new Map<string, string>();
+
+  // Parse Airlines reference sheet
+  const airlinesSheet = workbook.Sheets['Airlines IATA-Codes'];
+  if (airlinesSheet) {
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(airlinesSheet, { header: 1 });
+    // Skip header row (row 0) and title row if present
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i] as unknown[];
+      if (!row || row.length < 3) continue;
+      // Format: [Nr, ICAO, IATA]
+      const icao = String(row[1] || '').trim();
+      const iata = String(row[2] || '').trim();
+      if (icao && iata) {
+        airlineLookup.set(icao, iata);
+      }
+    }
+  }
+
+  // Parse Airports reference sheet
+  const airportsSheet = workbook.Sheets['Airports IATA-Codes'];
+  if (airportsSheet) {
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(airportsSheet, { header: 1 });
+    // Skip header row (row 0) and title row if present
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i] as unknown[];
+      if (!row || row.length < 3) continue;
+      // Format: [Nr, ICAO, IATA]
+      const icao = String(row[1] || '').trim();
+      const iata = String(row[2] || '').trim();
+      if (icao && iata) {
+        airportLookup.set(icao, iata);
+      }
+    }
+  }
+
+  return { airlineLookup, airportLookup };
+}
+
+/**
  * Parse BAZL Excel file and return records
  */
 export async function parseBAZLFile(file: File): Promise<BAZLRecord[]> {
   const data = await file.arrayBuffer();
   const workbook = XLSX.read(data, { type: 'array' });
+
+  // Build ICAO to IATA lookup maps from reference sheets
+  const { airlineLookup, airportLookup } = buildIcaoToIataLookups(workbook);
 
   // Get the BAZL-Daten sheet
   const sheet = workbook.Sheets[SHEET_NAMES.bazl];
@@ -103,7 +153,7 @@ export async function parseBAZLFile(file: File): Promise<BAZLRecord[]> {
     }
   });
 
-  // Get column indices - IATA preferred, ICAO as fallback
+  // Get column indices - IATA preferred, ICAO used for lookup
   const airlineIataIdx = headerIndex[BAZL_COLUMNS.airline];
   const airportIataIdx = headerIndex[BAZL_COLUMNS.airport];
   const airlineIcaoIdx = headerIndex['Airline Code (ICAO)'];
@@ -127,15 +177,19 @@ export async function parseBAZLFile(file: File): Promise<BAZLRecord[]> {
     const row = rows[i] as unknown[];
     if (!row || row.length === 0) continue;
 
-    // Try IATA first, fall back to ICAO if empty
+    // Get IATA code - if empty, look up from ICAO using reference tables
     let airline = airlineIataIdx !== undefined ? String(row[airlineIataIdx] || '').trim() : '';
     if (!airline && airlineIcaoIdx !== undefined) {
-      airline = String(row[airlineIcaoIdx] || '').trim();
+      const icaoCode = String(row[airlineIcaoIdx] || '').trim();
+      // Try to get IATA from lookup, fall back to ICAO if not found
+      airline = airlineLookup.get(icaoCode) || icaoCode;
     }
 
     let airport = airportIataIdx !== undefined ? String(row[airportIataIdx] || '').trim() : '';
     if (!airport && airportIcaoIdx !== undefined) {
-      airport = String(row[airportIcaoIdx] || '').trim();
+      const icaoCode = String(row[airportIcaoIdx] || '').trim();
+      // Try to get IATA from lookup, fall back to ICAO if not found
+      airport = airportLookup.get(icaoCode) || icaoCode;
     }
 
     const pax = Number(row[paxIdx]) || 0;
