@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
-import { TrendingUp, TrendingDown, Minus, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, BarChart3, Info } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -14,6 +14,13 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface SemesterData {
   semester: string;
@@ -26,6 +33,10 @@ interface SemesterData {
 
 export function TrendsTab() {
   const { inadData, bazlData, availableSemesters } = useAnalysisStore();
+
+  // State for semester comparison selection
+  const [compareSemester1, setCompareSemester1] = useState<string | null>(null);
+  const [compareSemester2, setCompareSemester2] = useState<string | null>(null);
 
   // Calculate time series data for all semesters
   const trendData = useMemo((): SemesterData[] => {
@@ -75,20 +86,28 @@ export function TrendsTab() {
     });
   }, [inadData, bazlData, availableSemesters]);
 
+  // Initialize default comparison (current vs previous semester)
+  useEffect(() => {
+    if (trendData.length >= 2 && !compareSemester1 && !compareSemester2) {
+      // Default: compare last two semesters (previous = semester1, current = semester2)
+      setCompareSemester1(trendData[trendData.length - 2].semester);
+      setCompareSemester2(trendData[trendData.length - 1].semester);
+    }
+  }, [trendData, compareSemester1, compareSemester2]);
+
   // Filter data for PAX/Density charts (only show semesters with PAX data)
   const paxTrendData = useMemo(() => {
     return trendData.filter(d => d.pax > 0);
   }, [trendData]);
 
-  // Calculate trend indicators
-  const { paxTrend, inadTrend, densityTrend } = useMemo(() => {
-    if (trendData.length < 2) {
-      return { paxTrend: 0, inadTrend: 0, densityTrend: 0 };
-    }
+  // Get comparison data
+  const comparisonData = useMemo(() => {
+    const semester1Data = trendData.find(d => d.semester === compareSemester1);
+    const semester2Data = trendData.find(d => d.semester === compareSemester2);
 
-    const lastTwo = trendData.slice(-2);
-    const prev = lastTwo[0];
-    const curr = lastTwo[1];
+    if (!semester1Data || !semester2Data) {
+      return null;
+    }
 
     const calcTrend = (current: number, previous: number) => {
       if (previous === 0) return current > 0 ? 100 : 0;
@@ -96,11 +115,13 @@ export function TrendsTab() {
     };
 
     return {
-      paxTrend: calcTrend(curr.pax, prev.pax),
-      inadTrend: calcTrend(curr.inad, prev.inad),
-      densityTrend: calcTrend(curr.density, prev.density),
+      semester1: semester1Data,
+      semester2: semester2Data,
+      paxTrend: calcTrend(semester2Data.pax, semester1Data.pax),
+      inadTrend: calcTrend(semester2Data.inad, semester1Data.inad),
+      densityTrend: calcTrend(semester2Data.density, semester1Data.density),
     };
-  }, [trendData]);
+  }, [trendData, compareSemester1, compareSemester2]);
 
   const TrendIndicator = ({ value }: { value: number }) => {
     if (Math.abs(value) < 0.1) {
@@ -132,8 +153,12 @@ export function TrendsTab() {
     );
   }
 
-  // Get latest values
+  // Get latest values for overall trend display
   const latest = trendData[trendData.length - 1];
+
+  // Get available options for each dropdown (excluding the other selected value)
+  const semester1Options = trendData.filter(d => d.semester !== compareSemester2);
+  const semester2Options = trendData.filter(d => d.semester !== compareSemester1);
 
   return (
     <div className="space-y-8">
@@ -147,73 +172,166 @@ export function TrendsTab() {
         </div>
       </div>
 
-      {/* KPI Cards with Trends */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-neutral-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Passagiere (aktuell)
-            </span>
-            <div className="flex items-center gap-1">
-              <TrendIndicator value={paxTrend} />
-              <span
-                className={`text-xs font-medium ${
-                  paxTrend > 0 ? 'text-red-600' : paxTrend < 0 ? 'text-green-600' : 'text-neutral-400'
-                }`}
-              >
-                {paxTrend > 0 ? '+' : ''}{paxTrend.toFixed(1)}%
-              </span>
-            </div>
+      {/* Semester Comparison Section */}
+      <div className="bg-neutral-50 border border-neutral-200 p-6">
+        <div className="flex items-start gap-3 mb-4">
+          <Info className="w-5 h-5 text-neutral-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-bold text-neutral-900">Semester-Vergleich</h4>
+            <p className="text-sm text-neutral-600 mt-1">
+              Wählen Sie zwei beliebige Semester aus dem Analysezeitraum, um deren Kennzahlen direkt zu vergleichen.
+            </p>
           </div>
-          <p className="text-2xl font-bold text-neutral-900">
-            {latest?.pax.toLocaleString('de-CH') || '-'}
-          </p>
-          <p className="text-xs text-neutral-500 mt-1">{latest?.semester}</p>
         </div>
 
-        <div className="bg-white border border-neutral-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              INAD-Fälle (aktuell)
-            </span>
-            <div className="flex items-center gap-1">
-              <TrendIndicator value={inadTrend} />
-              <span
-                className={`text-xs font-medium ${
-                  inadTrend > 0 ? 'text-red-600' : inadTrend < 0 ? 'text-green-600' : 'text-neutral-400'
-                }`}
-              >
-                {inadTrend > 0 ? '+' : ''}{inadTrend.toFixed(1)}%
-              </span>
-            </div>
+        {/* Semester Selection Dropdowns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
+              Referenz-Semester (Basis)
+            </label>
+            <Select
+              value={compareSemester1 || ''}
+              onValueChange={setCompareSemester1}
+            >
+              <SelectTrigger className="w-full border-neutral-300 focus:border-red-600 focus:ring-red-600">
+                <SelectValue placeholder="Semester wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {semester1Options.map((semester) => (
+                  <SelectItem key={semester.semester} value={semester.semester}>
+                    {semester.semester} ({semester.half === 1 ? 'Jan - Jun' : 'Jul - Dez'})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <p className="text-2xl font-bold text-neutral-900">
-            {latest?.inad.toLocaleString('de-CH') || '-'}
-          </p>
-          <p className="text-xs text-neutral-500 mt-1">{latest?.semester}</p>
+
+          <div>
+            <label className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
+              Vergleichs-Semester
+            </label>
+            <Select
+              value={compareSemester2 || ''}
+              onValueChange={setCompareSemester2}
+            >
+              <SelectTrigger className="w-full border-neutral-300 focus:border-red-600 focus:ring-red-600">
+                <SelectValue placeholder="Semester wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {semester2Options.map((semester) => (
+                  <SelectItem key={semester.semester} value={semester.semester}>
+                    {semester.semester} ({semester.half === 1 ? 'Jan - Jun' : 'Jul - Dez'})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <div className="bg-white border border-neutral-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Dichte (aktuell)
-            </span>
-            <div className="flex items-center gap-1">
-              <TrendIndicator value={densityTrend} />
-              <span
-                className={`text-xs font-medium ${
-                  densityTrend > 0 ? 'text-red-600' : densityTrend < 0 ? 'text-green-600' : 'text-neutral-400'
-                }`}
-              >
-                {densityTrend > 0 ? '+' : ''}{densityTrend.toFixed(1)}%
-              </span>
+        {/* Comparison KPI Cards */}
+        {comparisonData && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Passengers Comparison */}
+            <div className="bg-white border border-neutral-200 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                  Passagiere
+                </span>
+                <div className="flex items-center gap-1">
+                  <TrendIndicator value={comparisonData.paxTrend} />
+                  <span
+                    className={`text-xs font-medium ${
+                      comparisonData.paxTrend > 0 ? 'text-red-600' : comparisonData.paxTrend < 0 ? 'text-green-600' : 'text-neutral-400'
+                    }`}
+                  >
+                    {comparisonData.paxTrend > 0 ? '+' : ''}{comparisonData.paxTrend.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-neutral-500">{comparisonData.semester1.semester}</span>
+                  <span className="text-lg font-semibold text-neutral-700">
+                    {comparisonData.semester1.pax.toLocaleString('de-CH')}
+                  </span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-neutral-500">{comparisonData.semester2.semester}</span>
+                  <span className="text-2xl font-bold text-neutral-900">
+                    {comparisonData.semester2.pax.toLocaleString('de-CH')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* INAD Cases Comparison */}
+            <div className="bg-white border border-neutral-200 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                  INAD-Fälle
+                </span>
+                <div className="flex items-center gap-1">
+                  <TrendIndicator value={comparisonData.inadTrend} />
+                  <span
+                    className={`text-xs font-medium ${
+                      comparisonData.inadTrend > 0 ? 'text-red-600' : comparisonData.inadTrend < 0 ? 'text-green-600' : 'text-neutral-400'
+                    }`}
+                  >
+                    {comparisonData.inadTrend > 0 ? '+' : ''}{comparisonData.inadTrend.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-neutral-500">{comparisonData.semester1.semester}</span>
+                  <span className="text-lg font-semibold text-neutral-700">
+                    {comparisonData.semester1.inad.toLocaleString('de-CH')}
+                  </span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-neutral-500">{comparisonData.semester2.semester}</span>
+                  <span className="text-2xl font-bold text-neutral-900">
+                    {comparisonData.semester2.inad.toLocaleString('de-CH')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Density Comparison */}
+            <div className="bg-white border border-neutral-200 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                  Dichte
+                </span>
+                <div className="flex items-center gap-1">
+                  <TrendIndicator value={comparisonData.densityTrend} />
+                  <span
+                    className={`text-xs font-medium ${
+                      comparisonData.densityTrend > 0 ? 'text-red-600' : comparisonData.densityTrend < 0 ? 'text-green-600' : 'text-neutral-400'
+                    }`}
+                  >
+                    {comparisonData.densityTrend > 0 ? '+' : ''}{comparisonData.densityTrend.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-neutral-500">{comparisonData.semester1.semester}</span>
+                  <span className="text-lg font-semibold text-neutral-700">
+                    {comparisonData.semester1.density.toFixed(3)}‰
+                  </span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-neutral-500">{comparisonData.semester2.semester}</span>
+                  <span className="text-2xl font-bold text-neutral-900">
+                    {comparisonData.semester2.density.toFixed(3)}‰
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-          <p className="text-2xl font-bold text-neutral-900">
-            {latest?.density.toFixed(3) || '-'}‰
-          </p>
-          <p className="text-xs text-neutral-500 mt-1">{latest?.semester}</p>
-        </div>
+        )}
       </div>
 
       {/* Passenger Trend Chart */}

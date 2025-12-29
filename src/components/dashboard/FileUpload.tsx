@@ -259,22 +259,12 @@ export function FileUpload() {
     setBazlMessage('');
   };
 
+  const hasFiles = inadFileName || bazlFileName;
+
   return (
     <div className="space-y-4">
-      {/* Reset button */}
-      {(inadFileName || bazlFileName) && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 border border-neutral-300 hover:border-neutral-400 transition-colors"
-          >
-            Zurücksetzen
-          </button>
-        </div>
-      )}
-
-      {/* File upload zones */}
-      <div className="grid md:grid-cols-2 gap-4">
+      {/* File upload zones with optional reset button */}
+      <div className="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-stretch">
         <FileDropZone
           label="INAD-Daten"
           description="INAD-Tabelle hochladen (.xlsx oder .xlsm)"
@@ -298,6 +288,19 @@ export function FileUpload() {
           statusMessage={bazlMessage}
           icon={<FileSpreadsheet className="w-6 h-6" />}
         />
+
+        {/* Reset button - always rendered but invisible when no files to maintain layout */}
+        <div className={cn(
+          'flex items-center',
+          !hasFiles && 'invisible'
+        )}>
+          <button
+            onClick={handleReset}
+            className="px-4 py-2 h-fit text-sm font-medium text-neutral-600 hover:text-neutral-900 border border-neutral-300 hover:border-neutral-400 transition-colors whitespace-nowrap"
+          >
+            Zurücksetzen
+          </button>
+        </div>
       </div>
 
       {/* Analysis indicator */}

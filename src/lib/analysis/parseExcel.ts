@@ -134,7 +134,8 @@ export async function parseBAZLFile(file: File): Promise<BAZLRecord[]> {
 
     year = Number(rawYear) || 0;
 
-    // Month can be: integer (1-12), Excel serial date, or Date object
+    // Month can be: integer (1-12), Excel serial date, Date object, or string
+    // Handle robustly as source data may have inconsistent formatting
     if (typeof rawMonth === 'number') {
       if (rawMonth > 12) {
         // Excel serial date - convert to date
@@ -150,7 +151,29 @@ export async function parseBAZLFile(file: File): Promise<BAZLRecord[]> {
         month = rawMonth;
       }
     } else if (rawMonth instanceof Date) {
+      // JavaScript Date object
       month = rawMonth.getMonth() + 1;
+    } else if (rawMonth && typeof rawMonth === 'object') {
+      // Handle Date-like objects from XLSX library (may not pass instanceof check)
+      // Check for getMonth method or date properties
+      if (typeof (rawMonth as Date).getMonth === 'function') {
+        month = (rawMonth as Date).getMonth() + 1;
+      } else if ('m' in rawMonth && typeof (rawMonth as { m: number }).m === 'number') {
+        // XLSX parsed date object with m property
+        month = (rawMonth as { m: number }).m;
+      }
+    } else if (typeof rawMonth === 'string') {
+      // Try to parse string date (e.g., "2020-01-01" or "1")
+      const parsed = parseInt(rawMonth, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 12) {
+        month = parsed;
+      } else {
+        // Try parsing as ISO date string
+        const dateMatch = rawMonth.match(/^\d{4}-(\d{2})-\d{2}/);
+        if (dateMatch) {
+          month = parseInt(dateMatch[1], 10);
+        }
+      }
     }
 
     // Skip rows with missing essential data
