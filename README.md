@@ -97,6 +97,19 @@ The dashboard requires two Excel files:
 - **BAZL-Daten** (.xlsx)
   - Sheet: "BAZL-Daten"
   - Columns: Airline Code (IATA), Flughafen (IATA), Passagiere / Passagers, Jahr, Monat
+  - **ICAO Fallback**: If IATA columns are empty (common in older data before 2023), the parser automatically reads the "Airlines IATA-Codes" and "Airports IATA-Codes" reference sheets and converts ICAO codes to IATA codes at runtime. This ensures proper matching with INAD data.
+
+### BAZL Reference Sheets (for ICAO→IATA conversion)
+
+The BAZL Excel file should contain these reference sheets for automatic code conversion:
+
+- **Airlines IATA-Codes**
+  - Format: Nr | ICAO | IATA
+  - Example: 1 | DLH | LH
+
+- **Airports IATA-Codes**
+  - Format: Nr | ICAO | IATA
+  - Example: 1 | LSZH | ZRH
 
 ## Excluded Refusal Codes
 
