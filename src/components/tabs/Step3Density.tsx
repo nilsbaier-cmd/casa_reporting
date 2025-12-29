@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Step3Result } from '@/lib/analysis/types';
 import { getStep3Summary } from '@/lib/analysis/step3';
 import { PRIORITY_LABELS } from '@/lib/analysis/constants';
+import { useTranslations, useLocale } from 'next-intl';
 
 function exportToCSV(data: Step3Result[], threshold: number) {
   const headers = ['Airline', 'Last Stop', 'INAD Count', 'PAX', 'Density (‰)', 'Priority'];
@@ -35,12 +36,17 @@ function exportToCSV(data: Step3Result[], threshold: number) {
 }
 
 export function Step3Density() {
+  const t = useTranslations('steps.step3');
+  const tTable = useTranslations('table');
+  const tPriority = useTranslations('priority');
+  const locale = useLocale();
   const { step3Results, threshold, config } = useAnalysisStore();
+  const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   if (!step3Results) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        Laden Sie INAD- und BAZL-Dateien hoch, um Ergebnisse zu sehen
+        {t('noData')}
       </div>
     );
   }
@@ -50,37 +56,37 @@ export function Step3Density() {
   const columns: Column<Step3Result>[] = [
     {
       key: 'airline',
-      header: 'Airline',
+      header: tTable('airline'),
       sortable: true,
     },
     {
       key: 'lastStop',
-      header: 'Last Stop',
+      header: tTable('lastStop'),
       sortable: true,
     },
     {
       key: 'inadCount',
-      header: 'INADs',
+      header: tTable('inads'),
       sortable: true,
       align: 'right',
     },
     {
       key: 'pax',
-      header: 'PAX',
+      header: tTable('pax'),
       sortable: true,
       align: 'right',
-      render: (row) => row.pax.toLocaleString('de-CH'),
+      render: (row) => row.pax.toLocaleString(localeFormat),
     },
     {
       key: 'density',
-      header: 'Dichte (‰)',
+      header: t('densityUnit'),
       sortable: true,
       align: 'right',
-      render: (row) => (row.density !== null ? row.density.toFixed(3) : 'k.A.'),
+      render: (row) => (row.density !== null ? row.density.toFixed(3) : t('notAvailable')),
     },
     {
       key: 'priority',
-      header: 'Kategorie',
+      header: tTable('category'),
       align: 'center',
       render: (row) => <PriorityBadge priority={row.priority} />,
     },
@@ -104,10 +110,9 @@ export function Step3Density() {
       <div className="bg-slate-50 rounded-lg p-4">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-semibold mb-2">Prüfstufe 3: Dichte-Analyse</h3>
+            <h3 className="font-semibold mb-2">{t('title')}</h3>
             <p className="text-sm text-muted-foreground mb-3">
-              Berechnet die INAD-Dichte (pro 1'000 Passagiere) für jede Route und klassifiziert
-              basierend auf der Abweichung vom Median-Schwellenwert.
+              {t('description')}
             </p>
           </div>
           <Button
@@ -115,25 +120,25 @@ export function Step3Density() {
             size="sm"
             onClick={() => exportToCSV(step3Results, threshold || 0)}
           >
-            CSV Export
+            {t('csvExport')}
           </Button>
         </div>
 
         <div className="flex flex-wrap gap-4 text-sm">
           <span>
-            <strong>{summary.totalRoutes}</strong> Routen
+            <strong>{summary.totalRoutes}</strong> {t('routes')}
           </span>
           <span className="text-red-700">
-            <strong>{summary.highPriority}</strong> Sanktion
+            <strong>{summary.highPriority}</strong> {tPriority('sanction')}
           </span>
           <span className="text-orange-700">
-            <strong>{summary.watchList}</strong> Beobachtung
+            <strong>{summary.watchList}</strong> {tPriority('watchList')}
           </span>
           <span className="text-green-700">
-            <strong>{summary.clear}</strong> Konform
+            <strong>{summary.clear}</strong> {tPriority('clear')}
           </span>
           <span className="text-slate-600">
-            <strong>{summary.unreliable}</strong> Unzuverlässig
+            <strong>{summary.unreliable}</strong> {tPriority('unreliable')}
           </span>
         </div>
       </div>
@@ -141,33 +146,33 @@ export function Step3Density() {
       {/* Klassifizierungskriterien */}
       <Card>
         <CardContent className="pt-4">
-          <h4 className="font-medium mb-2 text-sm">Klassifizierungskriterien</h4>
+          <h4 className="font-medium mb-2 text-sm">{t('classificationCriteria')}</h4>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
             <div className="flex items-start gap-2">
               <PriorityBadge priority="HIGH_PRIORITY" />
               <span className="text-muted-foreground">
-                Dichte ≥ {(threshold || 0) * config.highPriorityMultiplier > 0
+                {t('densityUnit')} ≥ {(threshold || 0) * config.highPriorityMultiplier > 0
                   ? `${((threshold || 0) * config.highPriorityMultiplier).toFixed(3)}‰`
-                  : `${config.highPriorityMultiplier}× Schwellenwert`}
+                  : `${config.highPriorityMultiplier}× Threshold`}
                 , ≥ {config.minDensity}‰, ≥ {config.highPriorityMinInad} INADs
               </span>
             </div>
             <div className="flex items-start gap-2">
               <PriorityBadge priority="WATCH_LIST" />
               <span className="text-muted-foreground">
-                Dichte ≥ {threshold?.toFixed(3) || 0}‰ (Schwellenwert)
+                {t('densityUnit')} ≥ {threshold?.toFixed(3) || 0}‰ (Threshold)
               </span>
             </div>
             <div className="flex items-start gap-2">
               <PriorityBadge priority="CLEAR" />
               <span className="text-muted-foreground">
-                Dichte &lt; Schwellenwert
+                {t('densityUnit')} &lt; Threshold
               </span>
             </div>
             <div className="flex items-start gap-2">
               <PriorityBadge priority="UNRELIABLE" />
               <span className="text-muted-foreground">
-                PAX &lt; {config.minPax.toLocaleString('de-CH')}
+                PAX &lt; {config.minPax.toLocaleString(localeFormat)}
               </span>
             </div>
           </div>
@@ -179,7 +184,7 @@ export function Step3Density() {
         columns={columns}
         getRowKey={(row) => `${row.airline}-${row.lastStop}`}
         rowClassName={getRowClassName}
-        emptyMessage="Keine Routen in den Daten gefunden"
+        emptyMessage={t('noRoutes')}
       />
     </div>
   );

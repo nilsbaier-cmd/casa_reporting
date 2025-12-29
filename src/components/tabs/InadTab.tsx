@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { FileWarning, MapPin, Users, Globe } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   BarChart,
   Bar,
@@ -20,7 +21,10 @@ import {
 const EXCLUDE_CODES = ['B1n', 'B2n', 'C4n', 'C5n', 'C8', 'D1n', 'D2n', 'E', 'F1n', 'G', 'H', 'I'];
 
 export function InadTab() {
+  const t = useTranslations('inad');
+  const locale = useLocale();
   const { inadData, selectedSemester } = useAnalysisStore();
+  const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   // Calculate aggregated data for the selected semester
   const { topLastStops, topAirlines, totalInad, includedInad, excludedInad, byRefusalCode } = useMemo(() => {
@@ -63,7 +67,7 @@ export function InadTab() {
     // Aggregate by refusal code (all records)
     const refusalCodes = new Map<string, number>();
     for (const record of filtered) {
-      const code = record.refusalCode || 'Unbekannt';
+      const code = record.refusalCode || 'Unknown';
       const current = refusalCodes.get(code) || 0;
       refusalCodes.set(code, current + 1);
     }
@@ -111,8 +115,8 @@ export function InadTab() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-neutral-500">
         <FileWarning className="w-12 h-12 mb-4 text-neutral-300" />
-        <p className="text-lg font-medium">Keine INAD-Daten geladen</p>
-        <p className="text-sm mt-1">Bitte laden Sie eine INAD-Datei hoch</p>
+        <p className="text-lg font-medium">{t('noData')}</p>
+        <p className="text-sm mt-1">{t('noDataHint')}</p>
       </div>
     );
   }
@@ -121,8 +125,8 @@ export function InadTab() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-neutral-500">
         <FileWarning className="w-12 h-12 mb-4 text-neutral-300" />
-        <p className="text-lg font-medium">Kein Semester ausgewählt</p>
-        <p className="text-sm mt-1">Bitte wählen Sie ein Semester für die Analyse</p>
+        <p className="text-lg font-medium">{t('noSemester')}</p>
+        <p className="text-sm mt-1">{t('noSemesterHint')}</p>
       </div>
     );
   }
@@ -132,9 +136,9 @@ export function InadTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-neutral-900">INAD-Daten Übersicht</h3>
+          <h3 className="text-xl font-bold text-neutral-900">{t('title')}</h3>
           <p className="text-sm text-neutral-500 mt-1">
-            Einreiseverweigerungen für {selectedSemester.label}
+            {t('subtitle', { semester: selectedSemester.label })}
           </p>
         </div>
       </div>
@@ -145,40 +149,40 @@ export function InadTab() {
           <div className="flex items-center gap-2 mb-2">
             <FileWarning className="w-4 h-4 text-red-600" />
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Total INAD
+              {t('totalInad')}
             </span>
           </div>
           <p className="text-2xl font-bold text-neutral-900">
-            {totalInad.toLocaleString('de-CH')}
+            {totalInad.toLocaleString(localeFormat)}
           </p>
         </div>
         <div className="bg-white border border-neutral-200 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Users className="w-4 h-4 text-green-600" />
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Berücksichtigt
+              {t('included')}
             </span>
           </div>
           <p className="text-2xl font-bold text-green-700">
-            {includedInad.toLocaleString('de-CH')}
+            {includedInad.toLocaleString(localeFormat)}
           </p>
         </div>
         <div className="bg-white border border-neutral-200 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Globe className="w-4 h-4 text-neutral-500" />
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Ausgeschlossen
+              {t('excluded')}
             </span>
           </div>
           <p className="text-2xl font-bold text-neutral-500">
-            {excludedInad.toLocaleString('de-CH')}
+            {excludedInad.toLocaleString(localeFormat)}
           </p>
         </div>
         <div className="bg-white border border-neutral-200 p-4">
           <div className="flex items-center gap-2 mb-2">
             <MapPin className="w-4 h-4 text-red-600" />
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Last Stops
+              {t('lastStops')}
             </span>
           </div>
           <p className="text-2xl font-bold text-neutral-900">
@@ -190,10 +194,10 @@ export function InadTab() {
       {/* Included vs Excluded Pie Chart */}
       <div className="bg-white border border-neutral-200 p-6">
         <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          INAD-Verteilung
+          {t('distribution')}
         </h4>
         <p className="text-sm text-neutral-500 mb-6">
-          Berücksichtigte vs. ausgeschlossene Fälle
+          {t('distributionSubtitle')}
         </p>
         <div className="grid md:grid-cols-2 gap-6">
           <div className="h-64">
@@ -201,8 +205,8 @@ export function InadTab() {
               <PieChart>
                 <Pie
                   data={[
-                    { name: 'Berücksichtigt', value: includedInad },
-                    { name: 'Ausgeschlossen', value: excludedInad },
+                    { name: t('includedLabel'), value: includedInad },
+                    { name: t('excludedLabel'), value: excludedInad },
                   ]}
                   cx="50%"
                   cy="50%"
@@ -218,7 +222,7 @@ export function InadTab() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'Fälle']}
+                  formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('cases')]}
                   contentStyle={{
                     backgroundColor: '#fff',
                     border: '1px solid #e5e5e5',
@@ -232,18 +236,18 @@ export function InadTab() {
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 bg-red-600" />
               <div>
-                <p className="font-medium text-neutral-900">Berücksichtigt</p>
+                <p className="font-medium text-neutral-900">{t('includedLabel')}</p>
                 <p className="text-sm text-neutral-500">
-                  {includedInad.toLocaleString('de-CH')} Fälle werden in der Analyse berücksichtigt
+                  {t('includedDescription', { count: includedInad.toLocaleString(localeFormat) })}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 bg-neutral-500" />
               <div>
-                <p className="font-medium text-neutral-900">Ausgeschlossen</p>
+                <p className="font-medium text-neutral-900">{t('excludedLabel')}</p>
                 <p className="text-sm text-neutral-500">
-                  {excludedInad.toLocaleString('de-CH')} Fälle (administrative Gründe)
+                  {t('excludedDescription', { count: excludedInad.toLocaleString(localeFormat) })}
                 </p>
               </div>
             </div>
@@ -256,10 +260,10 @@ export function InadTab() {
         {/* Top 10 Last Stops */}
         <div className="bg-white border border-neutral-200 p-6">
           <h4 className="text-lg font-bold text-neutral-900 mb-1">
-            Top 10 Abflugorte
+            {t('top10LastStops')}
           </h4>
           <p className="text-sm text-neutral-500 mb-6">
-            Nach Anzahl INAD-Fälle (berücksichtigt)
+            {t('top10LastStopsSubtitle')}
           </p>
           {topLastStops.length > 0 ? (
             <div className="h-80">
@@ -281,7 +285,7 @@ export function InadTab() {
                     width={45}
                   />
                   <Tooltip
-                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'INAD-Fälle']}
+                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('inadCases')]}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e5e5',
@@ -298,7 +302,7 @@ export function InadTab() {
             </div>
           ) : (
             <div className="h-80 flex items-center justify-center text-neutral-400">
-              Keine Daten verfügbar
+              {t('noDataAvailable')}
             </div>
           )}
         </div>
@@ -306,10 +310,10 @@ export function InadTab() {
         {/* Top 10 Airlines */}
         <div className="bg-white border border-neutral-200 p-6">
           <h4 className="text-lg font-bold text-neutral-900 mb-1">
-            Top 10 Airlines
+            {t('top10Airlines')}
           </h4>
           <p className="text-sm text-neutral-500 mb-6">
-            Nach Anzahl INAD-Fälle (berücksichtigt)
+            {t('top10AirlinesSubtitle')}
           </p>
           {topAirlines.length > 0 ? (
             <div className="h-80">
@@ -331,7 +335,7 @@ export function InadTab() {
                     width={45}
                   />
                   <Tooltip
-                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'INAD-Fälle']}
+                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('inadCases')]}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e5e5',
@@ -348,7 +352,7 @@ export function InadTab() {
             </div>
           ) : (
             <div className="h-80 flex items-center justify-center text-neutral-400">
-              Keine Daten verfügbar
+              {t('noDataAvailable')}
             </div>
           )}
         </div>
@@ -357,10 +361,10 @@ export function InadTab() {
       {/* Refusal Codes */}
       <div className="bg-white border border-neutral-200 p-6">
         <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          Häufigste Verweigerungsgründe
+          {t('refusalReasons')}
         </h4>
         <p className="text-sm text-neutral-500 mb-6">
-          Top 10 EVGrund-Codes
+          {t('refusalReasonsSubtitle')}
         </p>
         {byRefusalCode.length > 0 ? (
           <div className="h-64">
@@ -382,8 +386,8 @@ export function InadTab() {
                 />
                 <Tooltip
                   formatter={(value, name, props) => [
-                    `${typeof value === 'number' ? value.toLocaleString('de-CH') : '–'} Fälle${(props as { payload: { excluded: boolean } }).payload.excluded ? ' (ausgeschlossen)' : ''}`,
-                    'Anzahl',
+                    `${typeof value === 'number' ? value.toLocaleString(localeFormat) : '–'} ${t('cases')}${(props as { payload: { excluded: boolean } }).payload.excluded ? ` (${t('excluded').toLowerCase()})` : ''}`,
+                    t('count'),
                   ]}
                   contentStyle={{
                     backgroundColor: '#fff',
@@ -404,11 +408,11 @@ export function InadTab() {
           </div>
         ) : (
           <div className="h-64 flex items-center justify-center text-neutral-400">
-            Keine Daten verfügbar
+            {t('noDataAvailable')}
           </div>
         )}
         <p className="text-xs text-neutral-500 mt-4">
-          Graue Balken zeigen ausgeschlossene Codes an (administrative Gründe)
+          {t('grayBarsNote')}
         </p>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { Calendar } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   Select,
   SelectContent,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/select';
 
 export function SemesterSelector() {
+  const t = useTranslations('semester');
   const {
     availableSemesters,
     selectedSemester,
@@ -28,8 +30,8 @@ export function SemesterSelector() {
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <p className="font-bold text-neutral-900 mb-1">Analysezeitraum</p>
-            <p className="text-sm text-neutral-500">INAD-Daten laden, um Semester auszuwählen</p>
+            <p className="font-bold text-neutral-900 mb-1">{t('title')}</p>
+            <p className="text-sm text-neutral-500">{t('placeholder')}</p>
           </div>
         </div>
       </div>
@@ -52,25 +54,25 @@ export function SemesterSelector() {
             <Calendar className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <p className="font-bold text-neutral-900 mb-1">Analysezeitraum</p>
+            <p className="font-bold text-neutral-900 mb-1">{t('title')}</p>
             <Select
               value={selectedSemester?.label || ''}
               onValueChange={handleSemesterChange}
             >
               <SelectTrigger className="w-full border-neutral-300 focus:border-red-600 focus:ring-red-600">
-                <SelectValue placeholder="Semester wählen" />
+                <SelectValue placeholder={t('select')} />
               </SelectTrigger>
               <SelectContent>
                 {availableSemesters.map((semester) => (
                   <SelectItem key={semester.label} value={semester.label}>
-                    {semester.label} ({semester.half === 1 ? 'Jan - Jun' : 'Jul - Dez'})
+                    {semester.label} ({semester.half === 1 ? t('janJun') : t('julDec')})
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {selectedSemester && (
               <p className="text-xs text-neutral-500 mt-2">
-                {selectedSemester.half === 1 ? 'Erstes Halbjahr' : 'Zweites Halbjahr'} {selectedSemester.year}
+                {selectedSemester.half === 1 ? t('firstHalf') : t('secondHalf')} {selectedSemester.year}
               </p>
             )}
           </div>

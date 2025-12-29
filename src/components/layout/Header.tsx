@@ -2,6 +2,8 @@
 
 import { useAuth } from '@/lib/auth/authContext';
 import { SwissCoat } from '@/components/ui/swiss-coat';
+import { LanguagePicker } from '@/components/ui/LanguagePicker';
+import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
   Plane,
@@ -16,7 +18,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   icon: React.ReactNode;
   href: string;
 }
@@ -29,13 +31,14 @@ interface HeaderProps {
 export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
   const { logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = useTranslations('header');
 
   const navItems: NavItem[] = [
-    { label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, href: 'dashboard' },
-    { label: 'PAX-Daten', icon: <Plane className="w-4 h-4" />, href: 'pax' },
-    { label: 'INAD', icon: <FileWarning className="w-4 h-4" />, href: 'inad' },
-    { label: 'Trends', icon: <BarChart3 className="w-4 h-4" />, href: 'trends' },
-    { label: 'Dokumentation', icon: <FileText className="w-4 h-4" />, href: 'docs' },
+    { labelKey: 'nav.dashboard', icon: <LayoutDashboard className="w-4 h-4" />, href: 'dashboard' },
+    { labelKey: 'nav.pax', icon: <Plane className="w-4 h-4" />, href: 'pax' },
+    { labelKey: 'nav.inad', icon: <FileWarning className="w-4 h-4" />, href: 'inad' },
+    { labelKey: 'nav.trends', icon: <BarChart3 className="w-4 h-4" />, href: 'trends' },
+    { labelKey: 'nav.docs', icon: <FileText className="w-4 h-4" />, href: 'docs' },
   ];
 
   const handleNavClick = (href: string) => {
@@ -53,23 +56,26 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
               <SwissCoat size="sm" />
               <div className="hidden sm:flex items-center gap-3 text-white">
                 <span className="text-sm font-medium tracking-wide">
-                  Schweizerische Eidgenossenschaft
+                  {t('swissConfederation')}
                 </span>
                 <span className="w-px h-4 bg-neutral-600" aria-hidden="true" />
                 <span className="text-sm text-neutral-300">
-                  Staatssekretariat für Migration SEM
+                  {t('sem')}
                 </span>
               </div>
               <span className="sm:hidden text-white text-sm font-medium">SEM</span>
             </div>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-300 hover:text-white transition-colors"
-              aria-label="Abmelden"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Abmelden</span>
-            </button>
+            <div className="flex items-center gap-4">
+              <LanguagePicker />
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-300 hover:text-white transition-colors"
+                aria-label={t('logout')}
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">{t('logout')}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -85,10 +91,10 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
             <div className="flex items-center gap-6">
               <div>
                 <h1 className="text-lg font-bold tracking-tight text-neutral-900">
-                  CASA Reporting
+                  {t('title')}
                 </h1>
                 <p className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-                  INAD & Passagier-Datenanalyse
+                  {t('subtitle')}
                 </p>
               </div>
             </div>
@@ -97,7 +103,7 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
             <nav
               className="hidden lg:flex items-center h-full"
               role="navigation"
-              aria-label="Hauptnavigation"
+              aria-label={t('mainNav')}
             >
               {navItems.map((item, index) => (
                 <button
@@ -115,7 +121,7 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
                   aria-current={activeTab === item.href ? 'page' : undefined}
                 >
                   {item.icon}
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey)}</span>
                   {/* Active indicator - Bold underline */}
                   {activeTab === item.href && (
                     <span
@@ -132,7 +138,7 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
               className="lg:hidden flex items-center justify-center w-10 h-10 text-neutral-700 hover:bg-neutral-100 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
-              aria-label={mobileMenuOpen ? 'Menü schließen' : 'Menü öffnen'}
+              aria-label={mobileMenuOpen ? t('menuClose') : t('menuOpen')}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -147,7 +153,7 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
           mobileMenuOpen ? 'max-h-80' : 'max-h-0'
         )}
       >
-        <nav className="sem-container py-3" role="navigation" aria-label="Mobile Navigation">
+        <nav className="sem-container py-3" role="navigation" aria-label={t('mobileNav')}>
           <div className="flex flex-col">
             {navItems.map((item, index) => (
               <button
@@ -164,7 +170,7 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
                 aria-current={activeTab === item.href ? 'page' : undefined}
               >
                 {item.icon}
-                {item.label}
+                {t(item.labelKey)}
               </button>
             ))}
           </div>

@@ -1,6 +1,9 @@
+'use client';
+
 import type { Priority } from '@/lib/analysis/types';
 import { cn } from '@/lib/utils';
 import { AlertTriangle, Eye, CheckCircle, HelpCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface PriorityBadgeProps {
   priority: Priority;
@@ -8,34 +11,36 @@ interface PriorityBadgeProps {
   showIcon?: boolean;
 }
 
-const PRIORITY_CONFIG = {
-  HIGH_PRIORITY: {
-    label: 'Sanktion',
-    shortLabel: 'S',
-    icon: AlertTriangle,
-    styles: 'bg-red-50 text-red-900 border-red-600',
-  },
-  WATCH_LIST: {
-    label: 'Beobachtung',
-    shortLabel: 'B',
-    icon: Eye,
-    styles: 'bg-amber-50 text-amber-900 border-amber-600',
-  },
-  CLEAR: {
-    label: 'Konform',
-    shortLabel: 'K',
-    icon: CheckCircle,
-    styles: 'bg-green-50 text-green-900 border-green-600',
-  },
-  UNRELIABLE: {
-    label: 'Unzuverlässig',
-    shortLabel: 'U',
-    icon: HelpCircle,
-    styles: 'bg-neutral-100 text-neutral-600 border-neutral-400',
-  },
-} as const;
-
 export function PriorityBadge({ priority, className, showIcon = true }: PriorityBadgeProps) {
+  const t = useTranslations('priority');
+
+  const PRIORITY_CONFIG = {
+    HIGH_PRIORITY: {
+      label: t('sanction'),
+      shortLabel: t('sanctionShort'),
+      icon: AlertTriangle,
+      styles: 'bg-red-50 text-red-900 border-red-600',
+    },
+    WATCH_LIST: {
+      label: t('watchList'),
+      shortLabel: t('watchListShort'),
+      icon: Eye,
+      styles: 'bg-amber-50 text-amber-900 border-amber-600',
+    },
+    CLEAR: {
+      label: t('clear'),
+      shortLabel: t('clearShort'),
+      icon: CheckCircle,
+      styles: 'bg-green-50 text-green-900 border-green-600',
+    },
+    UNRELIABLE: {
+      label: t('unreliable'),
+      shortLabel: t('unreliableShort'),
+      icon: HelpCircle,
+      styles: 'bg-neutral-100 text-neutral-600 border-neutral-400',
+    },
+  } as const;
+
   const config = PRIORITY_CONFIG[priority];
   const Icon = config.icon;
 

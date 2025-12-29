@@ -10,6 +10,7 @@ import {
 } from '@/lib/analysis';
 import { cn } from '@/lib/utils';
 import { Upload, FileCheck, FileX, Loader2, FileSpreadsheet, Plane } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface FileDropZoneProps {
   label: string;
@@ -21,6 +22,8 @@ interface FileDropZoneProps {
   status: 'idle' | 'success' | 'error';
   statusMessage?: string;
   icon: React.ReactNode;
+  dragOrClickText: string;
+  processingText: string;
 }
 
 function FileDropZone({
@@ -33,6 +36,8 @@ function FileDropZone({
   status,
   statusMessage,
   icon,
+  dragOrClickText,
+  processingText,
 }: FileDropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -128,7 +133,7 @@ function FileDropZone({
             <p className="font-bold text-neutral-900 mb-1">{label}</p>
 
             {isLoading ? (
-              <p className="text-sm text-neutral-500">Wird verarbeitet...</p>
+              <p className="text-sm text-neutral-500">{processingText}</p>
             ) : fileName ? (
               <div>
                 <p
@@ -155,7 +160,7 @@ function FileDropZone({
               <div id={`${label}-desc`}>
                 <p className="text-sm text-neutral-600">{description}</p>
                 <p className="text-xs text-neutral-400 mt-1">
-                  Datei hierher ziehen oder klicken
+                  {dragOrClickText}
                 </p>
               </div>
             )}
@@ -172,6 +177,7 @@ function FileDropZone({
 }
 
 export function FileUpload() {
+  const t = useTranslations('fileUpload');
   const {
     inadFileName,
     bazlFileName,
@@ -210,14 +216,14 @@ export function FileUpload() {
         }
       } catch (err) {
         setInadStatus('error');
-        const message = err instanceof Error ? err.message : 'Fehler beim Parsen der INAD-Datei';
+        const message = err instanceof Error ? err.message : t('errorParsingInad');
         setInadMessage(message);
         setError(message);
       } finally {
         setIsLoadingInad(false);
       }
     },
-    [setINADData, setError]
+    [setINADData, setError, t]
   );
 
   const handleBAZLFile = useCallback(
@@ -241,14 +247,14 @@ export function FileUpload() {
         }
       } catch (err) {
         setBazlStatus('error');
-        const message = err instanceof Error ? err.message : 'Fehler beim Parsen der BAZL-Datei';
+        const message = err instanceof Error ? err.message : t('errorParsingBazl');
         setBazlMessage(message);
         setError(message);
       } finally {
         setIsLoadingBazl(false);
       }
     },
-    [setBAZLData, setError]
+    [setBAZLData, setError, t]
   );
 
   const handleReset = () => {
@@ -266,8 +272,8 @@ export function FileUpload() {
       {/* File upload zones with optional reset button */}
       <div className="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-stretch">
         <FileDropZone
-          label="INAD-Daten"
-          description="INAD-Tabelle hochladen (.xlsx oder .xlsm)"
+          label={t('inadLabel')}
+          description={t('inadDescription')}
           accept=".xlsx,.xlsm"
           onFileSelect={handleINADFile}
           isLoading={isLoadingInad}
@@ -275,11 +281,13 @@ export function FileUpload() {
           status={inadStatus}
           statusMessage={inadMessage}
           icon={<Plane className="w-6 h-6" />}
+          dragOrClickText={t('dragOrClick')}
+          processingText={t('processing')}
         />
 
         <FileDropZone
-          label="BAZL-Passagierdaten"
-          description="BAZL-Daten hochladen (.xlsx)"
+          label={t('bazlLabel')}
+          description={t('bazlDescription')}
           accept=".xlsx"
           onFileSelect={handleBAZLFile}
           isLoading={isLoadingBazl}
@@ -287,6 +295,8 @@ export function FileUpload() {
           status={bazlStatus}
           statusMessage={bazlMessage}
           icon={<FileSpreadsheet className="w-6 h-6" />}
+          dragOrClickText={t('dragOrClick')}
+          processingText={t('processing')}
         />
 
         {/* Reset button - always rendered but invisible when no files to maintain layout */}
@@ -298,7 +308,7 @@ export function FileUpload() {
             onClick={handleReset}
             className="px-4 py-2 h-fit text-sm font-medium text-neutral-600 hover:text-neutral-900 border border-neutral-300 hover:border-neutral-400 transition-colors whitespace-nowrap"
           >
-            Zurücksetzen
+            {t('reset')}
           </button>
         </div>
       </div>
@@ -307,7 +317,7 @@ export function FileUpload() {
       {isAnalyzing && (
         <div className="flex items-center gap-3 p-4 bg-neutral-100 border-l-4 border-neutral-900">
           <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
-          <p className="text-sm font-medium text-neutral-700">Analyse wird durchgeführt...</p>
+          <p className="text-sm font-medium text-neutral-700">{t('analyzing')}</p>
         </div>
       )}
     </div>

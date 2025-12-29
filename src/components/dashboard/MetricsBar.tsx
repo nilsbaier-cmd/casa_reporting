@@ -3,6 +3,7 @@
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { getStep1Summary } from '@/lib/analysis/step1';
 import { getStep3Summary } from '@/lib/analysis/step3';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   Plane,
   Users,
@@ -123,6 +124,8 @@ function MetricCard({
 }
 
 export function MetricsBar() {
+  const t = useTranslations('metrics');
+  const locale = useLocale();
   const { step1Results, step3Results, threshold } = useAnalysisStore();
 
   if (!step1Results || !step3Results) {
@@ -131,6 +134,7 @@ export function MetricsBar() {
 
   const step1Summary = getStep1Summary(step1Results);
   const step3Summary = getStep3Summary(step3Results, threshold || 0);
+  const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   return (
     <div className="space-y-6">
@@ -138,55 +142,55 @@ export function MetricsBar() {
       <div className="flex items-center gap-3">
         <div className="w-8 h-px bg-red-600" aria-hidden="true" />
         <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
-          Übersicht Kennzahlen
+          {t('title')}
         </h2>
       </div>
 
       {/* Metrics grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard
-          label="Total INADs"
-          value={step1Summary.totalInads.toLocaleString('de-CH')}
-          description="Erfasste Fälle"
+          label={t('totalInads')}
+          value={step1Summary.totalInads.toLocaleString(localeFormat)}
+          description={t('totalInadsDesc')}
           icon={<Plane className="w-5 h-5" />}
           variant="primary"
         />
 
         <MetricCard
-          label="Airlines"
+          label={t('airlines')}
           value={`${step1Summary.passingAirlines}/${step1Summary.totalAirlines}`}
-          description="Über Schwellenwert"
+          description={t('airlinesDesc')}
           icon={<Users className="w-5 h-5" />}
         />
 
         <MetricCard
-          label="Hohe Priorität"
+          label={t('highPriority')}
           value={step3Summary.highPriority}
-          description="Handlung erforderlich"
+          description={t('highPriorityDesc')}
           icon={<AlertTriangle className="w-5 h-5" />}
           variant={step3Summary.highPriority > 0 ? 'danger' : 'default'}
         />
 
         <MetricCard
-          label="Beobachtung"
+          label={t('watchList')}
           value={step3Summary.watchList}
-          description="Unter Überwachung"
+          description={t('watchListDesc')}
           icon={<Eye className="w-5 h-5" />}
           variant={step3Summary.watchList > 0 ? 'warning' : 'default'}
         />
 
         <MetricCard
-          label="Konform"
+          label={t('clear')}
           value={step3Summary.clear}
-          description="Unter Schwellenwert"
+          description={t('clearDesc')}
           icon={<CheckCircle className="w-5 h-5" />}
           variant="success"
         />
 
         <MetricCard
-          label="Schwellenwert"
+          label={t('threshold')}
           value={`${threshold?.toFixed(3) || 0}‰`}
-          description="Median-Dichte"
+          description={t('thresholdDesc')}
           icon={<TrendingUp className="w-5 h-5" />}
         />
       </div>

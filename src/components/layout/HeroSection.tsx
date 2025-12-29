@@ -1,8 +1,11 @@
 'use client';
 
 import { Plane, Users, TrendingUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function HeroSection() {
+  const t = useTranslations('hero');
+
   return (
     <section
       className="relative bg-neutral-900 text-white overflow-hidden"
@@ -46,20 +49,19 @@ export function HeroSection() {
               {/* Document reference - Analysezeitraum */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-px bg-red-600" aria-hidden="true" />
-                <span className="sem-doc-number">Analysezeitraum 2010 - 2025</span>
+                <span className="sem-doc-number">{t('period')}</span>
               </div>
 
               <h2
                 id="hero-heading"
                 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-[1.1] tracking-tight"
               >
-                <span className="text-white">Überwachung der</span>
-                <span className="block text-red-500">Luftverkehrs&shy;unternehmen</span>
+                <span className="text-white">{t('title1')}</span>
+                <span className="block text-red-500">{t('title2')}</span>
               </h2>
 
               <p className="text-lg text-neutral-400 leading-relaxed max-w-xl">
-                Systematische Analyse von INAD-Fällen und Passagierdaten zur
-                Gewährleistung der Compliance im Schengen-Luftverkehr.
+                {t('description')}
               </p>
             </div>
 
@@ -69,20 +71,20 @@ export function HeroSection() {
               <div className="bg-white/5 border border-white/10 p-5 group hover:bg-white/10 transition-colors">
                 <div className="flex items-start justify-between mb-3">
                   <Plane className="w-5 h-5 text-red-500" />
-                  <span className="text-xs font-bold tracking-wider text-neutral-500 uppercase">Analyse</span>
+                  <span className="text-xs font-bold tracking-wider text-neutral-500 uppercase">{t('cards.analysis')}</span>
                 </div>
-                <p className="text-2xl font-bold mb-1">INAD</p>
-                <p className="text-xs text-neutral-500">Einreiseverweigerungen</p>
+                <p className="text-2xl font-bold mb-1">{t('cards.inad')}</p>
+                <p className="text-xs text-neutral-500">{t('cards.inadLabel')}</p>
               </div>
 
               {/* PAX Card */}
               <div className="bg-white/5 border border-white/10 p-5 group hover:bg-white/10 transition-colors">
                 <div className="flex items-start justify-between mb-3">
                   <Users className="w-5 h-5 text-red-500" />
-                  <span className="text-xs font-bold tracking-wider text-neutral-500 uppercase">Daten</span>
+                  <span className="text-xs font-bold tracking-wider text-neutral-500 uppercase">{t('cards.data')}</span>
                 </div>
-                <p className="text-2xl font-bold mb-1">PAX</p>
-                <p className="text-xs text-neutral-500">Passagiere</p>
+                <p className="text-2xl font-bold mb-1">{t('cards.pax')}</p>
+                <p className="text-xs text-neutral-500">{t('cards.paxLabel')}</p>
               </div>
 
               {/* Status Card */}
@@ -91,10 +93,10 @@ export function HeroSection() {
                 <div className="relative">
                   <div className="flex items-start justify-between mb-3">
                     <TrendingUp className="w-5 h-5 text-red-200" />
-                    <span className="text-xs font-bold tracking-wider text-red-200 uppercase">Status</span>
+                    <span className="text-xs font-bold tracking-wider text-red-200 uppercase">{t('cards.status')}</span>
                   </div>
-                  <p className="text-2xl font-bold mb-1">Aktiv</p>
-                  <p className="text-xs text-red-200">Bereit</p>
+                  <p className="text-2xl font-bold mb-1">{t('cards.active')}</p>
+                  <p className="text-xs text-red-200">{t('cards.ready')}</p>
                 </div>
               </div>
             </div>

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { Plane, MapPin, TrendingUp, Users } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   BarChart,
   Bar,
@@ -15,7 +16,10 @@ import {
 } from 'recharts';
 
 export function PaxTab() {
+  const t = useTranslations('pax');
+  const locale = useLocale();
   const { bazlData, selectedSemester } = useAnalysisStore();
+  const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   // Calculate aggregated data for the selected semester
   const { topLastStops, topAirlines, totalPax, uniqueRoutes } = useMemo(() => {
@@ -74,8 +78,8 @@ export function PaxTab() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-neutral-500">
         <Plane className="w-12 h-12 mb-4 text-neutral-300" />
-        <p className="text-lg font-medium">Keine BAZL-Daten geladen</p>
-        <p className="text-sm mt-1">Bitte laden Sie eine BAZL-Passagierdatei hoch</p>
+        <p className="text-lg font-medium">{t('noData')}</p>
+        <p className="text-sm mt-1">{t('noDataHint')}</p>
       </div>
     );
   }
@@ -84,8 +88,8 @@ export function PaxTab() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-neutral-500">
         <Plane className="w-12 h-12 mb-4 text-neutral-300" />
-        <p className="text-lg font-medium">Kein Semester ausgewählt</p>
-        <p className="text-sm mt-1">Bitte wählen Sie ein Semester für die Analyse</p>
+        <p className="text-lg font-medium">{t('noSemester')}</p>
+        <p className="text-sm mt-1">{t('noSemesterHint')}</p>
       </div>
     );
   }
@@ -95,9 +99,9 @@ export function PaxTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-neutral-900">PAX-Daten Übersicht</h3>
+          <h3 className="text-xl font-bold text-neutral-900">{t('title')}</h3>
           <p className="text-sm text-neutral-500 mt-1">
-            Passagierstatistiken für {selectedSemester.label}
+            {t('subtitle', { semester: selectedSemester.label })}
           </p>
         </div>
       </div>
@@ -108,29 +112,29 @@ export function PaxTab() {
           <div className="flex items-center gap-2 mb-2">
             <Users className="w-4 h-4 text-red-600" />
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Passagiere
+              {t('passengers')}
             </span>
           </div>
           <p className="text-2xl font-bold text-neutral-900">
-            {totalPax.toLocaleString('de-CH')}
+            {totalPax.toLocaleString(localeFormat)}
           </p>
         </div>
         <div className="bg-white border border-neutral-200 p-4">
           <div className="flex items-center gap-2 mb-2">
             <MapPin className="w-4 h-4 text-red-600" />
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Routen
+              {t('routes')}
             </span>
           </div>
           <p className="text-2xl font-bold text-neutral-900">
-            {uniqueRoutes.toLocaleString('de-CH')}
+            {uniqueRoutes.toLocaleString(localeFormat)}
           </p>
         </div>
         <div className="bg-white border border-neutral-200 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Plane className="w-4 h-4 text-red-600" />
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Airlines
+              {t('airlines')}
             </span>
           </div>
           <p className="text-2xl font-bold text-neutral-900">
@@ -141,7 +145,7 @@ export function PaxTab() {
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-red-600" />
             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Flughäfen
+              {t('airports')}
             </span>
           </div>
           <p className="text-2xl font-bold text-neutral-900">
@@ -155,10 +159,10 @@ export function PaxTab() {
         {/* Top 10 Last Stops */}
         <div className="bg-white border border-neutral-200 p-6">
           <h4 className="text-lg font-bold text-neutral-900 mb-1">
-            Top 10 Abflugorte
+            {t('top10LastStops')}
           </h4>
           <p className="text-sm text-neutral-500 mb-6">
-            Nach Anzahl Passagiere (Last Stop)
+            {t('top10LastStopsSubtitle')}
           </p>
           {topLastStops.length > 0 ? (
             <div className="h-80">
@@ -171,7 +175,7 @@ export function PaxTab() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
                   <XAxis
                     type="number"
-                    tickFormatter={(value) => value.toLocaleString('de-CH')}
+                    tickFormatter={(value) => value.toLocaleString(localeFormat)}
                     tick={{ fontSize: 12, fill: '#737373' }}
                   />
                   <YAxis
@@ -181,7 +185,7 @@ export function PaxTab() {
                     width={45}
                   />
                   <Tooltip
-                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'Passagiere']}
+                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('passengers')]}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e5e5',
@@ -198,7 +202,7 @@ export function PaxTab() {
             </div>
           ) : (
             <div className="h-80 flex items-center justify-center text-neutral-400">
-              Keine Daten verfügbar
+              {t('noDataAvailable')}
             </div>
           )}
         </div>
@@ -206,10 +210,10 @@ export function PaxTab() {
         {/* Top 10 Airlines */}
         <div className="bg-white border border-neutral-200 p-6">
           <h4 className="text-lg font-bold text-neutral-900 mb-1">
-            Top 10 Airlines
+            {t('top10Airlines')}
           </h4>
           <p className="text-sm text-neutral-500 mb-6">
-            Nach Anzahl Passagiere
+            {t('top10AirlinesSubtitle')}
           </p>
           {topAirlines.length > 0 ? (
             <div className="h-80">
@@ -222,7 +226,7 @@ export function PaxTab() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
                   <XAxis
                     type="number"
-                    tickFormatter={(value) => value.toLocaleString('de-CH')}
+                    tickFormatter={(value) => value.toLocaleString(localeFormat)}
                     tick={{ fontSize: 12, fill: '#737373' }}
                   />
                   <YAxis
@@ -232,7 +236,7 @@ export function PaxTab() {
                     width={45}
                   />
                   <Tooltip
-                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'Passagiere']}
+                    formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('passengers')]}
                     contentStyle={{
                       backgroundColor: '#fff',
                       border: '1px solid #e5e5e5',
@@ -249,7 +253,7 @@ export function PaxTab() {
             </div>
           ) : (
             <div className="h-80 flex items-center justify-center text-neutral-400">
-              Keine Daten verfügbar
+              {t('noDataAvailable')}
             </div>
           )}
         </div>

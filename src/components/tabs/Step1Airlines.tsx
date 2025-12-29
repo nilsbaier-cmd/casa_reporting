@@ -5,14 +5,17 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { Badge } from '@/components/ui/badge';
 import type { Step1Result } from '@/lib/analysis/types';
 import { getStep1Summary } from '@/lib/analysis/step1';
+import { useTranslations } from 'next-intl';
 
 export function Step1Airlines() {
+  const t = useTranslations('steps.step1');
+  const tTable = useTranslations('table');
   const { step1Results, config } = useAnalysisStore();
 
   if (!step1Results) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        Laden Sie INAD- und BAZL-Dateien hoch, um Ergebnisse zu sehen
+        {t('noData')}
       </div>
     );
   }
@@ -22,22 +25,22 @@ export function Step1Airlines() {
   const columns: Column<Step1Result>[] = [
     {
       key: 'airline',
-      header: 'Airline',
+      header: tTable('airline'),
       sortable: true,
     },
     {
       key: 'inadCount',
-      header: 'Anzahl INAD',
+      header: tTable('inadCount'),
       sortable: true,
       align: 'right',
     },
     {
       key: 'passesThreshold',
-      header: 'Status',
+      header: tTable('status'),
       align: 'center',
       render: (row) => (
         <Badge variant={row.passesThreshold ? 'default' : 'secondary'}>
-          {row.passesThreshold ? 'Prüfen' : 'OK'}
+          {row.passesThreshold ? tTable('check') : tTable('ok')}
         </Badge>
       ),
     },
@@ -46,20 +49,19 @@ export function Step1Airlines() {
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4">
-        <h3 className="font-semibold mb-2">Prüfstufe 1: Airline-Screening</h3>
+        <h3 className="font-semibold mb-2">{t('title')}</h3>
         <p className="text-sm text-muted-foreground mb-3">
-          Identifiziert Airlines mit mindestens {config.minInad} Einreiseverweigerungen im Analysezeitraum.
-          Airlines über diesem Schwellenwert werden in der Routen-Analyse weiter geprüft.
+          {t('description', { minInad: config.minInad })}
         </p>
         <div className="flex gap-4 text-sm">
           <span>
-            <strong>{summary.totalAirlines}</strong> Airlines analysiert
+            <strong>{summary.totalAirlines}</strong> {t('airlinesAnalyzed')}
           </span>
           <span>
-            <strong>{summary.passingAirlines}</strong> über Schwellenwert
+            <strong>{summary.passingAirlines}</strong> {t('aboveThreshold')}
           </span>
           <span>
-            <strong>{summary.totalInads}</strong> INADs total
+            <strong>{summary.totalInads}</strong> {t('totalInads')}
           </span>
         </div>
       </div>
@@ -71,7 +73,7 @@ export function Step1Airlines() {
         rowClassName={(row) =>
           row.passesThreshold ? 'bg-orange-50/50' : ''
         }
-        emptyMessage="Keine Airlines in den Daten gefunden"
+        emptyMessage={t('noAirlines')}
       />
     </div>
   );

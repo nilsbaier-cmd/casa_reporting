@@ -5,14 +5,17 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { Badge } from '@/components/ui/badge';
 import type { Step2Result } from '@/lib/analysis/types';
 import { getStep2Summary } from '@/lib/analysis/step2';
+import { useTranslations } from 'next-intl';
 
 export function Step2Routes() {
+  const t = useTranslations('steps.step2');
+  const tTable = useTranslations('table');
   const { step2Results, config } = useAnalysisStore();
 
   if (!step2Results) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        Laden Sie INAD- und BAZL-Dateien hoch, um Ergebnisse zu sehen
+        {t('noData')}
       </div>
     );
   }
@@ -22,27 +25,27 @@ export function Step2Routes() {
   const columns: Column<Step2Result>[] = [
     {
       key: 'airline',
-      header: 'Airline',
+      header: tTable('airline'),
       sortable: true,
     },
     {
       key: 'lastStop',
-      header: 'Last Stop',
+      header: tTable('lastStop'),
       sortable: true,
     },
     {
       key: 'inadCount',
-      header: 'Anzahl INAD',
+      header: tTable('inadCount'),
       sortable: true,
       align: 'right',
     },
     {
       key: 'passesThreshold',
-      header: 'Status',
+      header: tTable('status'),
       align: 'center',
       render: (row) => (
         <Badge variant={row.passesThreshold ? 'default' : 'secondary'}>
-          {row.passesThreshold ? 'Prüfen' : 'OK'}
+          {row.passesThreshold ? tTable('check') : tTable('ok')}
         </Badge>
       ),
     },
@@ -51,20 +54,19 @@ export function Step2Routes() {
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4">
-        <h3 className="font-semibold mb-2">Prüfstufe 2: Routen-Screening</h3>
+        <h3 className="font-semibold mb-2">{t('title')}</h3>
         <p className="text-sm text-muted-foreground mb-3">
-          Für Airlines aus Prüfstufe 1: Analyse einzelner Routen (Airline + Last Stop).
-          Routen mit mindestens {config.minInad} Einreiseverweigerungen werden in der Dichte-Analyse geprüft.
+          {t('description', { minInad: config.minInad })}
         </p>
         <div className="flex gap-4 text-sm">
           <span>
-            <strong>{summary.totalRoutes}</strong> Routen analysiert
+            <strong>{summary.totalRoutes}</strong> {t('routesAnalyzed')}
           </span>
           <span>
-            <strong>{summary.passingRoutes}</strong> über Schwellenwert
+            <strong>{summary.passingRoutes}</strong> {t('aboveThreshold')}
           </span>
           <span>
-            <strong>{summary.totalInads}</strong> INADs total
+            <strong>{summary.totalInads}</strong> {t('totalInads')}
           </span>
         </div>
       </div>
@@ -76,7 +78,7 @@ export function Step2Routes() {
         rowClassName={(row) =>
           row.passesThreshold ? 'bg-orange-50/50' : ''
         }
-        emptyMessage="Keine Routen in den Daten gefunden"
+        emptyMessage={t('noRoutes')}
       />
     </div>
   );

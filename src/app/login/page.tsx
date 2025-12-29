@@ -4,9 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/authContext';
 import { SwissCoat } from '@/components/ui/swiss-coat';
+import { LanguagePicker } from '@/components/ui/LanguagePicker';
 import { Lock, ArrowRight, AlertCircle, Shield } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
+  const t = useTranslations('login');
+  const tHeader = useTranslations('header');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,8 +59,8 @@ export default function LoginPage() {
           <div className="flex items-center gap-4">
             <SwissCoat size="lg" />
             <div className="text-white">
-              <p className="font-bold">Schweizerische Eidgenossenschaft</p>
-              <p className="text-neutral-400 text-sm">Staatssekretariat für Migration SEM</p>
+              <p className="font-bold">{tHeader('swissConfederation')}</p>
+              <p className="text-neutral-400 text-sm">{tHeader('sem')}</p>
             </div>
           </div>
 
@@ -65,12 +69,11 @@ export default function LoginPage() {
             <div>
               <p className="sem-doc-number text-neutral-500 mb-4">SEM-CASA-2024</p>
               <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-                CASA Reporting
-                <span className="block text-red-500">Dashboard</span>
+                {t('brandingTitle')}
+                <span className="block text-red-500">{t('brandingSubtitle')}</span>
               </h1>
               <p className="text-neutral-400 text-lg max-w-md">
-                Analyse und Überwachung von INAD-Fällen zur Gewährleistung der
-                Beförderungsvorschriften im Schengen-Luftverkehr.
+                {t('brandingDesc')}
               </p>
             </div>
 
@@ -78,18 +81,18 @@ export default function LoginPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/5 border border-white/10 p-4">
                 <Shield className="w-5 h-5 text-red-500 mb-2" />
-                <p className="text-white font-medium text-sm">Sanktionsüberwachung</p>
+                <p className="text-white font-medium text-sm">{t('feature1')}</p>
               </div>
               <div className="bg-white/5 border border-white/10 p-4">
                 <Lock className="w-5 h-5 text-red-500 mb-2" />
-                <p className="text-white font-medium text-sm">Gesicherter Zugang</p>
+                <p className="text-white font-medium text-sm">{t('feature2')}</p>
               </div>
             </div>
           </div>
 
           {/* Bottom */}
           <p className="text-neutral-600 text-sm">
-            &copy; {new Date().getFullYear()} Staatssekretariat für Migration SEM
+            &copy; {new Date().getFullYear()} {tHeader('sem')}
           </p>
         </div>
       </div>
@@ -97,6 +100,13 @@ export default function LoginPage() {
       {/* Right panel - Login form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-neutral-50">
         <div className="w-full max-w-md">
+          {/* Language Picker for mobile */}
+          <div className="lg:hidden flex justify-end mb-4">
+            <div className="bg-neutral-900 px-3 py-2 rounded">
+              <LanguagePicker />
+            </div>
+          </div>
+
           {/* Mobile branding */}
           <div className="lg:hidden flex items-center gap-3 mb-12">
             <SwissCoat size="md" />
@@ -117,10 +127,10 @@ export default function LoginPage() {
                   <Lock className="w-5 h-5 text-neutral-600" />
                 </div>
                 <h2 className="text-xl font-bold text-neutral-900 mb-1">
-                  Anmeldung
+                  {t('title')}
                 </h2>
                 <p className="text-neutral-500 text-sm">
-                  Bitte geben Sie Ihr Passwort ein
+                  {t('subtitle')}
                 </p>
               </div>
 
@@ -130,12 +140,12 @@ export default function LoginPage() {
                     htmlFor="password"
                     className="block text-sm font-medium text-neutral-700"
                   >
-                    Passwort
+                    {t('password')}
                   </label>
                   <input
                     id="password"
                     type="password"
-                    placeholder="Passwort eingeben"
+                    placeholder={t('passwordPlaceholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoFocus
@@ -153,9 +163,9 @@ export default function LoginPage() {
                   >
                     <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium">Anmeldung fehlgeschlagen</p>
+                      <p className="font-medium">{t('errorTitle')}</p>
                       <p className="text-sm text-red-700">
-                        Das eingegebene Passwort ist ungültig.
+                        {t('errorMessage')}
                       </p>
                     </div>
                   </div>
@@ -167,10 +177,10 @@ export default function LoginPage() {
                   className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isLoading ? (
-                    <span>Wird angemeldet...</span>
+                    <span>{t('submitting')}</span>
                   ) : (
                     <>
-                      <span>Anmelden</span>
+                      <span>{t('submit')}</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -181,8 +191,7 @@ export default function LoginPage() {
             {/* Bottom info */}
             <div className="px-8 py-4 bg-neutral-50 border-t border-neutral-200">
               <p className="text-xs text-neutral-500 text-center">
-                Zugang nur für autorisiertes Personal des SEM.
-                Bei Problemen kontaktieren Sie den IT-Support.
+                {t('info')}
               </p>
             </div>
           </div>
