@@ -26,9 +26,10 @@ export const INAD_COLUMNS = {
 } as const;
 
 // Excel column mappings for BAZL file
+// Note: Using ICAO codes as IATA columns are often empty in the source data
 export const BAZL_COLUMNS = {
-  airline: 'Airline Code (IATA)',
-  airport: 'Flughafen (IATA)',
+  airline: 'Airline Code (ICAO)',
+  airport: 'Flughafen (ICAO)',
   pax: 'Passagiere / Passagers',
   year: 'Jahr',
   month: 'Monat',
