@@ -103,16 +103,22 @@ export async function parseBAZLFile(file: File): Promise<BAZLRecord[]> {
     }
   });
 
-  // Get column indices
-  const airlineIdx = headerIndex[BAZL_COLUMNS.airline];
-  const airportIdx = headerIndex[BAZL_COLUMNS.airport];
+  // Get column indices - IATA preferred, ICAO as fallback
+  const airlineIataIdx = headerIndex[BAZL_COLUMNS.airline];
+  const airportIataIdx = headerIndex[BAZL_COLUMNS.airport];
+  const airlineIcaoIdx = headerIndex['Airline Code (ICAO)'];
+  const airportIcaoIdx = headerIndex['Flughafen (ICAO)'];
   const paxIdx = headerIndex[BAZL_COLUMNS.pax];
   const yearIdx = headerIndex[BAZL_COLUMNS.year];
   const monthIdx = headerIndex[BAZL_COLUMNS.month];
 
-  if (airlineIdx === undefined || airportIdx === undefined ||
+  // Need at least one airline column and one airport column
+  const hasAirlineCol = airlineIataIdx !== undefined || airlineIcaoIdx !== undefined;
+  const hasAirportCol = airportIataIdx !== undefined || airportIcaoIdx !== undefined;
+
+  if (!hasAirlineCol || !hasAirportCol ||
       paxIdx === undefined || yearIdx === undefined || monthIdx === undefined) {
-    throw new Error('Required columns not found in BAZL file. Expected: Airline Code (IATA), Flughafen (IATA), Passagiere / Passagers, Jahr, Monat');
+    throw new Error('Required columns not found in BAZL file. Expected: Airline Code (IATA/ICAO), Flughafen (IATA/ICAO), Passagiere / Passagers, Jahr, Monat');
   }
 
   // Parse data rows (skip header)
@@ -121,8 +127,17 @@ export async function parseBAZLFile(file: File): Promise<BAZLRecord[]> {
     const row = rows[i] as unknown[];
     if (!row || row.length === 0) continue;
 
-    const airline = String(row[airlineIdx] || '').trim();
-    const airport = String(row[airportIdx] || '').trim();
+    // Try IATA first, fall back to ICAO if empty
+    let airline = airlineIataIdx !== undefined ? String(row[airlineIataIdx] || '').trim() : '';
+    if (!airline && airlineIcaoIdx !== undefined) {
+      airline = String(row[airlineIcaoIdx] || '').trim();
+    }
+
+    let airport = airportIataIdx !== undefined ? String(row[airportIataIdx] || '').trim() : '';
+    if (!airport && airportIcaoIdx !== undefined) {
+      airport = String(row[airportIcaoIdx] || '').trim();
+    }
+
     const pax = Number(row[paxIdx]) || 0;
 
     // Handle month - can be integer or Excel date serial
