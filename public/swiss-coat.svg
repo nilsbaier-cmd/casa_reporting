@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 600">
+  <!-- Swiss Coat of Arms - Official heraldic shield shape -->
+  <path d="M5 0 L507 0 L507 300 C507 450 256 595 256 595 C256 595 5 450 5 300 Z" fill="#FF0000"/>
+  <!-- White cross - horizontal bar -->
+  <rect x="96" y="195" width="320" height="110" fill="#FFFFFF"/>
+  <!-- White cross - vertical bar -->
+  <rect x="201" y="90" width="110" height="320" fill="#FFFFFF"/>
+</svg>
