@@ -39,13 +39,28 @@ function filterBySemester<T extends { year: number; month: number }>(
   );
 }
 
-// Extract available semesters from data
-function extractSemesters(records: { year: number; month: number }[]): Semester[] {
+// Extract available semesters from BOTH INAD and BAZL data
+// This ensures all semesters with data from either source are available
+function extractAllSemesters(
+  inadData: { year: number; month: number }[] | null,
+  bazlData: { year: number; month: number }[] | null
+): Semester[] {
   const semesterSet = new Set<string>();
 
-  for (const record of records) {
-    const sem = getSemester(record.year, record.month);
-    semesterSet.add(sem.label);
+  // Add semesters from INAD data
+  if (inadData) {
+    for (const record of inadData) {
+      const sem = getSemester(record.year, record.month);
+      semesterSet.add(sem.label);
+    }
+  }
+
+  // Add semesters from BAZL data
+  if (bazlData) {
+    for (const record of bazlData) {
+      const sem = getSemester(record.year, record.month);
+      semesterSet.add(sem.label);
+    }
   }
 
   // Convert back to Semester objects and sort descending
@@ -120,8 +135,9 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
 
   // Actions
   setINADData: (data, fileName) => {
-    // Extract available semesters from INAD data
-    const semesters = extractSemesters(data);
+    const currentState = get();
+    // Extract available semesters from BOTH INAD and BAZL data
+    const semesters = extractAllSemesters(data, currentState.bazlData);
     const defaultSemester = semesters.length > 0 ? semesters[0] : null;
 
     set({
@@ -145,9 +161,21 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   },
 
   setBAZLData: (data, fileName) => {
+    const currentState = get();
+    // Extract available semesters from BOTH INAD and BAZL data
+    const semesters = extractAllSemesters(currentState.inadData, data);
+    // Keep current semester if still valid, otherwise use first available
+    const currentSemesterStillValid = currentState.selectedSemester &&
+      semesters.some(s => s.label === currentState.selectedSemester?.label);
+    const selectedSemester = currentSemesterStillValid
+      ? currentState.selectedSemester
+      : (semesters.length > 0 ? semesters[0] : null);
+
     set({
       bazlData: data,
       bazlFileName: fileName,
+      availableSemesters: semesters,
+      selectedSemester: selectedSemester,
       error: null,
       // Clear previous results when new data is loaded
       step1Results: null,
