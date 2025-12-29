@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type {
   INADRecord,
   BAZLRecord,
@@ -117,21 +118,23 @@ interface AnalysisState {
   setError: (error: string | null) => void;
 }
 
-export const useAnalysisStore = create<AnalysisState>((set, get) => ({
-  // Initial state
-  inadData: null,
-  bazlData: null,
-  inadFileName: null,
-  bazlFileName: null,
-  availableSemesters: [],
-  selectedSemester: null,
-  step1Results: null,
-  step2Results: null,
-  step3Results: null,
-  threshold: null,
-  config: DEFAULT_CONFIG,
-  isAnalyzing: false,
-  error: null,
+export const useAnalysisStore = create<AnalysisState>()(
+  persist(
+    (set, get) => ({
+      // Initial state
+      inadData: null,
+      bazlData: null,
+      inadFileName: null,
+      bazlFileName: null,
+      availableSemesters: [],
+      selectedSemester: null,
+      step1Results: null,
+      step2Results: null,
+      step3Results: null,
+      threshold: null,
+      config: DEFAULT_CONFIG,
+      isAnalyzing: false,
+      error: null,
 
   // Actions
   setINADData: (data, fileName) => {
@@ -273,4 +276,23 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   setError: (error) => {
     set({ error });
   },
-}));
+    }),
+    {
+      name: 'casa-analysis-storage',
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({
+        inadData: state.inadData,
+        bazlData: state.bazlData,
+        inadFileName: state.inadFileName,
+        bazlFileName: state.bazlFileName,
+        availableSemesters: state.availableSemesters,
+        selectedSemester: state.selectedSemester,
+        step1Results: state.step1Results,
+        step2Results: state.step2Results,
+        step3Results: state.step3Results,
+        threshold: state.threshold,
+        config: state.config,
+      }),
+    }
+  )
+);

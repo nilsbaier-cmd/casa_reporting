@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { TrendingUp, TrendingDown, Minus, BarChart3, Info } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   LineChart,
   Line,
@@ -33,6 +34,9 @@ interface SemesterData {
 
 export function TrendsTab() {
   const { inadData, bazlData, availableSemesters } = useAnalysisStore();
+  const t = useTranslations('trends');
+  const locale = useLocale();
+  const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   // State for semester comparison selection
   const [compareSemester1, setCompareSemester1] = useState<string | null>(null);
@@ -137,8 +141,8 @@ export function TrendsTab() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-neutral-500">
         <BarChart3 className="w-12 h-12 mb-4 text-neutral-300" />
-        <p className="text-lg font-medium">Keine Daten geladen</p>
-        <p className="text-sm mt-1">Bitte laden Sie INAD- und BAZL-Dateien hoch</p>
+        <p className="text-lg font-medium">{t('noData')}</p>
+        <p className="text-sm mt-1">{t('noDataHint')}</p>
       </div>
     );
   }
@@ -147,8 +151,8 @@ export function TrendsTab() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-neutral-500">
         <BarChart3 className="w-12 h-12 mb-4 text-neutral-300" />
-        <p className="text-lg font-medium">Keine Trenddaten verfügbar</p>
-        <p className="text-sm mt-1">Mindestens ein Semester mit Daten erforderlich</p>
+        <p className="text-lg font-medium">{t('noTrendData')}</p>
+        <p className="text-sm mt-1">{t('noTrendDataHint')}</p>
       </div>
     );
   }
@@ -165,9 +169,9 @@ export function TrendsTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-neutral-900">Trend-Analyse</h3>
+          <h3 className="text-xl font-bold text-neutral-900">{t('title')}</h3>
           <p className="text-sm text-neutral-500 mt-1">
-            Entwicklung über {trendData.length} Semester ({trendData[0]?.semester} - {latest?.semester})
+            {t('subtitle', { count: trendData.length, from: trendData[0]?.semester, to: latest?.semester })}
           </p>
         </div>
       </div>
@@ -177,9 +181,9 @@ export function TrendsTab() {
         <div className="flex items-start gap-3 mb-4">
           <Info className="w-5 h-5 text-neutral-500 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="font-bold text-neutral-900">Semester-Vergleich</h4>
+            <h4 className="font-bold text-neutral-900">{t('semesterComparison')}</h4>
             <p className="text-sm text-neutral-600 mt-1">
-              Wählen Sie zwei beliebige Semester aus dem Analysezeitraum, um deren Kennzahlen direkt zu vergleichen.
+              {t('semesterComparisonDesc')}
             </p>
           </div>
         </div>
@@ -188,19 +192,19 @@ export function TrendsTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
-              Referenz-Semester (Basis)
+              {t('referenceSemester')}
             </label>
             <Select
               value={compareSemester1 || ''}
               onValueChange={setCompareSemester1}
             >
               <SelectTrigger className="w-full border-neutral-300 focus:border-red-600 focus:ring-red-600">
-                <SelectValue placeholder="Semester wählen" />
+                <SelectValue placeholder={t('selectSemester')} />
               </SelectTrigger>
               <SelectContent>
                 {semester1Options.map((semester) => (
                   <SelectItem key={semester.semester} value={semester.semester}>
-                    {semester.semester} ({semester.half === 1 ? 'Jan - Jun' : 'Jul - Dez'})
+                    {semester.semester} ({semester.half === 1 ? t('janJun') : t('julDec')})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -209,19 +213,19 @@ export function TrendsTab() {
 
           <div>
             <label className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
-              Vergleichs-Semester
+              {t('comparisonSemester')}
             </label>
             <Select
               value={compareSemester2 || ''}
               onValueChange={setCompareSemester2}
             >
               <SelectTrigger className="w-full border-neutral-300 focus:border-red-600 focus:ring-red-600">
-                <SelectValue placeholder="Semester wählen" />
+                <SelectValue placeholder={t('selectSemester')} />
               </SelectTrigger>
               <SelectContent>
                 {semester2Options.map((semester) => (
                   <SelectItem key={semester.semester} value={semester.semester}>
-                    {semester.semester} ({semester.half === 1 ? 'Jan - Jun' : 'Jul - Dez'})
+                    {semester.semester} ({semester.half === 1 ? t('janJun') : t('julDec')})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -236,7 +240,7 @@ export function TrendsTab() {
             <div className="bg-white border border-neutral-200 p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  Passagiere
+                  {t('passengers')}
                 </span>
                 <div className="flex items-center gap-1">
                   <TrendIndicator value={comparisonData.paxTrend} />
@@ -253,13 +257,13 @@ export function TrendsTab() {
                 <div className="flex justify-between items-baseline">
                   <span className="text-xs text-neutral-500">{comparisonData.semester1.semester}</span>
                   <span className="text-lg font-semibold text-neutral-700">
-                    {comparisonData.semester1.pax.toLocaleString('de-CH')}
+                    {comparisonData.semester1.pax.toLocaleString(localeFormat)}
                   </span>
                 </div>
                 <div className="flex justify-between items-baseline">
                   <span className="text-xs text-neutral-500">{comparisonData.semester2.semester}</span>
                   <span className="text-2xl font-bold text-neutral-900">
-                    {comparisonData.semester2.pax.toLocaleString('de-CH')}
+                    {comparisonData.semester2.pax.toLocaleString(localeFormat)}
                   </span>
                 </div>
               </div>
@@ -269,7 +273,7 @@ export function TrendsTab() {
             <div className="bg-white border border-neutral-200 p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  INAD-Fälle
+                  {t('inadCases')}
                 </span>
                 <div className="flex items-center gap-1">
                   <TrendIndicator value={comparisonData.inadTrend} />
@@ -286,13 +290,13 @@ export function TrendsTab() {
                 <div className="flex justify-between items-baseline">
                   <span className="text-xs text-neutral-500">{comparisonData.semester1.semester}</span>
                   <span className="text-lg font-semibold text-neutral-700">
-                    {comparisonData.semester1.inad.toLocaleString('de-CH')}
+                    {comparisonData.semester1.inad.toLocaleString(localeFormat)}
                   </span>
                 </div>
                 <div className="flex justify-between items-baseline">
                   <span className="text-xs text-neutral-500">{comparisonData.semester2.semester}</span>
                   <span className="text-2xl font-bold text-neutral-900">
-                    {comparisonData.semester2.inad.toLocaleString('de-CH')}
+                    {comparisonData.semester2.inad.toLocaleString(localeFormat)}
                   </span>
                 </div>
               </div>
@@ -302,7 +306,7 @@ export function TrendsTab() {
             <div className="bg-white border border-neutral-200 p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  Dichte
+                  {t('density')}
                 </span>
                 <div className="flex items-center gap-1">
                   <TrendIndicator value={comparisonData.densityTrend} />
@@ -337,10 +341,10 @@ export function TrendsTab() {
       {/* Passenger Trend Chart */}
       <div className="bg-white border border-neutral-200 p-6">
         <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          Passagierentwicklung
+          {t('passengerTrend')}
         </h4>
         <p className="text-sm text-neutral-500 mb-6">
-          Anzahl Passagiere pro Semester (nur Semester mit BAZL-Daten)
+          {t('passengerTrendDesc')}
         </p>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
@@ -367,7 +371,7 @@ export function TrendsTab() {
                 tick={{ fontSize: 12, fill: '#737373' }}
               />
               <Tooltip
-                formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'Passagiere']}
+                formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('passengers')]}
                 contentStyle={{
                   backgroundColor: '#fff',
                   border: '1px solid #e5e5e5',
@@ -389,10 +393,10 @@ export function TrendsTab() {
       {/* INAD Trend Chart */}
       <div className="bg-white border border-neutral-200 p-6">
         <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          INAD-Entwicklung
+          {t('inadTrend')}
         </h4>
         <p className="text-sm text-neutral-500 mb-6">
-          Anzahl Einreiseverweigerungen pro Semester (berücksichtigt)
+          {t('inadTrendDesc')}
         </p>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
@@ -418,7 +422,7 @@ export function TrendsTab() {
                 tick={{ fontSize: 12, fill: '#737373' }}
               />
               <Tooltip
-                formatter={(value) => [typeof value === 'number' ? value.toLocaleString('de-CH') : '–', 'Einreiseverweigerungen']}
+                formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('refusals')]}
                 contentStyle={{
                   backgroundColor: '#fff',
                   border: '1px solid #e5e5e5',
@@ -440,10 +444,10 @@ export function TrendsTab() {
       {/* Density Trend Chart */}
       <div className="bg-white border border-neutral-200 p-6">
         <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          Dichte-Entwicklung
+          {t('densityTrend')}
         </h4>
         <p className="text-sm text-neutral-500 mb-6">
-          Einreiseverweigerungen pro 1'000 Passagiere (‰) pro Semester (nur Semester mit BAZL-Daten)
+          {t('densityTrendDesc')}
         </p>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
@@ -465,7 +469,7 @@ export function TrendsTab() {
                 domain={['auto', 'auto']}
               />
               <Tooltip
-                formatter={(value) => [typeof value === 'number' ? value.toFixed(4) + '‰' : '–', 'Dichte']}
+                formatter={(value) => [typeof value === 'number' ? value.toFixed(4) + '‰' : '–', t('density')]}
                 contentStyle={{
                   backgroundColor: '#fff',
                   border: '1px solid #e5e5e5',

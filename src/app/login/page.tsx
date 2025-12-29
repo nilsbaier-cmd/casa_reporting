@@ -58,10 +58,7 @@ export default function LoginPage() {
           {/* Top branding */}
           <div className="flex items-center gap-4">
             <SwissCoat size="lg" />
-            <div className="text-white">
-              <p className="font-bold">{tHeader('swissConfederation')}</p>
-              <p className="text-neutral-400 text-sm">{tHeader('sem')}</p>
-            </div>
+            <p className="text-neutral-400 text-sm">{tHeader('sem')}</p>
           </div>
 
           {/* Center content */}

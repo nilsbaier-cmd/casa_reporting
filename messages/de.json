@@ -265,5 +265,30 @@
     "inadFile": "INAD-Datei",
     "bazlFile": "BAZL-Datei",
     "analysisError": "Fehler bei der Analyse"
+  },
+  "trends": {
+    "title": "Trend-Analyse",
+    "subtitle": "Entwicklung über {count} Semester ({from} - {to})",
+    "noData": "Keine Daten geladen",
+    "noDataHint": "Bitte laden Sie INAD- und BAZL-Dateien hoch",
+    "noTrendData": "Keine Trenddaten verfügbar",
+    "noTrendDataHint": "Mindestens ein Semester mit Daten erforderlich",
+    "semesterComparison": "Semester-Vergleich",
+    "semesterComparisonDesc": "Wählen Sie zwei beliebige Semester aus dem Analysezeitraum, um deren Kennzahlen direkt zu vergleichen.",
+    "referenceSemester": "Referenz-Semester (Basis)",
+    "comparisonSemester": "Vergleichs-Semester",
+    "selectSemester": "Semester wählen",
+    "janJun": "Jan - Jun",
+    "julDec": "Jul - Dez",
+    "passengers": "Passagiere",
+    "inadCases": "INAD-Fälle",
+    "density": "Dichte",
+    "passengerTrend": "Passagierentwicklung",
+    "passengerTrendDesc": "Anzahl Passagiere pro Semester (nur Semester mit BAZL-Daten)",
+    "inadTrend": "INAD-Entwicklung",
+    "inadTrendDesc": "Anzahl Einreiseverweigerungen pro Semester (berücksichtigt)",
+    "densityTrend": "Dichte-Entwicklung",
+    "densityTrendDesc": "Einreiseverweigerungen pro 1'000 Passagiere (‰) pro Semester (nur Semester mit BAZL-Daten)",
+    "refusals": "Einreiseverweigerungen"
   }
 }

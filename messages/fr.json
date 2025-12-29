@@ -265,5 +265,30 @@
     "inadFile": "Fichier INAD",
     "bazlFile": "Fichier OFAC",
     "analysisError": "Erreur lors de l'analyse"
+  },
+  "trends": {
+    "title": "Analyse des tendances",
+    "subtitle": "Évolution sur {count} semestres ({from} - {to})",
+    "noData": "Aucune donnée chargée",
+    "noDataHint": "Veuillez télécharger les fichiers INAD et OFAC",
+    "noTrendData": "Aucune donnée de tendance disponible",
+    "noTrendDataHint": "Au moins un semestre avec des données est requis",
+    "semesterComparison": "Comparaison semestrielle",
+    "semesterComparisonDesc": "Sélectionnez deux semestres de la période d'analyse pour comparer directement leurs indicateurs.",
+    "referenceSemester": "Semestre de référence (base)",
+    "comparisonSemester": "Semestre de comparaison",
+    "selectSemester": "Sélectionner un semestre",
+    "janJun": "Jan - Juin",
+    "julDec": "Juil - Déc",
+    "passengers": "Passagers",
+    "inadCases": "Cas INAD",
+    "density": "Densité",
+    "passengerTrend": "Évolution des passagers",
+    "passengerTrendDesc": "Nombre de passagers par semestre (uniquement semestres avec données OFAC)",
+    "inadTrend": "Évolution INAD",
+    "inadTrendDesc": "Nombre de refus d'entrée par semestre (inclus)",
+    "densityTrend": "Évolution de la densité",
+    "densityTrendDesc": "Refus d'entrée pour 1'000 passagers (‰) par semestre (uniquement semestres avec données OFAC)",
+    "refusals": "Refus d'entrée"
   }
 }
