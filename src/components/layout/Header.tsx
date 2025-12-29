@@ -54,15 +54,9 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
           <div className="flex items-center justify-between h-11">
             <div className="flex items-center gap-4">
               <SwissCoat size="sm" />
-              <div className="hidden sm:flex items-center gap-3 text-white">
-                <span className="text-sm font-medium tracking-wide">
-                  {t('swissConfederation')}
-                </span>
-                <span className="w-px h-4 bg-neutral-600" aria-hidden="true" />
-                <span className="text-sm text-neutral-300">
-                  {t('sem')}
-                </span>
-              </div>
+              <span className="hidden sm:inline text-sm text-neutral-300">
+                {t('sem')}
+              </span>
               <span className="sm:hidden text-white text-sm font-medium">SEM</span>
             </div>
             <div className="flex items-center gap-4">

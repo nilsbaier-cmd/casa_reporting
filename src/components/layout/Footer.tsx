@@ -31,10 +31,7 @@ export function Footer({ version = '1.0.0', lastUpdated }: FooterProps) {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <SwissCoat size="md" />
-                <div>
-                  <p className="font-bold text-sm">{tHeader('swissConfederation')}</p>
-                  <p className="text-neutral-400 text-sm">{tHeader('sem')}</p>
-                </div>
+                <p className="text-neutral-400 text-sm">{tHeader('sem')}</p>
               </div>
               <p className="text-neutral-500 text-sm max-w-xs">
                 {t('description')}

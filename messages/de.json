@@ -226,7 +226,7 @@
     "submitting": "Wird angemeldet...",
     "errorTitle": "Anmeldung fehlgeschlagen",
     "errorMessage": "Das eingegebene Passwort ist ungültig.",
-    "info": "Zugang nur für autorisiertes Personal des SEM. Bei Problemen kontaktieren Sie den IT-Support.",
+    "info": "Zugang nur für autorisierte Behörden. Bei Problemen kontaktieren Sie bitte die Sektion Grundlagen Grenze.",
     "brandingTitle": "CASA Reporting",
     "brandingSubtitle": "Dashboard",
     "brandingDesc": "Analyse und Überwachung von INAD-Fällen zur Gewährleistung der Beförderungsvorschriften im Schengen-Luftverkehr.",
@@ -256,5 +256,14 @@
   "language": {
     "de": "Deutsch",
     "fr": "Français"
+  },
+  "dashboard": {
+    "dataControl": "Datensteuerung",
+    "analysisResults": "Analyseergebnisse",
+    "noResults": "Keine Analyseergebnisse",
+    "uploadHint": "Laden Sie die INAD- und BAZL-Excel-Dateien hoch, um die Analyse zu starten.",
+    "inadFile": "INAD-Datei",
+    "bazlFile": "BAZL-Datei",
+    "analysisError": "Fehler bei der Analyse"
   }
 }

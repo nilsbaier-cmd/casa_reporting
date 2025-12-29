@@ -14,19 +14,22 @@ export function SwissCoat({ className, size = 'md' }: SwissCoatProps) {
 
   return (
     <svg
-      viewBox="0 0 32 32"
+      viewBox="0 0 512 512"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(sizeClasses[size], className)}
       aria-label="Schweizer Wappen"
       role="img"
     >
-      {/* Shield background - Red */}
-      <rect x="2" y="2" width="28" height="28" rx="2" fill="#D32F2F" />
+      {/* Shield shape - classic heraldic form */}
+      <path
+        d="M16 0 L496 0 L496 224 Q496 400 256 512 Q16 400 16 224 Z"
+        fill="#D32F2F"
+      />
       {/* White cross - horizontal bar */}
-      <rect x="6" y="12" width="20" height="8" fill="white" />
+      <rect x="96" y="192" width="320" height="128" fill="white" />
       {/* White cross - vertical bar */}
-      <rect x="12" y="6" width="8" height="20" fill="white" />
+      <rect x="192" y="96" width="128" height="320" fill="white" />
     </svg>
   );
 }

@@ -19,6 +19,7 @@ import { TrendsTab } from '@/components/tabs/TrendsTab';
 import { DocumentationTab } from '@/components/tabs/DocumentationTab';
 import { AlertCircle, Upload, FileSpreadsheet, Plane } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -26,6 +27,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [analysisTab, setAnalysisTab] = useState('step1');
+  const t = useTranslations('dashboard');
+  const tSteps = useTranslations('steps');
+  const tCommon = useTranslations('common');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -38,7 +42,7 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center bg-neutral-50">
         <div className="text-center animate-sem-fade-in">
           <div className="w-12 h-12 border-2 border-neutral-200 border-t-red-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-neutral-500 text-sm font-medium">Wird geladen...</p>
+          <p className="text-neutral-500 text-sm font-medium">{tCommon('loading')}</p>
         </div>
       </div>
     );
@@ -52,9 +56,9 @@ export default function DashboardPage() {
   const hasData = inadData !== null || bazlData !== null;
 
   const analysisTabs = [
-    { id: 'step1', label: 'Schritt 1: Airlines', shortLabel: 'Airlines' },
-    { id: 'step2', label: 'Schritt 2: Routen', shortLabel: 'Routen' },
-    { id: 'step3', label: 'Schritt 3: Dichte-Analyse', shortLabel: 'Dichte' },
+    { id: 'step1', label: tSteps('step1.shortTitle'), shortLabel: tSteps('step1.tabTitle') },
+    { id: 'step2', label: tSteps('step2.shortTitle'), shortLabel: tSteps('step2.tabTitle') },
+    { id: 'step3', label: tSteps('step3.shortTitle'), shortLabel: tSteps('step3.tabTitle') },
   ];
 
   // Render content based on active tab
@@ -97,7 +101,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-8 h-px bg-red-600" aria-hidden="true" />
                   <h2 id="analysis-heading" className="text-xs font-bold uppercase tracking-wider text-neutral-500">
-                    Analyseergebnisse
+                    {t('analysisResults')}
                   </h2>
                 </div>
 
@@ -172,20 +176,20 @@ export default function DashboardPage() {
                     <Plane className="w-8 h-8 text-neutral-400" />
                   </div>
                   <h3 className="text-xl font-bold text-neutral-900 mb-3">
-                    Keine Analyseergebnisse
+                    {t('noResults')}
                   </h3>
                   <p className="text-neutral-600 mb-6">
-                    Laden Sie die INAD- und BAZL-Excel-Dateien hoch, um die Analyse zu starten.
+                    {t('uploadHint')}
                   </p>
                   <div className="flex items-center justify-center gap-4 text-sm text-neutral-500">
                     <div className="flex items-center gap-2">
                       <Upload className="w-4 h-4" />
-                      <span>INAD-Datei</span>
+                      <span>{t('inadFile')}</span>
                     </div>
                     <span className="text-neutral-300">+</span>
                     <div className="flex items-center gap-2">
                       <FileSpreadsheet className="w-4 h-4" />
-                      <span>BAZL-Datei</span>
+                      <span>{t('bazlFile')}</span>
                     </div>
                   </div>
                 </div>
@@ -212,7 +216,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 mb-6">
               <div className="w-8 h-px bg-red-600" aria-hidden="true" />
               <h2 id="controls-heading" className="text-xs font-bold uppercase tracking-wider text-neutral-500">
-                Datensteuerung
+                {t('dataControl')}
               </h2>
             </div>
 
@@ -237,7 +241,7 @@ export default function DashboardPage() {
             >
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-red-900">Fehler bei der Analyse</p>
+                <p className="font-bold text-red-900">{t('analysisError')}</p>
                 <p className="text-red-800">{error}</p>
               </div>
             </div>

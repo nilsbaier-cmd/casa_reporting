@@ -226,7 +226,7 @@
     "submitting": "Connexion en cours...",
     "errorTitle": "Échec de la connexion",
     "errorMessage": "Le mot de passe saisi est invalide.",
-    "info": "Accès réservé au personnel autorisé du SEM. En cas de problème, contactez le support informatique.",
+    "info": "Accès réservé aux autorités autorisées. En cas de problème, veuillez contacter la Section Bases Frontières.",
     "brandingTitle": "CASA Reporting",
     "brandingSubtitle": "Tableau de bord",
     "brandingDesc": "Analyse et surveillance des cas INAD pour garantir le respect des règles de transport dans le trafic aérien Schengen.",
@@ -256,5 +256,14 @@
   "language": {
     "de": "Deutsch",
     "fr": "Français"
+  },
+  "dashboard": {
+    "dataControl": "Contrôle des données",
+    "analysisResults": "Résultats d'analyse",
+    "noResults": "Aucun résultat d'analyse",
+    "uploadHint": "Téléchargez les fichiers Excel INAD et OFAC pour lancer l'analyse.",
+    "inadFile": "Fichier INAD",
+    "bazlFile": "Fichier OFAC",
+    "analysisError": "Erreur lors de l'analyse"
   }
 }
