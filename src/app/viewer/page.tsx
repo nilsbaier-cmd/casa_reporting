@@ -32,11 +32,12 @@ export default function ViewerPage() {
 
   // Try to load data from default URL on mount
   useEffect(() => {
-    const dataUrl = process.env.NEXT_PUBLIC_VIEWER_DATA_URL;
-    if (dataUrl && !publishedData) {
+    // First try environment variable, then fallback to local file
+    const dataUrl = process.env.NEXT_PUBLIC_VIEWER_DATA_URL || '/data/published.json';
+    if (!publishedData && !isLoading) {
       loadFromUrl(dataUrl);
     }
-  }, [loadFromUrl, publishedData]);
+  }, [loadFromUrl, publishedData, isLoading]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {

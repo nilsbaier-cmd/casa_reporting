@@ -36,6 +36,17 @@ export const useViewerStore = create<ViewerState>()((set) => ({
 
     try {
       const response = await fetch(url);
+
+      // If file doesn't exist (404), silently fail - data not published yet
+      if (response.status === 404) {
+        set({
+          publishedData: null,
+          isLoading: false,
+          error: null, // No error, just no data yet
+        });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
