@@ -210,7 +210,7 @@ export function PublishDialog() {
           {showConfirmDialog && (
             <div className="bg-blue-50 border border-blue-200 p-4 mb-4">
               <p className="text-sm font-medium text-blue-900 mb-3">
-                {t('confirmTitle', { semester: selectedSemester?.label })}
+                {t('confirmTitle', { semester: selectedSemester?.label ?? '' })}
               </p>
               <p className="text-xs text-blue-700 mb-4">{t('confirmDescription')}</p>
               <div className="flex items-center gap-3">

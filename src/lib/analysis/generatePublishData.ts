@@ -59,28 +59,47 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
   const totalInads = semesterInadData.length;
   const totalPax = semesterBazlData.reduce((sum, r) => sum + r.pax, 0);
 
+  // Build airline name lookup from INAD data
+  const airlineNameMap = new Map<string, string>();
+  for (const record of inadData) {
+    if (!airlineNameMap.has(record.airline) && record.airline) {
+      // Use the airline code itself as name since INADRecord doesn't have airlineName
+      airlineNameMap.set(record.airline, record.airline);
+    }
+  }
+
   // Airlines
   const airlines: PublishedAirline[] = step1Results.map((r) => ({
     airline: r.airline,
-    airlineName: r.airlineName,
+    airlineName: airlineNameMap.get(r.airline) || r.airline,
     inadCount: r.inadCount,
-    aboveThreshold: r.aboveThreshold,
+    aboveThreshold: r.passesThreshold,
   }));
 
   const airlinesAboveThreshold = airlines.filter((a) => a.aboveThreshold).length;
 
-  // Routes from Step 3
+  // Routes from Step 3 - convert priority to classification
+  const priorityToClassification = (priority: string): 'sanction' | 'watchList' | 'clear' | 'unreliable' => {
+    switch (priority) {
+      case 'HIGH_PRIORITY': return 'sanction';
+      case 'WATCH_LIST': return 'watchList';
+      case 'UNRELIABLE': return 'unreliable';
+      case 'CLEAR': return 'clear';
+      default: return 'clear';
+    }
+  };
+
   const routes: PublishedRoute[] = step3Results.map((r) => ({
     airline: r.airline,
-    airlineName: r.airlineName,
+    airlineName: airlineNameMap.get(r.airline) || r.airline,
     lastStop: r.lastStop,
     inadCount: r.inadCount,
     pax: r.pax,
     density: r.density,
-    classification: r.classification,
+    classification: priorityToClassification(r.priority),
   }));
 
-  const routesAboveThreshold = step2Results.filter((r) => r.aboveThreshold).length;
+  const routesAboveThreshold = step2Results.filter((r) => r.passesThreshold).length;
 
   // Top 10 Last Stops
   const lastStopCounts = new Map<string, number>();
@@ -94,22 +113,15 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
     .map(([name, count]) => ({ name, count }));
 
   // Top 10 Airlines
-  const airlineCounts = new Map<string, { name: string; count: number }>();
+  const airlineCounts = new Map<string, number>();
   for (const record of semesterInadData) {
-    const existing = airlineCounts.get(record.airline);
-    if (existing) {
-      existing.count++;
-    } else {
-      airlineCounts.set(record.airline, {
-        name: record.airlineName,
-        count: 1,
-      });
-    }
+    const existing = airlineCounts.get(record.airline) || 0;
+    airlineCounts.set(record.airline, existing + 1);
   }
   const top10Airlines = Array.from(airlineCounts.entries())
-    .sort((a, b) => b[1].count - a[1].count)
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
-    .map(([code, data]) => ({ code, name: data.name, count: data.count }));
+    .map(([code, count]) => ({ code, name: code, count }));
 
   // Trend data for all available semesters
   const trends: PublishedTrendData[] = availableSemesters
