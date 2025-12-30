@@ -289,6 +289,7 @@
     "inadTrendDesc": "Nombre de refus d'entrée par semestre (inclus)",
     "densityTrend": "Évolution de la densité",
     "densityTrendDesc": "Refus d'entrée pour 1'000 passagers (‰) par semestre (uniquement semestres avec données OFAC)",
-    "refusals": "Refus d'entrée"
+    "refusals": "Refus d'entrée",
+    "swapSemesters": "Inverser les semestres"
   }
 }

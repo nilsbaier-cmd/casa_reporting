@@ -289,6 +289,7 @@
     "inadTrendDesc": "Anzahl Einreiseverweigerungen pro Semester (berücksichtigt)",
     "densityTrend": "Dichte-Entwicklung",
     "densityTrendDesc": "Einreiseverweigerungen pro 1'000 Passagiere (‰) pro Semester (nur Semester mit BAZL-Daten)",
-    "refusals": "Einreiseverweigerungen"
+    "refusals": "Einreiseverweigerungen",
+    "swapSemesters": "Semester tauschen"
   }
 }

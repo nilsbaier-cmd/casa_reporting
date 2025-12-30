@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
-import { TrendingUp, TrendingDown, Minus, BarChart3, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, BarChart3, Info, ArrowRightLeft } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import {
   LineChart,
@@ -189,8 +189,8 @@ export function TrendsTab() {
         </div>
 
         {/* Semester Selection Dropdowns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
+        <div className="flex flex-col md:flex-row items-end gap-4 mb-6">
+          <div className="flex-1 w-full">
             <label className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
               {t('referenceSemester')}
             </label>
@@ -211,7 +211,21 @@ export function TrendsTab() {
             </Select>
           </div>
 
-          <div>
+          {/* Swap Button */}
+          <button
+            type="button"
+            onClick={() => {
+              const temp = compareSemester1;
+              setCompareSemester1(compareSemester2);
+              setCompareSemester2(temp);
+            }}
+            className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full border border-neutral-300 bg-white hover:bg-neutral-50 hover:border-neutral-400 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+            title={t('swapSemesters')}
+          >
+            <ArrowRightLeft className="w-4 h-4 text-neutral-600" />
+          </button>
+
+          <div className="flex-1 w-full">
             <label className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
               {t('comparisonSemester')}
             </label>
