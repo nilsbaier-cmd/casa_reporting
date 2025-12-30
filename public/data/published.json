@@ -1,0 +1,669 @@
+{
+  "metadata": {
+    "publishedAt": "2025-12-30T23:21:47.794Z",
+    "semester": "2024 H2",
+    "semesterRange": {
+      "startMonth": 7,
+      "endMonth": 12,
+      "year": 2024
+    },
+    "version": "1.0"
+  },
+  "summary": {
+    "totalInads": 323,
+    "totalPax": 6027028,
+    "airlinesAnalyzed": 39,
+    "airlinesAboveThreshold": 15,
+    "routesAnalyzed": 80,
+    "routesAboveThreshold": 14,
+    "medianDensity": 0.11604830558807658
+  },
+  "airlines": [
+    {
+      "airline": "LX",
+      "airlineName": "LX",
+      "inadCount": 105,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "WK",
+      "airlineName": "WK",
+      "inadCount": 25,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "UA",
+      "airlineName": "UA",
+      "inadCount": 21,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "BA",
+      "airlineName": "BA",
+      "inadCount": 17,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "DS",
+      "airlineName": "DS",
+      "inadCount": 16,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "TK",
+      "airlineName": "TK",
+      "inadCount": 13,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "GM",
+      "airlineName": "GM",
+      "inadCount": 12,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "XQ",
+      "airlineName": "XQ",
+      "inadCount": 10,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "U2",
+      "airlineName": "U2",
+      "inadCount": 10,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "IV",
+      "airlineName": "IV",
+      "inadCount": 9,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "AC",
+      "airlineName": "AC",
+      "inadCount": 8,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "PC",
+      "airlineName": "PC",
+      "inadCount": 7,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "SV",
+      "airlineName": "SV",
+      "inadCount": 7,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "AI",
+      "airlineName": "AI",
+      "inadCount": 6,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "W6",
+      "airlineName": "W6",
+      "inadCount": 6,
+      "aboveThreshold": true
+    },
+    {
+      "airline": "AA",
+      "airlineName": "AA",
+      "inadCount": 5,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "EK",
+      "airlineName": "EK",
+      "inadCount": 4,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "AT",
+      "airlineName": "AT",
+      "inadCount": 4,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "EY",
+      "airlineName": "EY",
+      "inadCount": 4,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "JU",
+      "airlineName": "JU",
+      "inadCount": 3,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "EI",
+      "airlineName": "EI",
+      "inadCount": 3,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "VF",
+      "airlineName": "VF",
+      "inadCount": 3,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "BJ",
+      "airlineName": "BJ",
+      "inadCount": 2,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "QR",
+      "airlineName": "QR",
+      "inadCount": 2,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "RJ",
+      "airlineName": "RJ",
+      "inadCount": 2,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "CX",
+      "airlineName": "CX",
+      "inadCount": 2,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "AH",
+      "airlineName": "AH",
+      "inadCount": 2,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "DL",
+      "airlineName": "DL",
+      "inadCount": 2,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "EZY",
+      "airlineName": "EZY",
+      "inadCount": 2,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "A0",
+      "airlineName": "A0",
+      "inadCount": 2,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "CA",
+      "airlineName": "CA",
+      "inadCount": 1,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "SQ",
+      "airlineName": "SQ",
+      "inadCount": 1,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "TG",
+      "airlineName": "TG",
+      "inadCount": 1,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "TU",
+      "airlineName": "TU",
+      "inadCount": 1,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "ME",
+      "airlineName": "ME",
+      "inadCount": 1,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "ZQ",
+      "airlineName": "ZQ",
+      "inadCount": 1,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "FR",
+      "airlineName": "FR",
+      "inadCount": 1,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "AO",
+      "airlineName": "AO",
+      "inadCount": 1,
+      "aboveThreshold": false
+    },
+    {
+      "airline": "WY",
+      "airlineName": "WY",
+      "inadCount": 1,
+      "aboveThreshold": false
+    }
+  ],
+  "routes": [
+    {
+      "airline": "AI",
+      "airlineName": "AI",
+      "lastStop": "DEL",
+      "inadCount": 6,
+      "pax": 19973,
+      "density": 0.3004055474891103,
+      "classification": "watchList"
+    },
+    {
+      "airline": "LX",
+      "airlineName": "LX",
+      "lastStop": "DUB",
+      "inadCount": 10,
+      "pax": 60965,
+      "density": 0.1640285409661281,
+      "classification": "watchList"
+    },
+    {
+      "airline": "LX",
+      "airlineName": "LX",
+      "lastStop": "YUL",
+      "inadCount": 6,
+      "pax": 40562,
+      "density": 0.14792170011340663,
+      "classification": "watchList"
+    },
+    {
+      "airline": "AC",
+      "airlineName": "AC",
+      "lastStop": "YYZ",
+      "inadCount": 7,
+      "pax": 47732,
+      "density": 0.14665214112126038,
+      "classification": "watchList"
+    },
+    {
+      "airline": "LX",
+      "airlineName": "LX",
+      "lastStop": "BOS",
+      "inadCount": 8,
+      "pax": 63046,
+      "density": 0.12689147606509532,
+      "classification": "watchList"
+    },
+    {
+      "airline": "UA",
+      "airlineName": "UA",
+      "lastStop": "IAD",
+      "inadCount": 7,
+      "pax": 56788,
+      "density": 0.12326547862224414,
+      "classification": "watchList"
+    },
+    {
+      "airline": "LX",
+      "airlineName": "LX",
+      "lastStop": "SIN",
+      "inadCount": 6,
+      "pax": 50450,
+      "density": 0.11892963330029732,
+      "classification": "watchList"
+    },
+    {
+      "airline": "UA",
+      "airlineName": "UA",
+      "lastStop": "EWR",
+      "inadCount": 6,
+      "pax": 53019,
+      "density": 0.11316697787585583,
+      "classification": "clear"
+    },
+    {
+      "airline": "GM",
+      "airlineName": "GM",
+      "lastStop": "PRN",
+      "inadCount": 11,
+      "pax": 109193,
+      "density": 0.10073905836454718,
+      "classification": "clear"
+    },
+    {
+      "airline": "IV",
+      "airlineName": "IV",
+      "lastStop": "PRN",
+      "inadCount": 9,
+      "pax": 91087,
+      "density": 0.09880663541449383,
+      "classification": "clear"
+    },
+    {
+      "airline": "TK",
+      "airlineName": "TK",
+      "lastStop": "IST",
+      "inadCount": 13,
+      "pax": 230593,
+      "density": 0.05637638610018517,
+      "classification": "clear"
+    },
+    {
+      "airline": "BA",
+      "airlineName": "BA",
+      "lastStop": "LHR",
+      "inadCount": 16,
+      "pax": 326082,
+      "density": 0.04906741249133653,
+      "classification": "clear"
+    },
+    {
+      "airline": "PC",
+      "airlineName": "PC",
+      "lastStop": "SAW",
+      "inadCount": 7,
+      "pax": 176832,
+      "density": 0.03958559536735432,
+      "classification": "clear"
+    },
+    {
+      "airline": "LX",
+      "airlineName": "LX",
+      "lastStop": "LHR",
+      "inadCount": 11,
+      "pax": 278705,
+      "density": 0.03946825496492708,
+      "classification": "clear"
+    }
+  ],
+  "trends": [
+    {
+      "semester": "2010 H1",
+      "inadCount": 270,
+      "paxCount": 0,
+      "density": null
+    },
+    {
+      "semester": "2010 H2",
+      "inadCount": 296,
+      "paxCount": 0,
+      "density": null
+    },
+    {
+      "semester": "2011 H1",
+      "inadCount": 239,
+      "paxCount": 0,
+      "density": null
+    },
+    {
+      "semester": "2011 H2",
+      "inadCount": 254,
+      "paxCount": 0,
+      "density": null
+    },
+    {
+      "semester": "2012 H1",
+      "inadCount": 255,
+      "paxCount": 0,
+      "density": null
+    },
+    {
+      "semester": "2012 H2",
+      "inadCount": 250,
+      "paxCount": 0,
+      "density": null
+    },
+    {
+      "semester": "2013 H1",
+      "inadCount": 208,
+      "paxCount": 4482512,
+      "density": 0.0464
+    },
+    {
+      "semester": "2013 H2",
+      "inadCount": 240,
+      "paxCount": 4514797,
+      "density": 0.0532
+    },
+    {
+      "semester": "2014 H1",
+      "inadCount": 208,
+      "paxCount": 4540489,
+      "density": 0.0458
+    },
+    {
+      "semester": "2014 H2",
+      "inadCount": 277,
+      "paxCount": 4757836,
+      "density": 0.0582
+    },
+    {
+      "semester": "2015 H1",
+      "inadCount": 206,
+      "paxCount": 4677669,
+      "density": 0.044
+    },
+    {
+      "semester": "2015 H2",
+      "inadCount": 235,
+      "paxCount": 4942644,
+      "density": 0.0475
+    },
+    {
+      "semester": "2016 H1",
+      "inadCount": 179,
+      "paxCount": 4848297,
+      "density": 0.0369
+    },
+    {
+      "semester": "2016 H2",
+      "inadCount": 174,
+      "paxCount": 5076172,
+      "density": 0.0343
+    },
+    {
+      "semester": "2017 H1",
+      "inadCount": 251,
+      "paxCount": 5133301,
+      "density": 0.0489
+    },
+    {
+      "semester": "2017 H2",
+      "inadCount": 320,
+      "paxCount": 5354666,
+      "density": 0.0598
+    },
+    {
+      "semester": "2018 H1",
+      "inadCount": 278,
+      "paxCount": 5509942,
+      "density": 0.0505
+    },
+    {
+      "semester": "2018 H2",
+      "inadCount": 259,
+      "paxCount": 5795109,
+      "density": 0.0447
+    },
+    {
+      "semester": "2019 H1",
+      "inadCount": 279,
+      "paxCount": 5774489,
+      "density": 0.0483
+    },
+    {
+      "semester": "2019 H2",
+      "inadCount": 257,
+      "paxCount": 5967201,
+      "density": 0.0431
+    },
+    {
+      "semester": "2020 H1",
+      "inadCount": 91,
+      "paxCount": 2426753,
+      "density": 0.0375
+    },
+    {
+      "semester": "2020 H2",
+      "inadCount": 41,
+      "paxCount": 909645,
+      "density": 0.0451
+    },
+    {
+      "semester": "2021 H1",
+      "inadCount": 32,
+      "paxCount": 972081,
+      "density": 0.0329
+    },
+    {
+      "semester": "2021 H2",
+      "inadCount": 177,
+      "paxCount": 2638717,
+      "density": 0.0671
+    },
+    {
+      "semester": "2022 H1",
+      "inadCount": 252,
+      "paxCount": 3759446,
+      "density": 0.067
+    },
+    {
+      "semester": "2022 H2",
+      "inadCount": 374,
+      "paxCount": 5075162,
+      "density": 0.0737
+    },
+    {
+      "semester": "2023 H1",
+      "inadCount": 343,
+      "paxCount": 5293471,
+      "density": 0.0648
+    },
+    {
+      "semester": "2023 H2",
+      "inadCount": 351,
+      "paxCount": 5760056,
+      "density": 0.0609
+    },
+    {
+      "semester": "2024 H1",
+      "inadCount": 309,
+      "paxCount": 5826904,
+      "density": 0.053
+    },
+    {
+      "semester": "2024 H2",
+      "inadCount": 323,
+      "paxCount": 6027028,
+      "density": 0.0536
+    },
+    {
+      "semester": "2025 H1",
+      "inadCount": 31,
+      "paxCount": 0,
+      "density": null
+    }
+  ],
+  "top10": {
+    "lastStops": [
+      {
+        "name": "LHR",
+        "count": 27
+      },
+      {
+        "name": "PRN",
+        "count": 26
+      },
+      {
+        "name": "IST",
+        "count": 13
+      },
+      {
+        "name": "DUB",
+        "count": 13
+      },
+      {
+        "name": "BEG",
+        "count": 12
+      },
+      {
+        "name": "SAW",
+        "count": 10
+      },
+      {
+        "name": "EWR",
+        "count": 10
+      },
+      {
+        "name": "IAD",
+        "count": 9
+      },
+      {
+        "name": "DEL",
+        "count": 9
+      },
+      {
+        "name": "BOS",
+        "count": 8
+      }
+    ],
+    "airlines": [
+      {
+        "code": "LX",
+        "name": "LX",
+        "count": 105
+      },
+      {
+        "code": "WK",
+        "name": "WK",
+        "count": 25
+      },
+      {
+        "code": "UA",
+        "name": "UA",
+        "count": 21
+      },
+      {
+        "code": "BA",
+        "name": "BA",
+        "count": 17
+      },
+      {
+        "code": "DS",
+        "name": "DS",
+        "count": 16
+      },
+      {
+        "code": "TK",
+        "name": "TK",
+        "count": 13
+      },
+      {
+        "code": "GM",
+        "name": "GM",
+        "count": 12
+      },
+      {
+        "code": "XQ",
+        "name": "XQ",
+        "count": 10
+      },
+      {
+        "code": "U2",
+        "name": "U2",
+        "count": 10
+      },
+      {
+        "code": "IV",
+        "name": "IV",
+        "count": 9
+      }
+    ]
+  }
+}
