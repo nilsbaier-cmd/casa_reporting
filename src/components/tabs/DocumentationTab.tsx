@@ -87,13 +87,13 @@ export function DocumentationTab() {
       <section>
         <h4 className="text-lg font-bold text-neutral-900 mb-3">{t('classification')}</h4>
         <div className="grid sm:grid-cols-2 gap-3">
-          {/* Hohe Priorität */}
+          {/* Kritisch */}
           <div className="flex items-start gap-3 p-3 bg-red-50 border-2 border-red-600">
             <AlertTriangle className="w-5 h-5 text-red-700 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-red-900 text-sm uppercase tracking-wide">{tPriority('sanction')}</p>
+              <p className="font-bold text-red-900 text-sm uppercase tracking-wide">{tPriority('critical')}</p>
               <p className="text-xs text-red-700 mt-1">
-                {t('sanctionDesc')}
+                {t('criticalDesc')}
               </p>
             </div>
           </div>

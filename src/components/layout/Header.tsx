@@ -48,6 +48,8 @@ export function Header({ activeTab = 'dashboard', onTabChange, isAdmin = false, 
 
   const viewerNavItems: NavItem[] = [
     { labelKey: 'nav.dashboard', icon: <LayoutDashboard className="w-4 h-4" />, href: 'dashboard' },
+    { labelKey: 'nav.pax', icon: <Plane className="w-4 h-4" />, href: 'pax' },
+    { labelKey: 'nav.inad', icon: <FileWarning className="w-4 h-4" />, href: 'inad' },
     { labelKey: 'nav.trends', icon: <BarChart3 className="w-4 h-4" />, href: 'trends' },
     { labelKey: 'nav.docs', icon: <FileText className="w-4 h-4" />, href: 'docs' },
   ];

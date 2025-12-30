@@ -8,8 +8,10 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ViewerDashboard } from '@/components/viewer/ViewerDashboard';
 import { ViewerTrends } from '@/components/viewer/ViewerTrends';
+import { ViewerPaxTab } from '@/components/viewer/ViewerPaxTab';
+import { ViewerInadTab } from '@/components/viewer/ViewerInadTab';
 import { DocumentationTab } from '@/components/tabs/DocumentationTab';
-import { AlertCircle, Upload, FileJson, BarChart3 } from 'lucide-react';
+import { AlertCircle, Upload, FileJson, BarChart3, Plane, Users, TrendingUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useDropzone } from 'react-dropzone';
 
@@ -20,6 +22,7 @@ export default function ViewerPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const t = useTranslations('viewer');
   const tCommon = useTranslations('common');
+  const tHero = useTranslations('hero');
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -111,6 +114,18 @@ export default function ViewerPage() {
     }
 
     switch (activeTab) {
+      case 'pax':
+        return (
+          <section className="bg-white border border-neutral-200 p-6">
+            <ViewerPaxTab />
+          </section>
+        );
+      case 'inad':
+        return (
+          <section className="bg-white border border-neutral-200 p-6">
+            <ViewerInadTab />
+          </section>
+        );
       case 'trends':
         return (
           <section className="bg-white border border-neutral-200 p-6">
@@ -136,21 +151,111 @@ export default function ViewerPage() {
 
       {/* Hero Section for Viewer */}
       {activeTab === 'dashboard' && hasData && (
-        <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 text-white py-8">
-          <div className="sem-container">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-px bg-blue-500" aria-hidden="true" />
-              <span className="text-xs font-medium text-blue-400 uppercase tracking-wider">
-                {t('viewerMode')}
-              </span>
+        <section
+          className="relative bg-neutral-900 text-white overflow-hidden"
+          aria-labelledby="hero-heading"
+        >
+          {/* Geometric grid pattern - Aviation/Technical aesthetic */}
+          <div className="absolute inset-0" aria-hidden="true">
+            {/* Grid lines */}
+            <div
+              className="absolute inset-0 opacity-[0.03]"
+              style={{
+                backgroundImage: `
+                  linear-gradient(to right, white 1px, transparent 1px),
+                  linear-gradient(to bottom, white 1px, transparent 1px)
+                `,
+                backgroundSize: '48px 48px',
+              }}
+            />
+            {/* Diagonal accent lines - Flight path inspired */}
+            <div className="absolute top-0 right-0 w-1/2 h-full opacity-[0.02]">
+              <svg className="w-full h-full" viewBox="0 0 400 300" preserveAspectRatio="none">
+                <line x1="0" y1="300" x2="400" y2="0" stroke="white" strokeWidth="0.5" />
+                <line x1="100" y1="300" x2="400" y2="50" stroke="white" strokeWidth="0.5" />
+                <line x1="200" y1="300" x2="400" y2="100" stroke="white" strokeWidth="0.5" />
+              </svg>
             </div>
-            <h1 className="text-2xl font-bold mb-2">{t('title')}</h1>
-            <p className="text-neutral-400">
-              {t('subtitle', {
-                semester: publishedData.metadata.semester,
-                date: new Date(publishedData.metadata.publishedAt).toLocaleDateString(),
-              })}
-            </p>
+            {/* Blue accent corner */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-600/20 to-transparent" />
+          </div>
+
+          {/* Large plane silhouette */}
+          <div className="absolute -right-24 top-1/2 -translate-y-1/2 opacity-[0.04]" aria-hidden="true">
+            <Plane className="w-[500px] h-[500px] transform -rotate-12" strokeWidth={0.3} />
+          </div>
+
+          <div className="sem-container relative">
+            <div className="py-16 lg:py-20">
+              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                {/* Left column - Main content */}
+                <div className="animate-sem-fade-in">
+                  {/* Document reference */}
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-px bg-blue-500" aria-hidden="true" />
+                    <span className="text-xs font-medium text-blue-400 uppercase tracking-wider">
+                      {t('viewerMode')}
+                    </span>
+                  </div>
+
+                  <h2
+                    id="hero-heading"
+                    className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-[1.1] tracking-tight"
+                  >
+                    <span className="text-white">{t('title')}</span>
+                  </h2>
+
+                  <p className="text-lg text-neutral-300 leading-relaxed max-w-xl">
+                    {t('subtitle', {
+                      semester: publishedData.metadata.semester,
+                      date: new Date(publishedData.metadata.publishedAt).toLocaleDateString(),
+                    })}
+                  </p>
+                </div>
+
+                {/* Right column - Metric cards (3 Kacheln) */}
+                <div className="grid grid-cols-3 gap-4 animate-sem-fade-in" style={{ animationDelay: '150ms' }}>
+                  {/* INAD Card */}
+                  <div className="bg-white/5 border border-white/10 p-5 group hover:bg-white/10 transition-colors">
+                    <div className="flex items-start justify-between mb-3">
+                      <Plane className="w-5 h-5 text-blue-400" />
+                      <span className="text-xs font-bold tracking-wider text-neutral-500 uppercase">{tHero('cards.analysis')}</span>
+                    </div>
+                    <p className="text-2xl font-bold mb-1">{publishedData.summary.totalInads.toLocaleString()}</p>
+                    <p className="text-xs text-neutral-500">{tHero('cards.inadLabel')}</p>
+                  </div>
+
+                  {/* PAX Card */}
+                  <div className="bg-white/5 border border-white/10 p-5 group hover:bg-white/10 transition-colors">
+                    <div className="flex items-start justify-between mb-3">
+                      <Users className="w-5 h-5 text-blue-400" />
+                      <span className="text-xs font-bold tracking-wider text-neutral-500 uppercase">{tHero('cards.data')}</span>
+                    </div>
+                    <p className="text-2xl font-bold mb-1">{(publishedData.summary.totalPax / 1000000).toFixed(1)}M</p>
+                    <p className="text-xs text-neutral-500">{tHero('cards.paxLabel')}</p>
+                  </div>
+
+                  {/* Status Card */}
+                  <div className="relative bg-blue-600 p-5 overflow-hidden">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/50 rounded-full -translate-y-10 translate-x-10" aria-hidden="true" />
+                    <div className="relative">
+                      <div className="flex items-start justify-between mb-3">
+                        <TrendingUp className="w-5 h-5 text-blue-200" />
+                        <span className="text-xs font-bold tracking-wider text-blue-200 uppercase">{tHero('cards.status')}</span>
+                      </div>
+                      <p className="text-2xl font-bold mb-1">{tHero('cards.active')}</p>
+                      <p className="text-xs text-blue-200">{tHero('cards.ready')}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom border with document-like detail */}
+          <div className="absolute bottom-0 left-0 right-0">
+            <div className="h-px bg-gradient-to-r from-transparent via-neutral-700 to-transparent" />
+            <div className="h-1 bg-blue-600" />
           </div>
         </section>
       )}
