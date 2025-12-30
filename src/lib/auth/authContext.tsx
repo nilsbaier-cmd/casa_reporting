@@ -3,55 +3,92 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import Cookies from 'js-cookie';
 
+type UserRole = 'admin' | 'viewer' | null;
+
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (password: string) => boolean;
+  role: UserRole;
+  login: (password: string, targetRole: 'admin' | 'viewer') => boolean;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const COOKIE_NAME = 'inad_auth';
+const ADMIN_COOKIE = 'casa_auth_admin';
+const VIEWER_COOKIE = 'casa_auth_viewer';
 const COOKIE_EXPIRY = 7; // days
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [role, setRole] = useState<UserRole>(null);
 
   useEffect(() => {
-    // Check cookie on mount
-    const authCookie = Cookies.get(COOKIE_NAME);
-    setIsAuthenticated(authCookie === 'authenticated');
+    // Check cookies on mount
+    const adminCookie = Cookies.get(ADMIN_COOKIE);
+    const viewerCookie = Cookies.get(VIEWER_COOKIE);
+
+    if (adminCookie === 'authenticated') {
+      setIsAuthenticated(true);
+      setRole('admin');
+    } else if (viewerCookie === 'authenticated') {
+      setIsAuthenticated(true);
+      setRole('viewer');
+    }
     setIsLoading(false);
   }, []);
 
-  const login = (password: string): boolean => {
-    const correctPassword = process.env.NEXT_PUBLIC_APP_PASSWORD;
+  const login = (password: string, targetRole: 'admin' | 'viewer'): boolean => {
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || process.env.NEXT_PUBLIC_APP_PASSWORD;
+    const viewerPassword = process.env.NEXT_PUBLIC_VIEWER_PASSWORD;
 
-    // If no password is configured, allow access (for development)
-    if (!correctPassword) {
-      console.warn('No password configured. Set NEXT_PUBLIC_APP_PASSWORD to enable authentication.');
-      Cookies.set(COOKIE_NAME, 'authenticated', { expires: COOKIE_EXPIRY });
-      setIsAuthenticated(true);
-      return true;
+    if (targetRole === 'admin') {
+      // If no password is configured, allow access (for development)
+      if (!adminPassword) {
+        console.warn('No admin password configured. Set NEXT_PUBLIC_ADMIN_PASSWORD to enable authentication.');
+        Cookies.set(ADMIN_COOKIE, 'authenticated', { expires: COOKIE_EXPIRY });
+        setIsAuthenticated(true);
+        setRole('admin');
+        return true;
+      }
+
+      if (password === adminPassword) {
+        Cookies.set(ADMIN_COOKIE, 'authenticated', { expires: COOKIE_EXPIRY });
+        setIsAuthenticated(true);
+        setRole('admin');
+        return true;
+      }
+    } else if (targetRole === 'viewer') {
+      // If no viewer password is configured, allow access (for development)
+      if (!viewerPassword) {
+        console.warn('No viewer password configured. Set NEXT_PUBLIC_VIEWER_PASSWORD to enable authentication.');
+        Cookies.set(VIEWER_COOKIE, 'authenticated', { expires: COOKIE_EXPIRY });
+        setIsAuthenticated(true);
+        setRole('viewer');
+        return true;
+      }
+
+      if (password === viewerPassword) {
+        Cookies.set(VIEWER_COOKIE, 'authenticated', { expires: COOKIE_EXPIRY });
+        setIsAuthenticated(true);
+        setRole('viewer');
+        return true;
+      }
     }
 
-    if (password === correctPassword) {
-      Cookies.set(COOKIE_NAME, 'authenticated', { expires: COOKIE_EXPIRY });
-      setIsAuthenticated(true);
-      return true;
-    }
     return false;
   };
 
   const logout = () => {
-    Cookies.remove(COOKIE_NAME);
+    Cookies.remove(ADMIN_COOKIE);
+    Cookies.remove(VIEWER_COOKIE);
     setIsAuthenticated(false);
+    setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, role, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

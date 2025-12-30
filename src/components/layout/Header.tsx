@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/authContext';
 import { SwissCoat } from '@/components/ui/swiss-coat';
 import { LanguagePicker } from '@/components/ui/LanguagePicker';
@@ -26,14 +27,18 @@ interface NavItem {
 interface HeaderProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  isAdmin?: boolean;
+  isViewer?: boolean;
 }
 
-export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
+export function Header({ activeTab = 'dashboard', onTabChange, isAdmin = false, isViewer = false }: HeaderProps) {
   const { logout } = useAuth();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = useTranslations('header');
 
-  const navItems: NavItem[] = [
+  // Different nav items for admin vs viewer
+  const adminNavItems: NavItem[] = [
     { labelKey: 'nav.dashboard', icon: <LayoutDashboard className="w-4 h-4" />, href: 'dashboard' },
     { labelKey: 'nav.pax', icon: <Plane className="w-4 h-4" />, href: 'pax' },
     { labelKey: 'nav.inad', icon: <FileWarning className="w-4 h-4" />, href: 'inad' },
@@ -41,15 +46,37 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
     { labelKey: 'nav.docs', icon: <FileText className="w-4 h-4" />, href: 'docs' },
   ];
 
+  const viewerNavItems: NavItem[] = [
+    { labelKey: 'nav.dashboard', icon: <LayoutDashboard className="w-4 h-4" />, href: 'dashboard' },
+    { labelKey: 'nav.trends', icon: <BarChart3 className="w-4 h-4" />, href: 'trends' },
+    { labelKey: 'nav.docs', icon: <FileText className="w-4 h-4" />, href: 'docs' },
+  ];
+
+  const navItems = isViewer ? viewerNavItems : adminNavItems;
+
   const handleNavClick = (href: string) => {
     onTabChange?.(href);
     setMobileMenuOpen(false);
   };
 
+  const handleLogout = () => {
+    logout();
+    if (isViewer) {
+      router.push('/viewer/login');
+    } else {
+      router.push('/admin/login');
+    }
+  };
+
+  // Accent color based on mode
+  const accentColor = isViewer ? 'bg-blue-600' : 'bg-red-600';
+  const accentTextColor = isViewer ? 'text-blue-600' : 'text-red-600';
+  const accentBgHover = isViewer ? 'bg-blue-50' : 'bg-red-50';
+
   return (
     <header className="sticky top-0 z-50">
       {/* Federal identity bar - Black with Swiss precision */}
-      <div className="bg-neutral-900">
+      <div className={isViewer ? 'bg-neutral-800' : 'bg-neutral-900'}>
         <div className="sem-container">
           <div className="flex items-center justify-between h-11">
             <div className="flex items-center gap-4">
@@ -58,11 +85,22 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
                 {t('sem')}
               </span>
               <span className="sm:hidden text-white text-sm font-medium">SEM</span>
+              {/* Mode indicator */}
+              {isViewer && (
+                <span className="hidden md:inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-600 text-white rounded">
+                  Viewer
+                </span>
+              )}
+              {isAdmin && (
+                <span className="hidden md:inline-flex items-center px-2 py-0.5 text-xs font-medium bg-red-600 text-white rounded">
+                  Admin
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-4">
               <LanguagePicker />
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-300 hover:text-white transition-colors"
                 aria-label={t('logout')}
               >
@@ -74,8 +112,8 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
         </div>
       </div>
 
-      {/* Red accent line - Swiss flag reference */}
-      <div className="h-1 bg-red-600" aria-hidden="true" />
+      {/* Accent line */}
+      <div className={cn('h-1', accentColor)} aria-hidden="true" />
 
       {/* Main navigation bar */}
       <div className="bg-white border-b border-neutral-200">
@@ -108,7 +146,7 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
                     'focus:outline-none focus-visible:bg-neutral-100',
                     'animate-sem-fade-in opacity-0',
                     activeTab === item.href
-                      ? 'text-red-600'
+                      ? accentTextColor
                       : 'text-neutral-600 hover:text-neutral-900'
                   )}
                   style={{ animationDelay: `${index * 50}ms` }}
@@ -119,7 +157,7 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
                   {/* Active indicator - Bold underline */}
                   {activeTab === item.href && (
                     <span
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"
+                      className={cn('absolute bottom-0 left-0 right-0 h-0.5', accentColor)}
                       aria-hidden="true"
                     />
                   )}
@@ -157,7 +195,7 @@ export function Header({ activeTab = 'dashboard', onTabChange }: HeaderProps) {
                   'flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors text-left',
                   'border-l-2',
                   activeTab === item.href
-                    ? 'text-red-600 bg-red-50 border-red-600'
+                    ? cn(accentTextColor, accentBgHover, isViewer ? 'border-blue-600' : 'border-red-600')
                     : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 border-transparent'
                 )}
                 style={{ animationDelay: `${index * 30}ms` }}
