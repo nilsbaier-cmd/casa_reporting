@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export interface Column<T> {
   key: keyof T | string;
@@ -28,8 +29,10 @@ export function DataTable<T>({
   columns,
   getRowKey,
   rowClassName,
-  emptyMessage = 'Keine Daten verfügbar',
+  emptyMessage,
 }: DataTableProps<T>) {
+  const tTable = useTranslations('table');
+  const defaultEmptyMessage = emptyMessage ?? tTable('noData');
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
@@ -87,7 +90,7 @@ export function DataTable<T>({
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-neutral-500">
-        {emptyMessage}
+        {defaultEmptyMessage}
       </div>
     );
   }
@@ -163,7 +166,7 @@ export function DataTable<T>({
 
       {/* Table footer with row count */}
       <div className="px-4 py-3 bg-neutral-50 border-t border-neutral-200 text-xs text-neutral-500">
-        {data.length} {data.length === 1 ? 'Eintrag' : 'Einträge'} insgesamt
+        {tTable('rowCount', { count: data.length })}
       </div>
     </div>
   );

@@ -51,6 +51,14 @@ export interface PublishedTop10 {
   airlines: { code: string; name: string; count: number }[];
 }
 
+export interface PublishedClassificationConfig {
+  minInad: number;           // Minimum INADs for Steps 1 & 2
+  minPax: number;            // Minimum PAX for reliable density calculation
+  minDensity: number;        // Minimum density (permille) for HIGH_PRIORITY
+  highPriorityMultiplier: number;  // Must be X times threshold for HIGH_PRIORITY
+  highPriorityMinInad: number;     // Must have X+ INADs for HIGH_PRIORITY
+}
+
 export interface PublishedData {
   metadata: PublishedMetadata;
   summary: PublishedSummary;
@@ -58,4 +66,5 @@ export interface PublishedData {
   routes: PublishedRoute[];
   trends: PublishedTrendData[];
   top10: PublishedTop10;
+  classificationConfig?: PublishedClassificationConfig;  // Optional for backward compatibility
 }

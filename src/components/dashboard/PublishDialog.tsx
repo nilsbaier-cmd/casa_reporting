@@ -29,6 +29,7 @@ export function PublishDialog() {
     step2Results,
     step3Results,
     threshold,
+    config,
   } = useAnalysisStore();
 
   const [isPublishing, setIsPublishing] = useState(false);
@@ -58,6 +59,7 @@ export function PublishDialog() {
       step2Results: step2Results!,
       step3Results: step3Results!,
       threshold: threshold!,
+      config,
     });
   };
 

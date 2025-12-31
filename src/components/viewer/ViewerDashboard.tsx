@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useViewerStore } from '@/stores/viewerStore';
 import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,20 @@ import {
   Eye,
   CheckCircle,
   TrendingUp,
+  Download,
 } from 'lucide-react';
+import { DataTable, Column } from '@/components/shared/DataTable';
+import { ClassificationCriteria } from './ClassificationCriteria';
+import type { PublishedRoute, PublishedAirline } from '@/lib/analysis/publishTypes';
+
+// Default config for backward compatibility with older published data
+const DEFAULT_CLASSIFICATION_CONFIG = {
+  minInad: 6,
+  minPax: 5000,
+  minDensity: 0.10,
+  highPriorityMultiplier: 1.5,
+  highPriorityMinInad: 10,
+};
 
 export function ViewerDashboard() {
   const { publishedData } = useViewerStore();
@@ -25,15 +38,16 @@ export function ViewerDashboard() {
 
   if (!publishedData) return null;
 
-  const { summary, routes, airlines } = publishedData;
+  const { summary, routes, airlines, classificationConfig } = publishedData;
+  const config = classificationConfig || DEFAULT_CLASSIFICATION_CONFIG;
 
   // Classification counts
   const criticalCount = routes.filter((r) => r.classification === 'sanction').length;
   const watchListCount = routes.filter((r) => r.classification === 'watchList').length;
   const clearCount = routes.filter((r) => r.classification === 'clear').length;
 
-  // Get badge color based on classification
-  const getClassificationBadge = (classification: string) => {
+  // Get badge color based on classification - memoized for performance
+  const getClassificationBadge = useCallback((classification: string) => {
     switch (classification) {
       case 'sanction':
         return (
@@ -62,10 +76,10 @@ export function ViewerDashboard() {
       default:
         return null;
     }
-  };
+  }, [tPriority]);
 
-  // Get status badge for step 1 and 2
-  const getStatusBadge = (aboveThreshold: boolean) => {
+  // Get status badge for step 1 and 2 - memoized for performance
+  const getStatusBadge = useCallback((aboveThreshold: boolean) => {
     return aboveThreshold ? (
       <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800">
         {tTable('check')}
@@ -75,7 +89,192 @@ export function ViewerDashboard() {
         {tTable('ok')}
       </span>
     );
+  }, [tTable]);
+
+  // CSV Export function with proper escaping
+  const handleExportCsv = () => {
+    // Helper to escape CSV fields - handles semicolons, quotes, and newlines
+    const escapeCSVField = (field: string): string => {
+      if (field.includes(';') || field.includes('"') || field.includes('\n')) {
+        return `"${field.replace(/"/g, '""')}"`;
+      }
+      return field;
+    };
+
+    const headers = [
+      'Airline',
+      'Airline Name',
+      'Last Stop',
+      'INADs',
+      'PAX',
+      'Density (permille)',
+      'Classification',
+    ];
+
+    const rows = routes.map((route) => [
+      escapeCSVField(route.airline),
+      escapeCSVField(route.airlineName),
+      escapeCSVField(route.lastStop),
+      route.inadCount.toString(),
+      route.pax.toString(),
+      route.density !== null ? route.density.toFixed(4) : '',
+      route.classification,
+    ]);
+
+    const csvContent = [
+      headers.join(';'),
+      ...rows.map((row) => row.join(';')),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `casa-routes-${publishedData.metadata.semester.replace(' ', '-')}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
+
+  // DataTable columns for Step 1 (Airlines)
+  const airlineColumns: Column<PublishedAirline>[] = [
+    {
+      key: 'airline',
+      header: tTable('airline'),
+      sortable: true,
+      render: (row) => (
+        <div>
+          <span className="font-medium text-neutral-900">{row.airline}</span>
+          {row.airlineName !== row.airline && (
+            <span className="text-neutral-500 ml-2 text-sm">{row.airlineName}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'inadCount',
+      header: tTable('inads'),
+      sortable: true,
+      align: 'right' as const,
+      render: (row) => (
+        <span className="font-medium text-neutral-900">{row.inadCount}</span>
+      ),
+    },
+    {
+      key: 'aboveThreshold',
+      header: tTable('status'),
+      sortable: true,
+      render: (row) => getStatusBadge(row.aboveThreshold),
+    },
+  ];
+
+  // DataTable columns for Step 3 (Routes with density)
+  const routeColumns: Column<PublishedRoute>[] = [
+    {
+      key: 'airline',
+      header: tTable('airline'),
+      sortable: true,
+      render: (row) => (
+        <div>
+          <span className="font-medium text-neutral-900">{row.airline}</span>
+          {row.airlineName !== row.airline && (
+            <span className="text-neutral-500 ml-2 text-sm">{row.airlineName}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'lastStop',
+      header: tTable('lastStop'),
+      sortable: true,
+      render: (row) => <span className="text-neutral-900">{row.lastStop}</span>,
+    },
+    {
+      key: 'inadCount',
+      header: tTable('inads'),
+      sortable: true,
+      align: 'right' as const,
+      render: (row) => (
+        <span className="font-medium text-neutral-900">{row.inadCount}</span>
+      ),
+    },
+    {
+      key: 'pax',
+      header: tTable('pax'),
+      sortable: true,
+      align: 'right' as const,
+      render: (row) => (
+        <span className="text-neutral-600">{row.pax.toLocaleString(localeFormat)}</span>
+      ),
+    },
+    {
+      key: 'density',
+      header: tTable('density'),
+      sortable: true,
+      align: 'right' as const,
+      render: (row) => (
+        <span className="font-medium text-neutral-900">
+          {row.density !== null ? `${row.density.toFixed(4)}‰` : '–'}
+        </span>
+      ),
+    },
+    {
+      key: 'classification',
+      header: tTable('status'),
+      sortable: true,
+      render: (row) => getClassificationBadge(row.classification),
+    },
+  ];
+
+  // DataTable columns for Step 2 (Routes simplified)
+  const routeStep2Columns: Column<PublishedRoute>[] = [
+    {
+      key: 'airline',
+      header: tTable('airline'),
+      sortable: true,
+      render: (row) => (
+        <div>
+          <span className="font-medium text-neutral-900">{row.airline}</span>
+          {row.airlineName !== row.airline && (
+            <span className="text-neutral-500 ml-2 text-sm">{row.airlineName}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'lastStop',
+      header: tTable('lastStop'),
+      sortable: true,
+      render: (row) => <span className="text-neutral-900">{row.lastStop}</span>,
+    },
+    {
+      key: 'inadCount',
+      header: tTable('inads'),
+      sortable: true,
+      align: 'right' as const,
+      render: (row) => (
+        <span className="font-medium text-neutral-900">{row.inadCount}</span>
+      ),
+    },
+    {
+      key: 'aboveThreshold',
+      header: tTable('status'),
+      sortable: false,
+      render: (row) => getStatusBadge(row.inadCount >= config.minInad),
+    },
+  ];
+
+  // Sort routes by classification priority then density - memoized for performance
+  const sortedRoutes = useMemo(() => {
+    return [...routes].sort((a, b) => {
+      const classOrder: Record<string, number> = { sanction: 0, watchList: 1, unreliable: 2, clear: 3 };
+      const orderA = classOrder[a.classification] ?? 4;
+      const orderB = classOrder[b.classification] ?? 4;
+      if (orderA !== orderB) return orderA - orderB;
+      return (b.density ?? 0) - (a.density ?? 0);
+    });
+  }, [routes]);
 
   return (
     <div className="space-y-8">
@@ -191,48 +390,15 @@ export function ViewerDashboard() {
             <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
               <h3 className="text-lg font-bold text-neutral-900">{tSteps('step1.title')}</h3>
               <p className="text-sm text-neutral-500 mt-1">
-                {tSteps('step1.description', { minInad: 6 })}
+                {tSteps('step1.description', { minInad: config.minInad })}
               </p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-neutral-50 border-b border-neutral-200">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('airline')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('inads')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('status')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200">
-                  {airlines
-                    .sort((a, b) => b.inadCount - a.inadCount)
-                    .map((airline) => (
-                      <tr
-                        key={airline.airline}
-                        className={cn(
-                          'hover:bg-neutral-50',
-                          airline.aboveThreshold && 'bg-amber-50/50'
-                        )}
-                      >
-                        <td className="px-4 py-3">
-                          <span className="font-medium text-neutral-900">{airline.airline}</span>
-                          <span className="text-neutral-500 ml-2 text-sm">{airline.airlineName}</span>
-                        </td>
-                        <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                          {airline.inadCount}
-                        </td>
-                        <td className="px-4 py-3">{getStatusBadge(airline.aboveThreshold)}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              data={airlines}
+              columns={airlineColumns}
+              getRowKey={(row) => row.airline}
+              rowClassName={(row) => row.aboveThreshold ? 'bg-amber-50/50' : ''}
+            />
           </>
         )}
 
@@ -242,49 +408,14 @@ export function ViewerDashboard() {
             <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
               <h3 className="text-lg font-bold text-neutral-900">{tSteps('step2.title')}</h3>
               <p className="text-sm text-neutral-500 mt-1">
-                {tSteps('step2.description', { minInad: 6 })}
+                {tSteps('step2.description', { minInad: config.minInad })}
               </p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-neutral-50 border-b border-neutral-200">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('airline')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('lastStop')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('inads')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('status')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200">
-                  {routes
-                    .sort((a, b) => b.inadCount - a.inadCount)
-                    .map((route, index) => (
-                      <tr
-                        key={`${route.airline}-${route.lastStop}-${index}`}
-                        className="hover:bg-neutral-50"
-                      >
-                        <td className="px-4 py-3">
-                          <span className="font-medium text-neutral-900">{route.airline}</span>
-                          <span className="text-neutral-500 ml-2 text-sm">{route.airlineName}</span>
-                        </td>
-                        <td className="px-4 py-3 text-neutral-900">{route.lastStop}</td>
-                        <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                          {route.inadCount}
-                        </td>
-                        <td className="px-4 py-3">{getStatusBadge(route.inadCount >= 6)}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              data={routes}
+              columns={routeStep2Columns}
+              getRowKey={(row) => `${row.airline}-${row.lastStop}`}
+            />
           </>
         )}
 
@@ -292,76 +423,34 @@ export function ViewerDashboard() {
         {activeStep === 3 && (
           <>
             <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-              <h3 className="text-lg font-bold text-neutral-900">{tSteps('step3.title')}</h3>
-              <p className="text-sm text-neutral-500 mt-1">
-                {tSteps('step3.description')}
-              </p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-neutral-900">{tSteps('step3.title')}</h3>
+                  <p className="text-sm text-neutral-500 mt-1">
+                    {tSteps('step3.description')}
+                  </p>
+                </div>
+                <button
+                  onClick={handleExportCsv}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-neutral-600 border border-neutral-300 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  {tSteps('step3.csvExport')}
+                </button>
+              </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-neutral-50 border-b border-neutral-200">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('airline')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('lastStop')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('inads')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('pax')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('density')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                      {tTable('status')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200">
-                  {routes
-                    .sort((a, b) => {
-                      const classOrder = { sanction: 0, watchList: 1, unreliable: 2, clear: 3 };
-                      const orderA = classOrder[a.classification] ?? 4;
-                      const orderB = classOrder[b.classification] ?? 4;
-                      if (orderA !== orderB) return orderA - orderB;
-                      return (b.density ?? 0) - (a.density ?? 0);
-                    })
-                    .map((route, index) => (
-                      <tr
-                        key={`${route.airline}-${route.lastStop}-${index}`}
-                        className={cn(
-                          'hover:bg-neutral-50',
-                          route.classification === 'sanction' && 'bg-red-50/50'
-                        )}
-                      >
-                        <td className="px-4 py-3">
-                          <span className="font-medium text-neutral-900">{route.airline}</span>
-                          <span className="text-neutral-500 ml-2 text-sm">{route.airlineName}</span>
-                        </td>
-                        <td className="px-4 py-3 text-neutral-900">{route.lastStop}</td>
-                        <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                          {route.inadCount}
-                        </td>
-                        <td className="px-4 py-3 text-right text-neutral-600">
-                          {route.pax.toLocaleString(localeFormat)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                          {route.density !== null ? `${route.density.toFixed(4)}‰` : '–'}
-                        </td>
-                        <td className="px-4 py-3">{getClassificationBadge(route.classification)}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              data={sortedRoutes}
+              columns={routeColumns}
+              getRowKey={(row) => `${row.airline}-${row.lastStop}`}
+              rowClassName={(row) => row.classification === 'sanction' ? 'bg-red-50/50' : ''}
+            />
           </>
         )}
       </section>
 
+      {/* Classification Criteria Section */}
+      <ClassificationCriteria config={config} medianThreshold={summary.medianDensity} />
     </div>
   );
 }

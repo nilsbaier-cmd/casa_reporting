@@ -4,6 +4,7 @@ import type {
   Step1Result,
   Step2Result,
   Step3Result,
+  AnalysisConfig,
 } from './types';
 import type {
   PublishedData,
@@ -12,6 +13,7 @@ import type {
   PublishedTrendData,
 } from './publishTypes';
 import type { Semester } from '@/stores/analysisStore';
+import { DEFAULT_CONFIG } from './constants';
 
 interface GeneratePublishDataParams {
   inadData: INADRecord[];
@@ -22,6 +24,7 @@ interface GeneratePublishDataParams {
   step2Results: Step2Result[];
   step3Results: Step3Result[];
   threshold: number;
+  config?: AnalysisConfig;
 }
 
 export function generatePublishData(params: GeneratePublishDataParams): PublishedData {
@@ -34,6 +37,7 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
     step2Results,
     step3Results,
     threshold,
+    config = DEFAULT_CONFIG,
   } = params;
 
   // Filter data for selected semester
@@ -170,7 +174,7 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
         endMonth,
         year: selectedSemester.year,
       },
-      version: '1.0',
+      version: '1.1',
     },
     summary: {
       totalInads,
@@ -187,6 +191,13 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
     top10: {
       lastStops: top10LastStops,
       airlines: top10Airlines,
+    },
+    classificationConfig: {
+      minInad: config.minInad,
+      minPax: config.minPax,
+      minDensity: config.minDensity,
+      highPriorityMultiplier: config.highPriorityMultiplier,
+      highPriorityMinInad: config.highPriorityMinInad,
     },
   };
 }
