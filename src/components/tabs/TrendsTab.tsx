@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ChartWrapper } from '@/components/ui/ChartWrapper';
 
 interface SemesterData {
   semester: string;
@@ -353,13 +354,10 @@ export function TrendsTab() {
       </div>
 
       {/* Passenger Trend Chart */}
-      <div className="bg-white border border-neutral-200 p-6">
-        <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          {t('passengerTrend')}
-        </h4>
-        <p className="text-sm text-neutral-500 mb-6">
-          {t('passengerTrendDesc')}
-        </p>
+      <ChartWrapper
+        title={t('passengerTrend')}
+        subtitle={t('passengerTrendDesc')}
+      >
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -402,16 +400,13 @@ export function TrendsTab() {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </ChartWrapper>
 
       {/* INAD Trend Chart */}
-      <div className="bg-white border border-neutral-200 p-6">
-        <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          {t('inadTrend')}
-        </h4>
-        <p className="text-sm text-neutral-500 mb-6">
-          {t('inadTrendDesc')}
-        </p>
+      <ChartWrapper
+        title={t('inadTrend')}
+        subtitle={t('inadTrendDesc')}
+      >
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -453,16 +448,13 @@ export function TrendsTab() {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </ChartWrapper>
 
       {/* Density Trend Chart */}
-      <div className="bg-white border border-neutral-200 p-6">
-        <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          {t('densityTrend')}
-        </h4>
-        <p className="text-sm text-neutral-500 mb-6">
-          {t('densityTrendDesc')}
-        </p>
+      <ChartWrapper
+        title={t('densityTrend')}
+        subtitle={t('densityTrendDesc')}
+      >
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -501,7 +493,7 @@ export function TrendsTab() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </ChartWrapper>
     </div>
   );
 }

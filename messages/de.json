@@ -338,6 +338,8 @@
     "paxTrendDesc": "Entwicklung der Passagierzahlen über alle Semester",
     "inadTrend": "INAD-Trend",
     "inadTrendDesc": "Entwicklung der Einreiseverweigerungen über alle Semester",
+    "densityTrend": "Dichte-Trend",
+    "densityTrendDesc": "Entwicklung der INAD-Dichte pro 1'000 Passagiere",
     "semester": "Semester",
     "passengers": "Passagiere",
     "inads": "INADs",

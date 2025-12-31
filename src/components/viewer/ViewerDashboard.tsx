@@ -10,9 +10,6 @@ import {
   Eye,
   CheckCircle,
   TrendingUp,
-  BarChart3,
-  Plane,
-  MapPin,
 } from 'lucide-react';
 
 export function ViewerDashboard() {
@@ -28,7 +25,7 @@ export function ViewerDashboard() {
 
   if (!publishedData) return null;
 
-  const { summary, routes, airlines, top10 } = publishedData;
+  const { summary, routes, airlines } = publishedData;
 
   // Classification counts
   const criticalCount = routes.filter((r) => r.classification === 'sanction').length;
@@ -155,37 +152,34 @@ export function ViewerDashboard() {
             <button
               onClick={() => setActiveStep(1)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
+                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
                 activeStep === 1
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
               )}
             >
-              <Plane className="w-4 h-4" />
               {tSteps('step1.tabTitle')}
             </button>
             <button
               onClick={() => setActiveStep(2)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
+                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
                 activeStep === 2
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
               )}
             >
-              <MapPin className="w-4 h-4" />
               {tSteps('step2.tabTitle')}
             </button>
             <button
               onClick={() => setActiveStep(3)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
+                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
                 activeStep === 3
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
               )}
             >
-              <BarChart3 className="w-4 h-4" />
               {tSteps('step3.tabTitle')}
             </button>
           </div>
@@ -368,47 +362,6 @@ export function ViewerDashboard() {
         )}
       </section>
 
-      {/* Top 10 Lists */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Top 10 Last Stops */}
-        <div className="bg-white border border-neutral-200 p-6">
-          <h4 className="text-lg font-bold text-neutral-900 mb-4">{t('top10LastStops')}</h4>
-          <div className="space-y-3">
-            {top10.lastStops.map((item, index) => (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-medium text-neutral-600">
-                    {index + 1}
-                  </span>
-                  <span className="font-medium text-neutral-900">{item.name}</span>
-                </div>
-                <span className="text-neutral-600">{item.count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Top 10 Airlines */}
-        <div className="bg-white border border-neutral-200 p-6">
-          <h4 className="text-lg font-bold text-neutral-900 mb-4">{t('top10Airlines')}</h4>
-          <div className="space-y-3">
-            {top10.airlines.map((item, index) => (
-              <div key={item.code} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-medium text-neutral-600">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <span className="font-medium text-neutral-900">{item.code}</span>
-                    <span className="text-neutral-500 ml-2 text-sm">{item.name}</span>
-                  </div>
-                </div>
-                <span className="text-neutral-600">{item.count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

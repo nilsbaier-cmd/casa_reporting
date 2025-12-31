@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import { ChartWrapper } from '@/components/ui/ChartWrapper';
 
 export function PaxTab() {
   const t = useTranslations('pax');
@@ -157,13 +158,10 @@ export function PaxTab() {
       {/* Charts Grid */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Top 10 Last Stops */}
-        <div className="bg-white border border-neutral-200 p-6">
-          <h4 className="text-lg font-bold text-neutral-900 mb-1">
-            {t('top10LastStops')}
-          </h4>
-          <p className="text-sm text-neutral-500 mb-6">
-            {t('top10LastStopsSubtitle')}
-          </p>
+        <ChartWrapper
+          title={t('top10LastStops')}
+          subtitle={t('top10LastStopsSubtitle')}
+        >
           {topLastStops.length > 0 ? (
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -205,16 +203,13 @@ export function PaxTab() {
               {t('noDataAvailable')}
             </div>
           )}
-        </div>
+        </ChartWrapper>
 
         {/* Top 10 Airlines */}
-        <div className="bg-white border border-neutral-200 p-6">
-          <h4 className="text-lg font-bold text-neutral-900 mb-1">
-            {t('top10Airlines')}
-          </h4>
-          <p className="text-sm text-neutral-500 mb-6">
-            {t('top10AirlinesSubtitle')}
-          </p>
+        <ChartWrapper
+          title={t('top10Airlines')}
+          subtitle={t('top10AirlinesSubtitle')}
+        >
           {topAirlines.length > 0 ? (
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -256,7 +251,7 @@ export function PaxTab() {
               {t('noDataAvailable')}
             </div>
           )}
-        </div>
+        </ChartWrapper>
       </div>
     </div>
   );

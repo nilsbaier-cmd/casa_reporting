@@ -16,6 +16,7 @@ import {
   PieChart,
   Pie,
 } from 'recharts';
+import { ChartWrapper } from '@/components/ui/ChartWrapper';
 
 // Refusal codes that are excluded from analysis
 const EXCLUDE_CODES = ['B1n', 'B2n', 'C4n', 'C5n', 'C8', 'D1n', 'D2n', 'E', 'F1n', 'G', 'H', 'I'];
@@ -192,13 +193,10 @@ export function InadTab() {
       </div>
 
       {/* Included vs Excluded Pie Chart */}
-      <div className="bg-white border border-neutral-200 p-6">
-        <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          {t('distribution')}
-        </h4>
-        <p className="text-sm text-neutral-500 mb-6">
-          {t('distributionSubtitle')}
-        </p>
+      <ChartWrapper
+        title={t('distribution')}
+        subtitle={t('distributionSubtitle')}
+      >
         <div className="grid md:grid-cols-2 gap-6">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -253,18 +251,15 @@ export function InadTab() {
             </div>
           </div>
         </div>
-      </div>
+      </ChartWrapper>
 
       {/* Charts Grid */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Top 10 Last Stops */}
-        <div className="bg-white border border-neutral-200 p-6">
-          <h4 className="text-lg font-bold text-neutral-900 mb-1">
-            {t('top10LastStops')}
-          </h4>
-          <p className="text-sm text-neutral-500 mb-6">
-            {t('top10LastStopsSubtitle')}
-          </p>
+        <ChartWrapper
+          title={t('top10LastStops')}
+          subtitle={t('top10LastStopsSubtitle')}
+        >
           {topLastStops.length > 0 ? (
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -305,16 +300,13 @@ export function InadTab() {
               {t('noDataAvailable')}
             </div>
           )}
-        </div>
+        </ChartWrapper>
 
         {/* Top 10 Airlines */}
-        <div className="bg-white border border-neutral-200 p-6">
-          <h4 className="text-lg font-bold text-neutral-900 mb-1">
-            {t('top10Airlines')}
-          </h4>
-          <p className="text-sm text-neutral-500 mb-6">
-            {t('top10AirlinesSubtitle')}
-          </p>
+        <ChartWrapper
+          title={t('top10Airlines')}
+          subtitle={t('top10AirlinesSubtitle')}
+        >
           {topAirlines.length > 0 ? (
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -355,17 +347,14 @@ export function InadTab() {
               {t('noDataAvailable')}
             </div>
           )}
-        </div>
+        </ChartWrapper>
       </div>
 
       {/* Refusal Codes */}
-      <div className="bg-white border border-neutral-200 p-6">
-        <h4 className="text-lg font-bold text-neutral-900 mb-1">
-          {t('refusalReasons')}
-        </h4>
-        <p className="text-sm text-neutral-500 mb-6">
-          {t('refusalReasonsSubtitle')}
-        </p>
+      <ChartWrapper
+        title={t('refusalReasons')}
+        subtitle={t('refusalReasonsSubtitle')}
+      >
         {byRefusalCode.length > 0 ? (
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -414,7 +403,7 @@ export function InadTab() {
         <p className="text-xs text-neutral-500 mt-4">
           {t('grayBarsNote')}
         </p>
-      </div>
+      </ChartWrapper>
     </div>
   );
 }

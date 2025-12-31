@@ -27,11 +27,10 @@ export default function ViewerPage() {
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push('/viewer/login');
-    } else if (!authLoading && isAuthenticated && role !== 'viewer') {
-      // If logged in as admin, redirect to admin
-      router.push('/admin');
     }
-  }, [isAuthenticated, authLoading, role, router]);
+    // Allow both admin and viewer roles to access viewer portal
+    // Admins may want to preview what viewers see
+  }, [isAuthenticated, authLoading, router]);
 
   // Try to load data from default URL on mount
   useEffect(() => {
@@ -70,7 +69,7 @@ export default function ViewerPage() {
     );
   }
 
-  if (!isAuthenticated || role !== 'viewer') {
+  if (!isAuthenticated) {
     return null;
   }
 

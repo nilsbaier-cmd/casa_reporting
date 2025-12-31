@@ -3,6 +3,18 @@
 import { useViewerStore } from '@/stores/viewerStore';
 import { useTranslations, useLocale } from 'next-intl';
 import { FileWarning, MapPin, Plane, TrendingUp } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  LineChart,
+  Line,
+} from 'recharts';
 
 export function ViewerInadTab() {
   const { publishedData } = useViewerStore();
@@ -21,6 +33,31 @@ export function ViewerInadTab() {
   const inadChange = prevSemester
     ? ((summary.totalInads - prevSemester.inadCount) / prevSemester.inadCount) * 100
     : null;
+
+  // Color palette for charts (blue tones for viewer portal)
+  const colors = [
+    '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE',
+    '#1D4ED8', '#1E40AF', '#1E3A8A', '#3730A3', '#4F46E5',
+  ];
+
+  // Prepare data for INAD trend line chart
+  const trendChartData = [...trends].map(t => ({
+    semester: t.semester,
+    inads: t.inadCount,
+    density: t.density,
+  }));
+
+  // Prepare top 10 data for bar charts
+  const top10LastStopsData = top10.lastStops.map(item => ({
+    name: item.name,
+    count: item.count,
+  }));
+
+  const top10AirlinesData = top10.airlines.map(item => ({
+    name: item.code,
+    count: item.count,
+    fullName: item.name,
+  }));
 
   return (
     <div className="space-y-8">
@@ -96,7 +133,118 @@ export function ViewerInadTab() {
         </div>
       </div>
 
-      {/* Top 10 Lists */}
+      {/* INAD Trend Chart */}
+      <section className="bg-white border border-neutral-200">
+        <div className="border-b border-neutral-200 px-6 py-4">
+          <h3 className="text-lg font-bold text-neutral-900">{t('inadTrend')}</h3>
+          <p className="text-sm text-neutral-500 mt-1">{t('inadTrendDesc')}</p>
+        </div>
+        <div className="p-6">
+          {trendChartData.length > 0 ? (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={trendChartData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                  <XAxis
+                    dataKey="semester"
+                    tick={{ fontSize: 11, fill: '#171717' }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: '#737373' }}
+                  />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                      name === 'inads' ? t('inads') : t('density'),
+                    ]}
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: 0,
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="inads"
+                    stroke="#DC2626"
+                    strokeWidth={2}
+                    dot={{ fill: '#DC2626', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-72 flex items-center justify-center text-neutral-400">
+              {tInad('noDataAvailable')}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Density Trend Chart */}
+      <section className="bg-white border border-neutral-200">
+        <div className="border-b border-neutral-200 px-6 py-4">
+          <h3 className="text-lg font-bold text-neutral-900">{t('densityTrend')}</h3>
+          <p className="text-sm text-neutral-500 mt-1">{t('densityTrendDesc')}</p>
+        </div>
+        <div className="p-6">
+          {trendChartData.length > 0 ? (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={trendChartData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                  <XAxis
+                    dataKey="semester"
+                    tick={{ fontSize: 11, fill: '#171717' }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: '#737373' }}
+                    tickFormatter={(value) => `${value.toFixed(4)}‰`}
+                  />
+                  <Tooltip
+                    formatter={(value) => [
+                      typeof value === 'number' ? `${value.toFixed(4)}‰` : '–',
+                      t('density'),
+                    ]}
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: 0,
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="density"
+                    stroke="#2563EB"
+                    strokeWidth={2}
+                    dot={{ fill: '#2563EB', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-72 flex items-center justify-center text-neutral-400">
+              {tInad('noDataAvailable')}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Top 10 Charts Grid */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Top 10 Last Stops */}
         <section className="bg-white border border-neutral-200">
@@ -108,19 +256,49 @@ export function ViewerInadTab() {
             <p className="text-sm text-neutral-500 mt-1">{t('top10LastStopsDesc')}</p>
           </div>
           <div className="p-6">
-            <div className="space-y-3">
-              {top10.lastStops.map((item, index) => (
-                <div key={item.name} className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 bg-neutral-100 rounded-full flex items-center justify-center text-sm font-bold text-neutral-600">
-                      {index + 1}
-                    </span>
-                    <span className="font-medium text-neutral-900">{item.name}</span>
-                  </div>
-                  <span className="font-semibold text-neutral-700">{item.count}</span>
-                </div>
-              ))}
-            </div>
+            {top10LastStopsData.length > 0 ? (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={top10LastStopsData}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis
+                      type="number"
+                      tick={{ fontSize: 12, fill: '#737373' }}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tick={{ fontSize: 12, fill: '#171717' }}
+                      width={45}
+                    />
+                    <Tooltip
+                      formatter={(value) => [
+                        typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                        t('inads'),
+                      ]}
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e5e5e5',
+                        borderRadius: 0,
+                      }}
+                    />
+                    <Bar dataKey="count" radius={[0, 2, 2, 0]}>
+                      {top10LastStopsData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-80 flex items-center justify-center text-neutral-400">
+                {tInad('noDataAvailable')}
+              </div>
+            )}
           </div>
         </section>
 
@@ -134,78 +312,52 @@ export function ViewerInadTab() {
             <p className="text-sm text-neutral-500 mt-1">{t('top10AirlinesDesc')}</p>
           </div>
           <div className="p-6">
-            <div className="space-y-3">
-              {top10.airlines.map((item, index) => (
-                <div key={item.code} className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 bg-neutral-100 rounded-full flex items-center justify-center text-sm font-bold text-neutral-600">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <span className="font-medium text-neutral-900">{item.code}</span>
-                      <span className="text-neutral-500 ml-2 text-sm">{item.name}</span>
-                    </div>
-                  </div>
-                  <span className="font-semibold text-neutral-700">{item.count}</span>
-                </div>
-              ))}
-            </div>
+            {top10AirlinesData.length > 0 ? (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={top10AirlinesData}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis
+                      type="number"
+                      tick={{ fontSize: 12, fill: '#737373' }}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tick={{ fontSize: 12, fill: '#171717' }}
+                      width={45}
+                    />
+                    <Tooltip
+                      formatter={(value, name, props) => [
+                        typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                        (props as { payload?: { fullName?: string } }).payload?.fullName || t('inads'),
+                      ]}
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e5e5e5',
+                        borderRadius: 0,
+                      }}
+                    />
+                    <Bar dataKey="count" radius={[0, 2, 2, 0]}>
+                      {top10AirlinesData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-80 flex items-center justify-center text-neutral-400">
+                {tInad('noDataAvailable')}
+              </div>
+            )}
           </div>
         </section>
       </div>
-
-      {/* INAD Trend Table */}
-      <section className="bg-white border border-neutral-200">
-        <div className="border-b border-neutral-200 px-6 py-4">
-          <h3 className="text-lg font-bold text-neutral-900">{t('inadTrend')}</h3>
-          <p className="text-sm text-neutral-500 mt-1">{t('inadTrendDesc')}</p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-neutral-50 border-b border-neutral-200">
-                <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  {t('semester')}
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  {t('inads')}
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  {t('passengers')}
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  {t('density')}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {[...trends].reverse().map((trend) => (
-                <tr
-                  key={trend.semester}
-                  className={trend.semester === metadata.semester ? 'bg-blue-50' : 'hover:bg-neutral-50'}
-                >
-                  <td className="px-4 py-3">
-                    <span className="font-medium text-neutral-900">{trend.semester}</span>
-                    {trend.semester === metadata.semester && (
-                      <span className="ml-2 text-xs text-blue-600 font-medium">{t('current')}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                    {trend.inadCount.toLocaleString(localeFormat)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-neutral-600">
-                    {trend.paxCount.toLocaleString(localeFormat)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                    {trend.density !== null ? `${trend.density.toFixed(4)}‰` : '–'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
     </div>
   );
 }

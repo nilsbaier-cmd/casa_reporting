@@ -2,7 +2,19 @@
 
 import { useViewerStore } from '@/stores/viewerStore';
 import { useTranslations, useLocale } from 'next-intl';
-import { Users, TrendingUp, Calendar } from 'lucide-react';
+import { Users, TrendingUp, Calendar, MapPin, Plane } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  LineChart,
+  Line,
+} from 'recharts';
 
 export function ViewerPaxTab() {
   const { publishedData } = useViewerStore();
@@ -13,7 +25,7 @@ export function ViewerPaxTab() {
 
   if (!publishedData) return null;
 
-  const { summary, trends, metadata } = publishedData;
+  const { summary, trends, metadata, top10 } = publishedData;
 
   // Calculate average PAX per semester from trends
   const avgPax = trends.length > 0
@@ -26,6 +38,30 @@ export function ViewerPaxTab() {
   const paxChange = prevSemester
     ? ((summary.totalPax - prevSemester.paxCount) / prevSemester.paxCount) * 100
     : null;
+
+  // Color palette for charts (blue tones for viewer)
+  const colors = [
+    '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE',
+    '#1D4ED8', '#1E40AF', '#1E3A8A', '#3730A3', '#4F46E5',
+  ];
+
+  // Prepare data for PAX trend line chart
+  const trendChartData = [...trends].map(t => ({
+    semester: t.semester,
+    pax: t.paxCount,
+  }));
+
+  // Prepare top 10 data for bar charts
+  const top10LastStopsData = top10.lastStops.map(item => ({
+    name: item.name,
+    count: item.count,
+  }));
+
+  const top10AirlinesData = top10.airlines.map(item => ({
+    name: item.code,
+    count: item.count,
+    fullName: item.name,
+  }));
 
   return (
     <div className="space-y-8">
@@ -88,58 +124,176 @@ export function ViewerPaxTab() {
         </div>
       </div>
 
-      {/* PAX Trend Table */}
+      {/* PAX Trend Chart */}
       <section className="bg-white border border-neutral-200">
         <div className="border-b border-neutral-200 px-6 py-4">
           <h3 className="text-lg font-bold text-neutral-900">{t('paxTrend')}</h3>
           <p className="text-sm text-neutral-500 mt-1">{t('paxTrendDesc')}</p>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-neutral-50 border-b border-neutral-200">
-                <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  {t('semester')}
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  {t('passengers')}
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  {t('inads')}
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                  {t('density')}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {[...trends].reverse().map((trend) => (
-                <tr
-                  key={trend.semester}
-                  className={trend.semester === metadata.semester ? 'bg-blue-50' : 'hover:bg-neutral-50'}
+        <div className="p-6">
+          {trendChartData.length > 0 ? (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={trendChartData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
-                  <td className="px-4 py-3">
-                    <span className="font-medium text-neutral-900">{trend.semester}</span>
-                    {trend.semester === metadata.semester && (
-                      <span className="ml-2 text-xs text-blue-600 font-medium">{t('current')}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right text-neutral-900">
-                    {trend.paxCount.toLocaleString(localeFormat)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-neutral-600">
-                    {trend.inadCount.toLocaleString(localeFormat)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                    {trend.density !== null ? `${trend.density.toFixed(4)}‰` : '–'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                  <XAxis
+                    dataKey="semester"
+                    tick={{ fontSize: 11, fill: '#171717' }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: '#737373' }}
+                    tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
+                  />
+                  <Tooltip
+                    formatter={(value) => [
+                      typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                      tPax('passengers'),
+                    ]}
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: 0,
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="pax"
+                    stroke="#2563EB"
+                    strokeWidth={2}
+                    dot={{ fill: '#2563EB', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-72 flex items-center justify-center text-neutral-400">
+              {tPax('noDataAvailable')}
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Top 10 Charts Grid */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Top 10 Last Stops by PAX-related INADs */}
+        <section className="bg-white border border-neutral-200">
+          <div className="border-b border-neutral-200 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <MapPin className="w-5 h-5 text-neutral-600" />
+              <h3 className="text-lg font-bold text-neutral-900">{t('top10LastStops')}</h3>
+            </div>
+            <p className="text-sm text-neutral-500 mt-1">{t('top10LastStopsDesc')}</p>
+          </div>
+          <div className="p-6">
+            {top10LastStopsData.length > 0 ? (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={top10LastStopsData}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis
+                      type="number"
+                      tick={{ fontSize: 12, fill: '#737373' }}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tick={{ fontSize: 12, fill: '#171717' }}
+                      width={45}
+                    />
+                    <Tooltip
+                      formatter={(value) => [
+                        typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                        t('inads'),
+                      ]}
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e5e5e5',
+                        borderRadius: 0,
+                      }}
+                    />
+                    <Bar dataKey="count" radius={[0, 2, 2, 0]}>
+                      {top10LastStopsData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-80 flex items-center justify-center text-neutral-400">
+                {tPax('noDataAvailable')}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Top 10 Airlines by PAX-related INADs */}
+        <section className="bg-white border border-neutral-200">
+          <div className="border-b border-neutral-200 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Plane className="w-5 h-5 text-neutral-600" />
+              <h3 className="text-lg font-bold text-neutral-900">{t('top10Airlines')}</h3>
+            </div>
+            <p className="text-sm text-neutral-500 mt-1">{t('top10AirlinesDesc')}</p>
+          </div>
+          <div className="p-6">
+            {top10AirlinesData.length > 0 ? (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={top10AirlinesData}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis
+                      type="number"
+                      tick={{ fontSize: 12, fill: '#737373' }}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tick={{ fontSize: 12, fill: '#171717' }}
+                      width={45}
+                    />
+                    <Tooltip
+                      formatter={(value, name, props) => [
+                        typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                        (props as { payload?: { fullName?: string } }).payload?.fullName || t('inads'),
+                      ]}
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e5e5e5',
+                        borderRadius: 0,
+                      }}
+                    />
+                    <Bar dataKey="count" radius={[0, 2, 2, 0]}>
+                      {top10AirlinesData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-80 flex items-center justify-center text-neutral-400">
+                {tPax('noDataAvailable')}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

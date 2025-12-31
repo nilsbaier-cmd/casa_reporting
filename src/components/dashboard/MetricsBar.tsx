@@ -136,6 +136,14 @@ export function MetricsBar() {
   const step3Summary = getStep3Summary(step3Results, threshold || 0);
   const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
+  // Count unique airlines with routes above threshold (WATCH_LIST or HIGH_PRIORITY) in Step 3
+  const step3Airlines = new Set(step3Results.map(r => r.airline));
+  const step3AirlinesAboveThreshold = new Set(
+    step3Results
+      .filter(r => r.priority === 'HIGH_PRIORITY' || r.priority === 'WATCH_LIST')
+      .map(r => r.airline)
+  );
+
   return (
     <div className="space-y-6">
       {/* Section header */}
@@ -158,9 +166,10 @@ export function MetricsBar() {
 
         <MetricCard
           label={t('airlines')}
-          value={`${step1Summary.passingAirlines}/${step1Summary.totalAirlines}`}
+          value={`${step3AirlinesAboveThreshold.size}/${step3Airlines.size}`}
           description={t('airlinesDesc')}
           icon={<Users className="w-5 h-5" />}
+          variant={step3AirlinesAboveThreshold.size > 0 ? 'warning' : 'default'}
         />
 
         <MetricCard

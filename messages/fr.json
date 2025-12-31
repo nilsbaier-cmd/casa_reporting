@@ -338,6 +338,8 @@
     "paxTrendDesc": "Évolution du nombre de passagers sur tous les semestres",
     "inadTrend": "Tendance INAD",
     "inadTrendDesc": "Évolution des refus d'entrée sur tous les semestres",
+    "densityTrend": "Tendance densité",
+    "densityTrendDesc": "Évolution de la densité INAD pour 1'000 passagers",
     "semester": "Semestre",
     "passengers": "Passagers",
     "inads": "INAD",
