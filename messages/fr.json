@@ -96,7 +96,8 @@
       "aboveThreshold": "au-dessus du seuil",
       "totalInads": "INAD total",
       "noData": "Téléchargez les fichiers INAD et OFAC pour voir les résultats",
-      "noAirlines": "Aucune compagnie trouvée dans les données"
+      "noAirlines": "Aucune compagnie trouvée dans les données",
+      "csvExport": "Export CSV"
     },
     "step2": {
       "title": "Niveau 2 : Screening des routes",
@@ -107,7 +108,8 @@
       "aboveThreshold": "au-dessus du seuil",
       "totalInads": "INAD total",
       "noData": "Téléchargez les fichiers INAD et OFAC pour voir les résultats",
-      "noRoutes": "Aucune route trouvée dans les données"
+      "noRoutes": "Aucune route trouvée dans les données",
+      "csvExport": "Export CSV"
     },
     "step3": {
       "title": "Niveau 3 : Analyse de densité",
@@ -133,7 +135,22 @@
     "category": "Catégorie",
     "status": "Statut",
     "check": "Vérifier",
-    "ok": "OK"
+    "ok": "OK",
+    "noData": "Aucune donnée disponible",
+    "rowCount": "{count, plural, =0 {Aucune entrée} =1 {1 entrée} other {# entrées}} au total"
+  },
+  "criteria": {
+    "medianThreshold": "Seuil médian",
+    "densityGte": "Densité",
+    "densityLt": "Densité",
+    "median": "médiane",
+    "and": "ET",
+    "minInads": "au moins",
+    "notAllCriteria": "Mais pas tous les critères pour \"Critique\" remplis",
+    "paxCount": "Nombre de passagers",
+    "densityUnreliable": "Densité statistiquement non significative",
+    "minInadInfo": "Au moins",
+    "requiredForAnalysis": "requis pour inclusion dans l'analyse des routes (Niveau 1 & 2)"
   },
   "inad": {
     "title": "Aperçu des données INAD",
@@ -163,6 +180,7 @@
     "cases": "Cas",
     "casesExcluded": "Cas (exclus)",
     "count": "Nombre",
+    "routes": "Routes",
     "grayBarsNote": "Les barres grises indiquent les codes exclus (raisons administratives)"
   },
   "pax": {

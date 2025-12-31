@@ -96,7 +96,8 @@
       "aboveThreshold": "über Schwellenwert",
       "totalInads": "INADs total",
       "noData": "Laden Sie INAD- und BAZL-Dateien hoch, um Ergebnisse zu sehen",
-      "noAirlines": "Keine Airlines in den Daten gefunden"
+      "noAirlines": "Keine Airlines in den Daten gefunden",
+      "csvExport": "CSV Export"
     },
     "step2": {
       "title": "Prüfstufe 2: Routen-Screening",
@@ -107,7 +108,8 @@
       "aboveThreshold": "über Schwellenwert",
       "totalInads": "INADs total",
       "noData": "Laden Sie INAD- und BAZL-Dateien hoch, um Ergebnisse zu sehen",
-      "noRoutes": "Keine Routen in den Daten gefunden"
+      "noRoutes": "Keine Routen in den Daten gefunden",
+      "csvExport": "CSV Export"
     },
     "step3": {
       "title": "Prüfstufe 3: Dichte-Analyse",
@@ -133,7 +135,22 @@
     "category": "Kategorie",
     "status": "Status",
     "check": "Prüfen",
-    "ok": "OK"
+    "ok": "OK",
+    "noData": "Keine Daten verfügbar",
+    "rowCount": "{count, plural, =0 {Keine Einträge} =1 {1 Eintrag} other {# Einträge}} insgesamt"
+  },
+  "criteria": {
+    "medianThreshold": "Median-Schwellenwert",
+    "densityGte": "Dichte",
+    "densityLt": "Dichte",
+    "median": "Median",
+    "and": "UND",
+    "minInads": "mindestens",
+    "notAllCriteria": "Aber nicht alle Kriterien für \"Kritisch\" erfüllt",
+    "paxCount": "Passagierzahl",
+    "densityUnreliable": "Dichte statistisch nicht aussagekräftig",
+    "minInadInfo": "Mindestens",
+    "requiredForAnalysis": "erforderlich für Aufnahme in die Routen-Analyse (Prüfstufe 1 & 2)"
   },
   "inad": {
     "title": "INAD-Daten Übersicht",
@@ -163,6 +180,7 @@
     "cases": "Fälle",
     "casesExcluded": "Fälle (ausgeschlossen)",
     "count": "Anzahl",
+    "routes": "Routen",
     "grayBarsNote": "Graue Balken zeigen ausgeschlossene Codes an (administrative Gründe)"
   },
   "pax": {

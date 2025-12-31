@@ -279,14 +279,13 @@ export function PublishDialog() {
           <div className="mt-4 pt-4 border-t border-neutral-200">
             <div className="flex items-center gap-2 text-sm">
               <ExternalLink className="w-4 h-4 text-neutral-400" />
-              <span className="text-neutral-500">{t('viewerLink')}:</span>
               <a
                 href="/viewer"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"
               >
-                /viewer
+                {t('viewerLink')}
               </a>
             </div>
           </div>

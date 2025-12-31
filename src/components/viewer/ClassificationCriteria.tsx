@@ -19,15 +19,6 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
   // Calculate actual threshold values
   const highPriorityThreshold = medianThreshold * config.highPriorityMultiplier;
 
-  // Fallback texts for missing translations
-  const getText = (key: string, fallback: string) => {
-    try {
-      return tCriteria(key);
-    } catch {
-      return fallback;
-    }
-  };
-
   return (
     <div className="bg-neutral-50 border border-neutral-200 p-6">
       <div className="flex items-start gap-3 mb-4">
@@ -35,7 +26,7 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
         <div>
           <h4 className="font-bold text-neutral-900">{tDocs('classification')}</h4>
           <p className="text-sm text-neutral-600 mt-1">
-            {getText('medianThreshold', 'Median-Schwellenwert')}: <span className="font-semibold">{medianThreshold.toFixed(4)}‰</span>
+            {tCriteria('medianThreshold')}: <span className="font-semibold">{medianThreshold.toFixed(4)}‰</span>
           </p>
         </div>
       </div>
@@ -47,9 +38,9 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
           <div>
             <p className="font-bold text-red-900 text-sm uppercase tracking-wide">{t('critical')}</p>
             <ul className="text-xs text-red-700 mt-1 space-y-0.5">
-              <li>{getText('densityGte', 'Dichte')} &ge; {highPriorityThreshold.toFixed(4)}‰ ({config.highPriorityMultiplier}x {getText('median', 'Median')})</li>
-              <li>{getText('and', 'UND')} {getText('densityGte', 'Dichte')} &ge; {config.minDensity.toFixed(2)}‰</li>
-              <li>{getText('and', 'UND')} {getText('minInads', 'mindestens')} {config.highPriorityMinInad} INADs</li>
+              <li>{tCriteria('densityGte')} ≥ {highPriorityThreshold.toFixed(4)}‰ ({config.highPriorityMultiplier}x {tCriteria('median')})</li>
+              <li>{tCriteria('and')} {tCriteria('densityGte')} ≥ {config.minDensity.toFixed(2)}‰</li>
+              <li>{tCriteria('and')} {tCriteria('minInads')} {config.highPriorityMinInad} INADs</li>
             </ul>
           </div>
         </div>
@@ -60,8 +51,8 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
           <div>
             <p className="font-bold text-amber-900 text-sm uppercase tracking-wide">{t('watchList')}</p>
             <ul className="text-xs text-amber-700 mt-1 space-y-0.5">
-              <li>{getText('densityGte', 'Dichte')} &ge; {medianThreshold.toFixed(4)}‰ ({getText('median', 'Median')})</li>
-              <li>{getText('notAllCriteria', 'Aber nicht alle Kriterien fuer "Kritisch" erfuellt')}</li>
+              <li>{tCriteria('densityGte')} ≥ {medianThreshold.toFixed(4)}‰ ({tCriteria('median')})</li>
+              <li>{tCriteria('notAllCriteria')}</li>
             </ul>
           </div>
         </div>
@@ -72,7 +63,7 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
           <div>
             <p className="font-bold text-green-900 text-sm uppercase tracking-wide">{t('clear')}</p>
             <ul className="text-xs text-green-700 mt-1 space-y-0.5">
-              <li>{getText('densityLt', 'Dichte')} &lt; {medianThreshold.toFixed(4)}‰ ({getText('median', 'Median')})</li>
+              <li>{tCriteria('densityLt')} &lt; {medianThreshold.toFixed(4)}‰ ({tCriteria('median')})</li>
             </ul>
           </div>
         </div>
@@ -83,8 +74,8 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
           <div>
             <p className="font-bold text-neutral-700 text-sm uppercase tracking-wide">{t('unreliable')}</p>
             <ul className="text-xs text-neutral-600 mt-1 space-y-0.5">
-              <li>{getText('paxCount', 'Passagierzahl')} &lt; {config.minPax.toLocaleString(localeFormat)}</li>
-              <li>{getText('densityUnreliable', 'Dichte statistisch nicht aussagekraeftig')}</li>
+              <li>{tCriteria('paxCount')} &lt; {config.minPax.toLocaleString(localeFormat)}</li>
+              <li>{tCriteria('densityUnreliable')}</li>
             </ul>
           </div>
         </div>
@@ -93,7 +84,7 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
       {/* Additional Info */}
       <div className="mt-4 pt-4 border-t border-neutral-200">
         <p className="text-xs text-neutral-500">
-          {getText('minInadInfo', 'Mindestens')} {config.minInad} INADs {getText('requiredForAnalysis', 'erforderlich fuer Aufnahme in die Routen-Analyse (Prufstufe 1 & 2)')}.
+          {tCriteria('minInadInfo')} {config.minInad} INADs {tCriteria('requiredForAnalysis')}.
         </p>
       </div>
     </div>

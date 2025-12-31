@@ -91,16 +91,73 @@ export function ViewerDashboard() {
     );
   }, [tTable]);
 
-  // CSV Export function with proper escaping
-  const handleExportCsv = () => {
-    // Helper to escape CSV fields - handles semicolons, quotes, and newlines
-    const escapeCSVField = (field: string): string => {
-      if (field.includes(';') || field.includes('"') || field.includes('\n')) {
-        return `"${field.replace(/"/g, '""')}"`;
-      }
-      return field;
-    };
+  // Helper to escape CSV fields - handles semicolons, quotes, and newlines
+  const escapeCSVField = useCallback((field: string): string => {
+    if (field.includes(';') || field.includes('"') || field.includes('\n')) {
+      return `"${field.replace(/"/g, '""')}"`;
+    }
+    return field;
+  }, []);
 
+  // CSV Export for Step 1 (Airlines)
+  const handleExportStep1Csv = useCallback(() => {
+    const headers = ['Airline', 'Airline Name', 'INADs', 'Status'];
+    const rows = airlines.map((row) => [
+      escapeCSVField(row.airline),
+      escapeCSVField(row.airlineName),
+      row.inadCount.toString(),
+      row.aboveThreshold ? 'Check' : 'OK',
+    ]);
+
+    const csvContent = [
+      headers.join(';'),
+      ...rows.map((row) => row.join(';')),
+      '',
+      `Min INAD Threshold;${config.minInad}`,
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `casa-airlines-${publishedData.metadata.semester.replace(' ', '-')}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [airlines, config.minInad, publishedData.metadata.semester, escapeCSVField]);
+
+  // CSV Export for Step 2 (Routes)
+  const handleExportStep2Csv = useCallback(() => {
+    const headers = ['Airline', 'Airline Name', 'Last Stop', 'INADs', 'Status'];
+    const rows = routes.map((row) => [
+      escapeCSVField(row.airline),
+      escapeCSVField(row.airlineName),
+      escapeCSVField(row.lastStop),
+      row.inadCount.toString(),
+      row.inadCount >= config.minInad ? 'Check' : 'OK',
+    ]);
+
+    const csvContent = [
+      headers.join(';'),
+      ...rows.map((row) => row.join(';')),
+      '',
+      `Min INAD Threshold;${config.minInad}`,
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `casa-routes-step2-${publishedData.metadata.semester.replace(' ', '-')}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [routes, config.minInad, publishedData.metadata.semester, escapeCSVField]);
+
+  // CSV Export for Step 3 (Routes with density)
+  const handleExportCsv = useCallback(() => {
     const headers = [
       'Airline',
       'Airline Name',
@@ -135,7 +192,7 @@ export function ViewerDashboard() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  };
+  }, [routes, publishedData.metadata.semester, escapeCSVField]);
 
   // DataTable columns for Step 1 (Airlines)
   const airlineColumns: Column<PublishedAirline>[] = [
@@ -276,6 +333,33 @@ export function ViewerDashboard() {
     });
   }, [routes]);
 
+  // Find the index of the last "above threshold" row (sanction or watchList) for the separator line
+  const lastAboveThresholdIndex = useMemo(() => {
+    for (let i = sortedRoutes.length - 1; i >= 0; i--) {
+      if (sortedRoutes[i].classification === 'sanction' || sortedRoutes[i].classification === 'watchList') {
+        return i;
+      }
+    }
+    return -1;
+  }, [sortedRoutes]);
+
+  // Row class for Step 3 with separator line
+  const getStep3RowClassName = useCallback((row: PublishedRoute, index: number) => {
+    const classes: string[] = [];
+
+    // Background color for critical routes
+    if (row.classification === 'sanction') {
+      classes.push('bg-red-50/50');
+    }
+
+    // Add separator line after the last above-threshold row
+    if (index === lastAboveThresholdIndex && lastAboveThresholdIndex >= 0) {
+      classes.push('border-b-4 border-b-red-600');
+    }
+
+    return classes.join(' ');
+  }, [lastAboveThresholdIndex]);
+
   return (
     <div className="space-y-8">
       {/* Summary Metrics - 5 Cards */}
@@ -388,10 +472,21 @@ export function ViewerDashboard() {
         {activeStep === 1 && (
           <>
             <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-              <h3 className="text-lg font-bold text-neutral-900">{tSteps('step1.title')}</h3>
-              <p className="text-sm text-neutral-500 mt-1">
-                {tSteps('step1.description', { minInad: config.minInad })}
-              </p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-neutral-900">{tSteps('step1.title')}</h3>
+                  <p className="text-sm text-neutral-500 mt-1">
+                    {tSteps('step1.description', { minInad: config.minInad })}
+                  </p>
+                </div>
+                <button
+                  onClick={handleExportStep1Csv}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-neutral-600 border border-neutral-300 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  {tSteps('step1.csvExport')}
+                </button>
+              </div>
             </div>
             <DataTable
               data={airlines}
@@ -406,10 +501,21 @@ export function ViewerDashboard() {
         {activeStep === 2 && (
           <>
             <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-              <h3 className="text-lg font-bold text-neutral-900">{tSteps('step2.title')}</h3>
-              <p className="text-sm text-neutral-500 mt-1">
-                {tSteps('step2.description', { minInad: config.minInad })}
-              </p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-neutral-900">{tSteps('step2.title')}</h3>
+                  <p className="text-sm text-neutral-500 mt-1">
+                    {tSteps('step2.description', { minInad: config.minInad })}
+                  </p>
+                </div>
+                <button
+                  onClick={handleExportStep2Csv}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-neutral-600 border border-neutral-300 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  {tSteps('step2.csvExport')}
+                </button>
+              </div>
             </div>
             <DataTable
               data={routes}
@@ -443,7 +549,7 @@ export function ViewerDashboard() {
               data={sortedRoutes}
               columns={routeColumns}
               getRowKey={(row) => `${row.airline}-${row.lastStop}`}
-              rowClassName={(row) => row.classification === 'sanction' ? 'bg-red-50/50' : ''}
+              rowClassName={getStep3RowClassName}
             />
           </>
         )}

@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { Maximize2, Download, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { createPortal } from 'react-dom';
 
 interface ChartWrapperProps {
   children: React.ReactNode;
@@ -13,32 +14,42 @@ interface ChartWrapperProps {
 
 export function ChartWrapper({ children, title, subtitle, className }: ChartWrapperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const handleFullscreen = useCallback(() => {
-    if (!containerRef.current) return;
-
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().then(() => {
-        setIsFullscreen(true);
-      }).catch((err) => {
-        console.error('Error entering fullscreen:', err);
-      });
-    } else {
-      document.exitFullscreen().then(() => {
-        setIsFullscreen(false);
-      });
-    }
+  // Handle client-side mounting for portal
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
-  const handleExitFullscreen = useCallback(() => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen().then(() => {
-        setIsFullscreen(false);
-      });
-    }
+  const openModal = useCallback(() => {
+    setIsModalOpen(true);
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
   }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    document.body.style.overflow = '';
+  }, []);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isModalOpen) {
+        closeModal();
+      }
+    };
+
+    if (isModalOpen) {
+      document.addEventListener('keydown', handleEsc);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [isModalOpen, closeModal]);
 
   const handleDownloadPng = useCallback(async () => {
     if (!containerRef.current || isExporting) return;
@@ -76,80 +87,113 @@ export function ChartWrapper({ children, title, subtitle, className }: ChartWrap
     }
   }, [title, isExporting]);
 
-  // Listen for fullscreen changes
-  const handleFullscreenChange = useCallback(() => {
-    setIsFullscreen(!!document.fullscreenElement);
-  }, []);
-
-  // Add event listener for fullscreen changes
-  if (typeof document !== 'undefined') {
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-  }
-
-  return (
+  // Modal content - rendered in portal
+  const modalContent = isModalOpen && isMounted && createPortal(
     <div
-      ref={containerRef}
-      className={cn(
-        'bg-white border border-neutral-200 relative group',
-        isFullscreen && 'fixed inset-0 z-50 flex flex-col overflow-auto',
-        className
-      )}
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="chart-modal-title"
     >
-      {/* Header with title and action buttons */}
-      <div className={cn(
-        'flex items-start justify-between border-b border-neutral-200 px-6 py-4',
-        isFullscreen && 'bg-white'
-      )}>
-        <div>
-          <h4 className="text-lg font-bold text-neutral-900">{title}</h4>
-          {subtitle && (
-            <p className="text-sm text-neutral-500 mt-1">{subtitle}</p>
-          )}
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+        onClick={closeModal}
+        aria-hidden="true"
+      />
+
+      {/* Modal content */}
+      <div
+        className="relative bg-white w-[90vw] h-[90vh] max-w-7xl flex flex-col shadow-2xl animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal header */}
+        <div className="flex items-start justify-between border-b border-neutral-200 px-6 py-4 bg-neutral-50">
+          <div>
+            <h4 id="chart-modal-title" className="text-xl font-bold text-neutral-900">{title}</h4>
+            {subtitle && (
+              <p className="text-sm text-neutral-500 mt-1">{subtitle}</p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadPng}
+              disabled={isExporting}
+              className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer disabled:opacity-50"
+              title="Als PNG herunterladen"
+              aria-label="Als PNG herunterladen"
+            >
+              <Download className="w-5 h-5" />
+            </button>
+            <button
+              onClick={closeModal}
+              className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+              title="Schliessen"
+              aria-label="Modal schliessen"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Action buttons */}
-        <div className={cn(
-          'flex items-center gap-2',
-          !isFullscreen && 'opacity-0 group-hover:opacity-100 transition-opacity'
-        )}>
-          <button
-            onClick={handleDownloadPng}
-            disabled={isExporting}
-            className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer disabled:opacity-50"
-            title="Als PNG herunterladen"
-            aria-label="Als PNG herunterladen"
-          >
-            <Download className="w-4 h-4" />
-          </button>
-          {isFullscreen ? (
+        {/* Modal body - chart content */}
+        <div className="flex-1 overflow-auto p-6 chart-content">
+          {children}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+
+  return (
+    <>
+      <div
+        ref={containerRef}
+        className={cn(
+          'bg-white border border-neutral-200 relative group',
+          className
+        )}
+      >
+        {/* Header with title and action buttons */}
+        <div className="flex items-start justify-between border-b border-neutral-200 px-6 py-4">
+          <div>
+            <h4 className="text-lg font-bold text-neutral-900">{title}</h4>
+            {subtitle && (
+              <p className="text-sm text-neutral-500 mt-1">{subtitle}</p>
+            )}
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onClick={handleExitFullscreen}
-              className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
-              title="Vollbild beenden"
-              aria-label="Vollbild beenden"
+              onClick={handleDownloadPng}
+              disabled={isExporting}
+              className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer disabled:opacity-50"
+              title="Als PNG herunterladen"
+              aria-label="Als PNG herunterladen"
             >
-              <X className="w-4 h-4" />
+              <Download className="w-4 h-4" />
             </button>
-          ) : (
             <button
-              onClick={handleFullscreen}
+              onClick={openModal}
               className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
-              title="Vollbild"
-              aria-label="Vollbild"
+              title="Vergrössern"
+              aria-label="Im Modal öffnen"
             >
               <Maximize2 className="w-4 h-4" />
             </button>
-          )}
+          </div>
+        </div>
+
+        {/* Chart content */}
+        <div className="chart-content p-6">
+          {children}
         </div>
       </div>
 
-      {/* Chart content */}
-      <div className={cn(
-        'chart-content p-6',
-        isFullscreen && 'flex-1 overflow-auto'
-      )}>
-        {children}
-      </div>
-    </div>
+      {/* Modal portal */}
+      {modalContent}
+    </>
   );
 }

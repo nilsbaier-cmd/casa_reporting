@@ -18,7 +18,7 @@ interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
   getRowKey: (row: T) => string;
-  rowClassName?: (row: T) => string;
+  rowClassName?: (row: T, index: number, allData: T[]) => string;
   emptyMessage?: string;
 }
 
@@ -140,7 +140,7 @@ export function DataTable<T>({
               className={cn(
                 'hover:bg-neutral-50 transition-colors',
                 'animate-sem-fade-in opacity-0',
-                rowClassName?.(row)
+                rowClassName?.(row, index, sortedData)
               )}
               style={{ animationDelay: `${Math.min(index * 20, 300)}ms` }}
             >

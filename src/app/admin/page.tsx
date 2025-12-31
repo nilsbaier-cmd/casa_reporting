@@ -214,30 +214,32 @@ export default function AdminDashboardPage() {
       {/* Main Content */}
       <main className="flex-1">
         <div className="sem-container py-8 lg:py-12 space-y-8">
-          {/* Data Control Bar - Semester links, Upload rechts */}
-          <section aria-labelledby="controls-heading">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-px bg-red-600" aria-hidden="true" />
-              <h2 id="controls-heading" className="text-xs font-bold uppercase tracking-wider text-neutral-500">
-                {t('dataControl')}
-              </h2>
-            </div>
-
-            <div className="grid lg:grid-cols-12 gap-6 items-start">
-              {/* Semester Selection - Left, compact */}
-              <div className="lg:col-span-3">
-                <SemesterSelector />
+          {/* Data Control Bar - Only on Dashboard, PAX, and INAD tabs */}
+          {(activeTab === 'dashboard' || activeTab === 'pax' || activeTab === 'inad') && (
+            <section aria-labelledby="controls-heading">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-px bg-red-600" aria-hidden="true" />
+                <h2 id="controls-heading" className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+                  {t('dataControl')}
+                </h2>
               </div>
 
-              {/* File Upload - Right, larger */}
-              <div className="lg:col-span-9">
-                <FileUpload />
-              </div>
-            </div>
-          </section>
+              <div className="grid lg:grid-cols-12 gap-6 items-start">
+                {/* Semester Selection - Left, compact */}
+                <div className="lg:col-span-3">
+                  <SemesterSelector />
+                </div>
 
-          {/* Publish Section - Only visible when data is loaded */}
-          {hasResults && (
+                {/* File Upload - Right, larger */}
+                <div className="lg:col-span-9">
+                  <FileUpload />
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Publish Section - Only visible on Dashboard when data is loaded */}
+          {activeTab === 'dashboard' && hasResults && (
             <section aria-labelledby="publish-heading">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-px bg-red-600" aria-hidden="true" />

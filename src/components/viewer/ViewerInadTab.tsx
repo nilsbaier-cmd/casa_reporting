@@ -18,6 +18,7 @@ import {
   Pie,
   Legend,
 } from 'recharts';
+import { ChartWrapper } from '@/components/ui/ChartWrapper';
 
 export function ViewerInadTab() {
   const { publishedData } = useViewerStore();
@@ -43,12 +44,12 @@ export function ViewerInadTab() {
     '#1D4ED8', '#1E40AF', '#1E3A8A', '#3730A3', '#4F46E5',
   ];
 
-  // Classification colors for Pie Chart
+  // Classification colors for Pie Chart (blue tones for viewer portal)
   const classificationColors: Record<string, string> = {
-    sanction: '#DC2626',   // red
-    watchList: '#D97706',  // amber
-    clear: '#16A34A',      // green
-    unreliable: '#6B7280', // gray
+    sanction: '#1E3A8A',   // dark blue (critical)
+    watchList: '#2563EB',  // blue (watch list)
+    clear: '#60A5FA',      // light blue (compliant)
+    unreliable: '#94A3B8', // slate gray (unreliable)
   };
 
   // Calculate classification distribution
@@ -160,172 +161,154 @@ export function ViewerInadTab() {
       </div>
 
       {/* Classification Distribution Pie Chart */}
-      <section className="bg-white border border-neutral-200">
-        <div className="border-b border-neutral-200 px-6 py-4">
-          <h3 className="text-lg font-bold text-neutral-900">{tInad('distribution')}</h3>
-          <p className="text-sm text-neutral-500 mt-1">{tInad('distributionSubtitle')}</p>
-        </div>
-        <div className="p-6">
-          {classificationData.length > 0 ? (
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={classificationData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    innerRadius={40}
-                    paddingAngle={2}
-                    label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
-                    labelLine={true}
-                  >
-                    {classificationData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Legend
-                    verticalAlign="bottom"
-                    height={36}
-                    formatter={(value, entry) => {
-                      const item = classificationData.find(d => d.name === value);
-                      return `${value} (${item?.value || 0})`;
-                    }}
-                  />
-                  <Tooltip
-                    formatter={(value) => [
-                      typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
-                      tInad('routes'),
-                    ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="h-72 flex items-center justify-center text-neutral-400">
-              {tInad('noDataAvailable')}
-            </div>
-          )}
-        </div>
-      </section>
+      <ChartWrapper title={tInad('distribution')} subtitle={tInad('distributionSubtitle')}>
+        {classificationData.length > 0 ? (
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={classificationData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  innerRadius={40}
+                  paddingAngle={2}
+                  label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
+                  labelLine={true}
+                >
+                  {classificationData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  formatter={(value) => {
+                    const item = classificationData.find(d => d.name === value);
+                    return `${value} (${item?.value || 0})`;
+                  }}
+                />
+                <Tooltip
+                  formatter={(value) => [
+                    typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                    tInad('routes'),
+                  ]}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e5e5e5',
+                    borderRadius: 0,
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-72 flex items-center justify-center text-neutral-400">
+            {tInad('noDataAvailable')}
+          </div>
+        )}
+      </ChartWrapper>
 
       {/* INAD Trend Chart */}
-      <section className="bg-white border border-neutral-200">
-        <div className="border-b border-neutral-200 px-6 py-4">
-          <h3 className="text-lg font-bold text-neutral-900">{t('inadTrend')}</h3>
-          <p className="text-sm text-neutral-500 mt-1">{t('inadTrendDesc')}</p>
-        </div>
-        <div className="p-6">
-          {trendChartData.length > 0 ? (
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={trendChartData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                  <XAxis
-                    dataKey="semester"
-                    tick={{ fontSize: 11, fill: '#171717' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12, fill: '#737373' }}
-                  />
-                  <Tooltip
-                    formatter={(value, name) => [
-                      typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
-                      name === 'inads' ? t('inads') : t('density'),
-                    ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="inads"
-                    stroke="#DC2626"
-                    strokeWidth={2}
-                    dot={{ fill: '#DC2626', r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="h-72 flex items-center justify-center text-neutral-400">
-              {tInad('noDataAvailable')}
-            </div>
-          )}
-        </div>
-      </section>
+      <ChartWrapper title={t('inadTrend')} subtitle={t('inadTrendDesc')}>
+        {trendChartData.length > 0 ? (
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={trendChartData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                <XAxis
+                  dataKey="semester"
+                  tick={{ fontSize: 11, fill: '#171717' }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: '#737373' }}
+                />
+                <Tooltip
+                  formatter={(value, name) => [
+                    typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                    name === 'inads' ? t('inads') : t('density'),
+                  ]}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e5e5e5',
+                    borderRadius: 0,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="inads"
+                  stroke="#DC2626"
+                  strokeWidth={2}
+                  dot={{ fill: '#DC2626', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-72 flex items-center justify-center text-neutral-400">
+            {tInad('noDataAvailable')}
+          </div>
+        )}
+      </ChartWrapper>
 
       {/* Density Trend Chart */}
-      <section className="bg-white border border-neutral-200">
-        <div className="border-b border-neutral-200 px-6 py-4">
-          <h3 className="text-lg font-bold text-neutral-900">{t('densityTrend')}</h3>
-          <p className="text-sm text-neutral-500 mt-1">{t('densityTrendDesc')}</p>
-        </div>
-        <div className="p-6">
-          {trendChartData.length > 0 ? (
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={trendChartData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                  <XAxis
-                    dataKey="semester"
-                    tick={{ fontSize: 11, fill: '#171717' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12, fill: '#737373' }}
-                    tickFormatter={(value) => `${value.toFixed(4)}‰`}
-                  />
-                  <Tooltip
-                    formatter={(value) => [
-                      typeof value === 'number' ? `${value.toFixed(4)}‰` : '–',
-                      t('density'),
-                    ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="density"
-                    stroke="#2563EB"
-                    strokeWidth={2}
-                    dot={{ fill: '#2563EB', r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="h-72 flex items-center justify-center text-neutral-400">
-              {tInad('noDataAvailable')}
-            </div>
-          )}
-        </div>
-      </section>
+      <ChartWrapper title={t('densityTrend')} subtitle={t('densityTrendDesc')}>
+        {trendChartData.length > 0 ? (
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={trendChartData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                <XAxis
+                  dataKey="semester"
+                  tick={{ fontSize: 11, fill: '#171717' }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: '#737373' }}
+                  tickFormatter={(value) => `${value.toFixed(4)}‰`}
+                />
+                <Tooltip
+                  formatter={(value) => [
+                    typeof value === 'number' ? `${value.toFixed(4)}‰` : '–',
+                    t('density'),
+                  ]}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e5e5e5',
+                    borderRadius: 0,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="density"
+                  stroke="#2563EB"
+                  strokeWidth={2}
+                  dot={{ fill: '#2563EB', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-72 flex items-center justify-center text-neutral-400">
+            {tInad('noDataAvailable')}
+          </div>
+        )}
+      </ChartWrapper>
 
       {/* Top 10 Charts Grid */}
       <div className="grid md:grid-cols-2 gap-6">

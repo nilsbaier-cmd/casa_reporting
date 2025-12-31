@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
@@ -9,6 +10,14 @@ import type { Step3Result } from '@/lib/analysis/types';
 import { getStep3Summary } from '@/lib/analysis/step3';
 import { PRIORITY_LABELS } from '@/lib/analysis/constants';
 import { useTranslations, useLocale } from 'next-intl';
+
+// Priority order for sorting (above threshold first, then below)
+const PRIORITY_ORDER: Record<string, number> = {
+  HIGH_PRIORITY: 0,
+  WATCH_LIST: 1,
+  CLEAR: 2,
+  UNRELIABLE: 3,
+};
 
 function exportToCSV(data: Step3Result[], threshold: number) {
   const headers = ['Airline', 'Last Stop', 'INAD Count', 'PAX', 'Density (‰)', 'Priority'];
@@ -53,6 +62,27 @@ export function Step3Density() {
 
   const summary = getStep3Summary(step3Results, threshold || 0);
 
+  // Sort data by priority: above threshold first (HIGH_PRIORITY, WATCH_LIST), then below (CLEAR, UNRELIABLE)
+  const sortedResults = useMemo(() => {
+    return [...step3Results].sort((a, b) => {
+      const orderA = PRIORITY_ORDER[a.priority] ?? 99;
+      const orderB = PRIORITY_ORDER[b.priority] ?? 99;
+      if (orderA !== orderB) return orderA - orderB;
+      // Secondary sort by density (descending) within same priority
+      return (b.density ?? 0) - (a.density ?? 0);
+    });
+  }, [step3Results]);
+
+  // Find the index of the last "above threshold" row (HIGH_PRIORITY or WATCH_LIST)
+  const lastAboveThresholdIndex = useMemo(() => {
+    for (let i = sortedResults.length - 1; i >= 0; i--) {
+      if (sortedResults[i].priority === 'HIGH_PRIORITY' || sortedResults[i].priority === 'WATCH_LIST') {
+        return i;
+      }
+    }
+    return -1;
+  }, [sortedResults]);
+
   const columns: Column<Step3Result>[] = [
     {
       key: 'airline',
@@ -92,17 +122,28 @@ export function Step3Density() {
     },
   ];
 
-  const getRowClassName = (row: Step3Result) => {
+  const getRowClassName = (row: Step3Result, index: number) => {
+    const classes: string[] = [];
+
+    // Background color based on priority
     switch (row.priority) {
       case 'HIGH_PRIORITY':
-        return 'bg-red-50';
+        classes.push('bg-red-50');
+        break;
       case 'WATCH_LIST':
-        return 'bg-orange-50';
+        classes.push('bg-orange-50');
+        break;
       case 'UNRELIABLE':
-        return 'bg-slate-50';
-      default:
-        return '';
+        classes.push('bg-slate-50');
+        break;
     }
+
+    // Add separator line after the last above-threshold row
+    if (index === lastAboveThresholdIndex && lastAboveThresholdIndex >= 0) {
+      classes.push('border-b-4 border-b-red-600');
+    }
+
+    return classes.join(' ');
   };
 
   return (
@@ -180,7 +221,7 @@ export function Step3Density() {
       </Card>
 
       <DataTable
-        data={step3Results}
+        data={sortedResults}
         columns={columns}
         getRowKey={(row) => `${row.airline}-${row.lastStop}`}
         rowClassName={getRowClassName}
