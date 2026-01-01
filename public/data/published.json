@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "publishedAt": "2025-12-31T23:07:08.058Z",
+    "publishedAt": "2026-01-01T00:27:22.109Z",
     "semester": "2024 H2",
     "semesterRange": {
       "startMonth": 7,
@@ -10,7 +10,9 @@
     "version": "1.1"
   },
   "summary": {
-    "totalInads": 323,
+    "totalInads": 838,
+    "includedInads": 323,
+    "excludedInads": 515,
     "totalPax": 6027028,
     "airlinesAnalyzed": 39,
     "airlinesAboveThreshold": 15,
