@@ -2,7 +2,7 @@
 
 import { useViewerStore } from '@/stores/viewerStore';
 import { useTranslations, useLocale } from 'next-intl';
-import { Users, TrendingUp, Calendar, MapPin, Plane } from 'lucide-react';
+import { Users, TrendingUp, Calendar } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -15,6 +15,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import { ChartWrapper } from '@/components/ui/ChartWrapper';
 
 export function ViewerPaxTab() {
   const { publishedData } = useViewerStore();
@@ -125,35 +126,82 @@ export function ViewerPaxTab() {
       </div>
 
       {/* PAX Trend Chart */}
-      <section className="bg-white border border-neutral-200">
-        <div className="border-b border-neutral-200 px-6 py-4">
-          <h3 className="text-lg font-bold text-neutral-900">{t('paxTrend')}</h3>
-          <p className="text-sm text-neutral-500 mt-1">{t('paxTrendDesc')}</p>
-        </div>
-        <div className="p-6">
-          {trendChartData.length > 0 ? (
-            <div className="h-72">
+      <ChartWrapper title={t('paxTrend')} subtitle={t('paxTrendDesc')}>
+        {trendChartData.length > 0 ? (
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={trendChartData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                <XAxis
+                  dataKey="semester"
+                  tick={{ fontSize: 11, fill: '#171717' }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: '#737373' }}
+                  tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
+                />
+                <Tooltip
+                  formatter={(value) => [
+                    typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                    tPax('passengers'),
+                  ]}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e5e5e5',
+                    borderRadius: 0,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="pax"
+                  stroke="#2563EB"
+                  strokeWidth={2}
+                  dot={{ fill: '#2563EB', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-72 flex items-center justify-center text-neutral-400">
+            {tPax('noDataAvailable')}
+          </div>
+        )}
+      </ChartWrapper>
+
+      {/* Top 10 Charts Grid */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Top 10 Last Stops by PAX-related INADs */}
+        <ChartWrapper title={t('top10LastStops')} subtitle={t('top10LastStopsDesc')}>
+          {top10LastStopsData.length > 0 ? (
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={trendChartData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                <BarChart
+                  data={top10LastStopsData}
+                  layout="vertical"
+                  margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
                   <XAxis
-                    dataKey="semester"
-                    tick={{ fontSize: 11, fill: '#171717' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
+                    type="number"
+                    tick={{ fontSize: 12, fill: '#737373' }}
                   />
                   <YAxis
-                    tick={{ fontSize: 12, fill: '#737373' }}
-                    tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
+                    type="category"
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: '#171717' }}
+                    width={45}
                   />
                   <Tooltip
                     formatter={(value) => [
                       typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
-                      tPax('passengers'),
+                      t('inads'),
                     ]}
                     contentStyle={{
                       backgroundColor: '#fff',
@@ -161,138 +209,67 @@ export function ViewerPaxTab() {
                       borderRadius: 0,
                     }}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="pax"
-                    stroke="#2563EB"
-                    strokeWidth={2}
-                    dot={{ fill: '#2563EB', r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
+                  <Bar dataKey="count" radius={[0, 2, 2, 0]}>
+                    {top10LastStopsData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-72 flex items-center justify-center text-neutral-400">
+            <div className="h-80 flex items-center justify-center text-neutral-400">
               {tPax('noDataAvailable')}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Top 10 Charts Grid */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Top 10 Last Stops by PAX-related INADs */}
-        <section className="bg-white border border-neutral-200">
-          <div className="border-b border-neutral-200 px-6 py-4">
-            <div className="flex items-center gap-3">
-              <MapPin className="w-5 h-5 text-neutral-600" />
-              <h3 className="text-lg font-bold text-neutral-900">{t('top10LastStops')}</h3>
-            </div>
-            <p className="text-sm text-neutral-500 mt-1">{t('top10LastStopsDesc')}</p>
-          </div>
-          <div className="p-6">
-            {top10LastStopsData.length > 0 ? (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={top10LastStopsData}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                    <XAxis
-                      type="number"
-                      tick={{ fontSize: 12, fill: '#737373' }}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      tick={{ fontSize: 12, fill: '#171717' }}
-                      width={45}
-                    />
-                    <Tooltip
-                      formatter={(value) => [
-                        typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
-                        t('inads'),
-                      ]}
-                      contentStyle={{
-                        backgroundColor: '#fff',
-                        border: '1px solid #e5e5e5',
-                        borderRadius: 0,
-                      }}
-                    />
-                    <Bar dataKey="count" radius={[0, 2, 2, 0]}>
-                      {top10LastStopsData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-80 flex items-center justify-center text-neutral-400">
-                {tPax('noDataAvailable')}
-              </div>
-            )}
-          </div>
-        </section>
+        </ChartWrapper>
 
         {/* Top 10 Airlines by PAX-related INADs */}
-        <section className="bg-white border border-neutral-200">
-          <div className="border-b border-neutral-200 px-6 py-4">
-            <div className="flex items-center gap-3">
-              <Plane className="w-5 h-5 text-neutral-600" />
-              <h3 className="text-lg font-bold text-neutral-900">{t('top10Airlines')}</h3>
+        <ChartWrapper title={t('top10Airlines')} subtitle={t('top10AirlinesDesc')}>
+          {top10AirlinesData.length > 0 ? (
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={top10AirlinesData}
+                  layout="vertical"
+                  margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 12, fill: '#737373' }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: '#171717' }}
+                    width={45}
+                  />
+                  <Tooltip
+                    formatter={(value, name, props) => [
+                      typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                      (props as { payload?: { fullName?: string } }).payload?.fullName || t('inads'),
+                    ]}
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e5e5',
+                      borderRadius: 0,
+                    }}
+                  />
+                  <Bar dataKey="count" radius={[0, 2, 2, 0]}>
+                    {top10AirlinesData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            <p className="text-sm text-neutral-500 mt-1">{t('top10AirlinesDesc')}</p>
-          </div>
-          <div className="p-6">
-            {top10AirlinesData.length > 0 ? (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={top10AirlinesData}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                    <XAxis
-                      type="number"
-                      tick={{ fontSize: 12, fill: '#737373' }}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      tick={{ fontSize: 12, fill: '#171717' }}
-                      width={45}
-                    />
-                    <Tooltip
-                      formatter={(value, name, props) => [
-                        typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
-                        (props as { payload?: { fullName?: string } }).payload?.fullName || t('inads'),
-                      ]}
-                      contentStyle={{
-                        backgroundColor: '#fff',
-                        border: '1px solid #e5e5e5',
-                        borderRadius: 0,
-                      }}
-                    />
-                    <Bar dataKey="count" radius={[0, 2, 2, 0]}>
-                      {top10AirlinesData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-80 flex items-center justify-center text-neutral-400">
-                {tPax('noDataAvailable')}
-              </div>
-            )}
-          </div>
-        </section>
+          ) : (
+            <div className="h-80 flex items-center justify-center text-neutral-400">
+              {tPax('noDataAvailable')}
+            </div>
+          )}
+        </ChartWrapper>
       </div>
     </div>
   );

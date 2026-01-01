@@ -14,8 +14,8 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
-// Note: LineChart and Line are used in the density trend chart
 import { TrendingUp, TrendingDown, Minus, BarChart3, Info, ArrowRightLeft } from 'lucide-react';
+import { ChartWrapper } from '@/components/ui/ChartWrapper';
 import {
   Select,
   SelectContent,
@@ -302,9 +302,7 @@ export function ViewerTrends() {
       )}
 
       {/* INAD Trend Chart */}
-      <div className="bg-white border border-neutral-200 p-6">
-        <h4 className="text-lg font-bold text-neutral-900 mb-1">{t('inadTrend')}</h4>
-        <p className="text-sm text-neutral-500 mb-6">{t('inadTrendDesc')}</p>
+      <ChartWrapper title={t('inadTrend')} subtitle={t('inadTrendDesc')}>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={trends} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
@@ -344,13 +342,11 @@ export function ViewerTrends() {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </ChartWrapper>
 
       {/* Passenger Trend Chart */}
       {trendsWithPax.length > 0 && (
-        <div className="bg-white border border-neutral-200 p-6">
-          <h4 className="text-lg font-bold text-neutral-900 mb-1">{t('passengerTrend')}</h4>
-          <p className="text-sm text-neutral-500 mb-6">{t('passengerTrendDesc')}</p>
+        <ChartWrapper title={t('passengerTrend')} subtitle={t('passengerTrendDesc')}>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
@@ -396,14 +392,12 @@ export function ViewerTrends() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </ChartWrapper>
       )}
 
       {/* Density Trend Chart */}
       {trendsWithPax.length > 0 && (
-        <div className="bg-white border border-neutral-200 p-6">
-          <h4 className="text-lg font-bold text-neutral-900 mb-1">{t('densityTrend')}</h4>
-          <p className="text-sm text-neutral-500 mb-6">{t('densityTrendDesc')}</p>
+        <ChartWrapper title={t('densityTrend')} subtitle={t('densityTrendDesc')}>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -445,7 +439,7 @@ export function ViewerTrends() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </ChartWrapper>
       )}
     </div>
   );
