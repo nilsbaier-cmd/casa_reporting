@@ -16,7 +16,6 @@ import {
   Line,
   PieChart,
   Pie,
-  Legend,
 } from 'recharts';
 import { ChartWrapper } from '@/components/ui/ChartWrapper';
 
@@ -44,28 +43,8 @@ export function ViewerInadTab() {
     '#1D4ED8', '#1E40AF', '#1E3A8A', '#3730A3', '#4F46E5',
   ];
 
-  // Classification colors for Pie Chart (blue tones for viewer portal)
-  const classificationColors: Record<string, string> = {
-    sanction: '#1E3A8A',   // dark blue (critical)
-    watchList: '#2563EB',  // blue (watch list)
-    clear: '#60A5FA',      // light blue (compliant)
-    unreliable: '#94A3B8', // slate gray (unreliable)
-  };
-
-  // Calculate classification distribution
-  const classificationCounts = routes.reduce((acc, route) => {
-    acc[route.classification] = (acc[route.classification] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Use translation keys for classification names
-  const tPriority = useTranslations('priority');
-  const classificationData = [
-    { name: tPriority('critical'), value: classificationCounts.sanction || 0, color: classificationColors.sanction },
-    { name: tPriority('watchList'), value: classificationCounts.watchList || 0, color: classificationColors.watchList },
-    { name: tPriority('clear'), value: classificationCounts.clear || 0, color: classificationColors.clear },
-    { name: tPriority('unreliable'), value: classificationCounts.unreliable || 0, color: classificationColors.unreliable },
-  ].filter(item => item.value > 0);
+  // Pie chart colors for included/excluded distribution
+  const pieColors = ['#DC2626', '#737373'];
 
   // Prepare data for INAD trend line chart
   const trendChartData = [...trends].map(t => ({
@@ -160,40 +139,34 @@ export function ViewerInadTab() {
         </div>
       </div>
 
-      {/* Classification Distribution Pie Chart */}
+      {/* Included vs Excluded Distribution Pie Chart */}
       <ChartWrapper title={tInad('distribution')} subtitle={tInad('distributionSubtitle')}>
-        {classificationData.length > 0 ? (
-          <div className="h-72">
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={classificationData}
-                  dataKey="value"
-                  nameKey="name"
+                  data={[
+                    { name: tInad('includedLabel'), value: summary.includedInads ?? summary.totalInads },
+                    { name: tInad('excludedLabel'), value: summary.excludedInads ?? 0 },
+                  ]}
                   cx="50%"
                   cy="50%"
-                  outerRadius={80}
-                  innerRadius={40}
+                  innerRadius={60}
+                  outerRadius={90}
                   paddingAngle={2}
+                  dataKey="value"
                   label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
-                  labelLine={true}
+                  labelLine={false}
                 >
-                  {classificationData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {[0, 1].map((index) => (
+                    <Cell key={`cell-${index}`} fill={pieColors[index]} />
                   ))}
                 </Pie>
-                <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  formatter={(value) => {
-                    const item = classificationData.find(d => d.name === value);
-                    return `${value} (${item?.value || 0})`;
-                  }}
-                />
                 <Tooltip
                   formatter={(value) => [
                     typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
-                    tInad('routes'),
+                    tInad('cases'),
                   ]}
                   contentStyle={{
                     backgroundColor: '#fff',
@@ -204,11 +177,27 @@ export function ViewerInadTab() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-        ) : (
-          <div className="h-72 flex items-center justify-center text-neutral-400">
-            {tInad('noDataAvailable')}
+          <div className="flex flex-col justify-center space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 bg-red-600" />
+              <div>
+                <p className="font-medium text-neutral-900">{tInad('includedLabel')}</p>
+                <p className="text-sm text-neutral-500">
+                  {tInad('includedDescription', { count: (summary.includedInads ?? summary.totalInads).toLocaleString(localeFormat) })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 bg-neutral-500" />
+              <div>
+                <p className="font-medium text-neutral-900">{tInad('excludedLabel')}</p>
+                <p className="text-sm text-neutral-500">
+                  {tInad('excludedDescription', { count: (summary.excludedInads ?? 0).toLocaleString(localeFormat) })}
+                </p>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </ChartWrapper>
 
       {/* INAD Trend Chart */}

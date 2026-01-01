@@ -44,13 +44,19 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
   const startMonth = selectedSemester.half === 1 ? 1 : 7;
   const endMonth = selectedSemester.half === 1 ? 6 : 12;
 
-  const semesterInadData = inadData.filter(
+  // All INAD data for the semester (both included and excluded)
+  const allSemesterInadData = inadData.filter(
     (r) =>
       r.year === selectedSemester.year &&
       r.month >= startMonth &&
-      r.month <= endMonth &&
-      r.included
+      r.month <= endMonth
   );
+
+  // Only included INADs (used for analysis)
+  const semesterInadData = allSemesterInadData.filter((r) => r.included);
+
+  // Count excluded INADs
+  const excludedInadCount = allSemesterInadData.filter((r) => !r.included).length;
 
   const semesterBazlData = bazlData.filter(
     (r) =>
@@ -177,7 +183,9 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
       version: '1.1',
     },
     summary: {
-      totalInads,
+      totalInads: totalInads + excludedInadCount,
+      includedInads: totalInads,
+      excludedInads: excludedInadCount,
       totalPax,
       airlinesAnalyzed: airlines.length,
       airlinesAboveThreshold,

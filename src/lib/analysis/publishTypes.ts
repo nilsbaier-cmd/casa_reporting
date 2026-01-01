@@ -14,6 +14,8 @@ export interface PublishedMetadata {
 
 export interface PublishedSummary {
   totalInads: number;
+  includedInads: number;
+  excludedInads: number;
   totalPax: number;
   airlinesAnalyzed: number;
   airlinesAboveThreshold: number;
