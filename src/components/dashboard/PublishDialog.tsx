@@ -5,7 +5,6 @@ import { useAnalysisStore } from '@/stores/analysisStore';
 import { generatePublishData } from '@/lib/analysis/generatePublishData';
 import {
   Upload,
-  Download,
   CheckCircle,
   AlertTriangle,
   ExternalLink,
@@ -61,26 +60,6 @@ export function PublishDialog() {
       threshold: threshold!,
       config,
     });
-  };
-
-  const handleDownloadJson = () => {
-    const publishData = generateData();
-    if (!publishData) return;
-
-    // Create and download JSON file
-    const jsonString = JSON.stringify(publishData, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `casa-data-${selectedSemester!.label.replace(' ', '-')}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    setLastPublished(new Date().toLocaleString(localeFormat));
   };
 
   const handlePublishToGitHub = async () => {
@@ -255,16 +234,6 @@ export function PublishDialog() {
               >
                 <Github className="w-4 h-4" />
                 <span>{t('publishToGitHub')}</span>
-              </button>
-
-              {/* Download Button */}
-              <button
-                onClick={handleDownloadJson}
-                disabled={!canPublish}
-                className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 text-neutral-700 text-sm font-medium hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                <span>{t('downloadJson')}</span>
               </button>
 
               {lastPublished && (
