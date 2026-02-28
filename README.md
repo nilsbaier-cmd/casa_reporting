@@ -36,7 +36,6 @@ The viewer portal is designed for cantonal authorities:
 - **Priority Classification**
   - **Kritisch (High Priority)**: Density ≥ threshold × 1.5, ≥ 0.10‰, ≥ 10 INADs
   - **Beobachtung (Watch List)**: Density ≥ threshold
-  - **Unzuverlässig (Unreliable)**: PAX < 5,000
   - **Konform (Clear)**: Below threshold
 
 - **Sortable Data Tables**

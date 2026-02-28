@@ -82,9 +82,7 @@
     "watchList": "Beobachtung",
     "watchListShort": "B",
     "clear": "Konform",
-    "clearShort": "OK",
-    "unreliable": "Unzuverlässig",
-    "unreliableShort": "U"
+    "clearShort": "OK"
   },
   "steps": {
     "step1": {
@@ -147,8 +145,6 @@
     "and": "UND",
     "minInads": "mindestens",
     "notAllCriteria": "Aber nicht alle Kriterien für \"Kritisch\" erfüllt",
-    "paxCount": "Passagierzahl",
-    "densityUnreliable": "Dichte statistisch nicht aussagekräftig",
     "minInadInfo": "Mindestens",
     "requiredForAnalysis": "erforderlich für Aufnahme in die Routen-Analyse (Prüfstufe 1 & 2)"
   },
@@ -230,7 +226,6 @@
     "sanctionDesc": "Dichte ≥ Schwellenwert × 1.5, UND Dichte ≥ 0.10‰, UND mindestens 10 INADs",
     "watchListDesc": "Dichte ≥ Schwellenwert (Median)",
     "clearDesc": "Dichte unter dem Schwellenwert",
-    "unreliableDesc": "Passagierzahl unter 5'000 - Dichte statistisch nicht aussagekräftig",
     "excludedCodes": "Ausgeschlossene Einreiseverweigerungsgründe",
     "excludedCodesDesc": "Folgende Einreiseverweigerungscodes werden von der INAD-Zählung ausgeschlossen, da sie administrative Gründe darstellen und nicht die Carrier-Performance widerspiegeln:",
     "processingNotes": "Hinweise zur Datenverarbeitung",

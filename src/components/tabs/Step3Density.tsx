@@ -16,7 +16,6 @@ const PRIORITY_ORDER: Record<string, number> = {
   HIGH_PRIORITY: 0,
   WATCH_LIST: 1,
   CLEAR: 2,
-  UNRELIABLE: 3,
 };
 
 function exportToCSV(data: Step3Result[], threshold: number) {
@@ -62,7 +61,7 @@ export function Step3Density() {
 
   const summary = getStep3Summary(step3Results, threshold || 0);
 
-  // Sort data by priority: above threshold first (HIGH_PRIORITY, WATCH_LIST), then below (CLEAR, UNRELIABLE)
+  // Sort data by priority: above threshold first (HIGH_PRIORITY, WATCH_LIST), then below (CLEAR)
   const sortedResults = useMemo(() => {
     return [...step3Results].sort((a, b) => {
       const orderA = PRIORITY_ORDER[a.priority] ?? 99;
@@ -133,9 +132,6 @@ export function Step3Density() {
       case 'WATCH_LIST':
         classes.push('bg-orange-50');
         break;
-      case 'UNRELIABLE':
-        classes.push('bg-slate-50');
-        break;
     }
 
     // Add separator line after the last above-threshold row
@@ -178,9 +174,6 @@ export function Step3Density() {
           <span className="text-green-700">
             <strong>{summary.clear}</strong> {tPriority('clear')}
           </span>
-          <span className="text-slate-600">
-            <strong>{summary.unreliable}</strong> {tPriority('unreliable')}
-          </span>
         </div>
       </div>
 
@@ -188,7 +181,7 @@ export function Step3Density() {
       <Card>
         <CardContent className="pt-4">
           <h4 className="font-medium mb-2 text-sm">{t('classificationCriteria')}</h4>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
             <div className="flex items-start gap-2">
               <PriorityBadge priority="HIGH_PRIORITY" />
               <span className="text-muted-foreground">
@@ -208,12 +201,6 @@ export function Step3Density() {
               <PriorityBadge priority="CLEAR" />
               <span className="text-muted-foreground">
                 {t('densityUnit')} &lt; Threshold
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <PriorityBadge priority="UNRELIABLE" />
-              <span className="text-muted-foreground">
-                PAX &lt; {config.minPax.toLocaleString(localeFormat)}
               </span>
             </div>
           </div>

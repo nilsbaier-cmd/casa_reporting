@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Calculator, AlertTriangle, CheckCircle, Eye, HelpCircle } from 'lucide-react';
+import { FileText, Calculator, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export function DocumentationTab() {
@@ -120,16 +120,6 @@ export function DocumentationTab() {
             </div>
           </div>
 
-          {/* Unzuverlässig */}
-          <div className="flex items-start gap-3 p-3 bg-neutral-100 border-2 border-neutral-400">
-            <HelpCircle className="w-5 h-5 text-neutral-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold text-neutral-700 text-sm uppercase tracking-wide">{tPriority('unreliable')}</p>
-              <p className="text-xs text-neutral-600 mt-1">
-                {t('unreliableDesc')}
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 

@@ -21,5 +21,4 @@ export const CLASSIFICATION_COLORS = {
   sanction: '#DC2626',   // red
   watchList: '#D97706',  // amber
   clear: '#16A34A',      // green
-  unreliable: '#6B7280', // gray
 } as const;

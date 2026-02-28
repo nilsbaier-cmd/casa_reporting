@@ -2,6 +2,27 @@
 
 All notable changes to the CASA Reporting Dashboard are documented in this file.
 
+## [2.1.0] - 2025-03-01
+
+### Changed
+
+#### Removed minimum PAX threshold (5,000)
+- All passenger volumes are now included in the density analysis, regardless of size
+- The "Unzuverlässig (Unreliable)" classification category has been removed entirely
+- Routes previously classified as "Unreliable" are now classified normally (Kritisch / Beobachtung / Konform)
+- The median threshold is now calculated from all route densities, not just those with PAX ≥ 5,000
+- Reason: Legal review determined that all passenger numbers must be considered per applicable regulations
+
+#### Affected areas
+- **Analysis logic**: `step3.ts` no longer filters by `minPax`; median uses all densities
+- **Classification**: 3 categories instead of 4 (Kritisch, Beobachtung, Konform)
+- **Admin UI**: Step 3 density table, classification criteria legend (3 columns instead of 4)
+- **Viewer UI**: Classification criteria, route badges, dashboard metrics
+- **Documentation tab**: Removed "Unzuverlässig" from classification overview
+- **Translations**: Removed unreliable-related labels in DE and FR
+
+---
+
 ## [2.0.0] - 2024-12-31
 
 ### Added - Viewer Portal Enhancements
@@ -19,11 +40,10 @@ All notable changes to the CASA Reporting Dashboard are documented in this file.
 
 #### Classification Criteria Display
 - New `ClassificationCriteria` component showing all classification rules
-- Displays all four classification levels with their thresholds:
+- Displays classification levels with their thresholds:
   - Kritisch (Critical): Density >= 1.5x median AND >= 0.10‰ AND >= 10 INADs
   - Beobachtung (Watch List): Density >= median
   - Konform (Clear): Density < median
-  - Unzuverlässig (Unreliable): PAX < 5,000
 - Shows calculated median threshold value
 
 #### Sortable Tables in Viewer

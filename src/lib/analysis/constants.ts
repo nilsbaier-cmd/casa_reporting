@@ -10,7 +10,6 @@ export const EXCLUDE_CODES = new Set([
 // Default analysis configuration
 export const DEFAULT_CONFIG: AnalysisConfig = {
   minInad: 6,                   // Minimum INADs for Steps 1 & 2
-  minPax: 5000,                 // Minimum PAX for reliable density calculation
   minDensity: 0.10,             // Minimum density (‰) for HIGH_PRIORITY
   highPriorityMultiplier: 1.5,  // Must be 1.5× threshold for HIGH_PRIORITY
   highPriorityMinInad: 10,      // Must have 10+ INADs for HIGH_PRIORITY
@@ -52,11 +51,6 @@ export const PRIORITY_COLORS = {
     text: 'text-orange-800',
     border: 'border-orange-200',
   },
-  UNRELIABLE: {
-    bg: 'bg-slate-100',
-    text: 'text-slate-600',
-    border: 'border-slate-200',
-  },
   CLEAR: {
     bg: 'bg-green-100',
     text: 'text-green-800',
@@ -68,6 +62,5 @@ export const PRIORITY_COLORS = {
 export const PRIORITY_LABELS = {
   HIGH_PRIORITY: 'High Priority',
   WATCH_LIST: 'Watch List',
-  UNRELIABLE: 'Unreliable Data',
   CLEAR: 'Clear',
 } as const;

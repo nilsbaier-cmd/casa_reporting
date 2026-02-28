@@ -19,7 +19,6 @@ import type { PublishedRoute, PublishedAirline } from '@/lib/analysis/publishTyp
 // Default config for backward compatibility with older published data
 const DEFAULT_CLASSIFICATION_CONFIG = {
   minInad: 6,
-  minPax: 5000,
   minDensity: 0.10,
   highPriorityMultiplier: 1.5,
   highPriorityMinInad: 10,
@@ -65,12 +64,6 @@ export function ViewerDashboard() {
         return (
           <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800">
             {tPriority('clear')}
-          </span>
-        );
-      case 'unreliable':
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-600">
-            {tPriority('unreliable')}
           </span>
         );
       default:
@@ -325,7 +318,7 @@ export function ViewerDashboard() {
   // Sort routes by classification priority then density - memoized for performance
   const sortedRoutes = useMemo(() => {
     return [...routes].sort((a, b) => {
-      const classOrder: Record<string, number> = { sanction: 0, watchList: 1, unreliable: 2, clear: 3 };
+      const classOrder: Record<string, number> = { sanction: 0, watchList: 1, clear: 2 };
       const orderA = classOrder[a.classification] ?? 4;
       const orderB = classOrder[b.classification] ?? 4;
       if (orderA !== orderB) return orderA - orderB;

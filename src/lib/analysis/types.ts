@@ -33,7 +33,7 @@ export interface Step2Result {
 }
 
 // Priority classification
-export type Priority = 'HIGH_PRIORITY' | 'WATCH_LIST' | 'UNRELIABLE' | 'CLEAR';
+export type Priority = 'HIGH_PRIORITY' | 'WATCH_LIST' | 'CLEAR';
 
 // Step 3 result: Density analysis with priority
 export interface Step3Result {
@@ -42,14 +42,12 @@ export interface Step3Result {
   inadCount: number;
   pax: number;
   density: number | null;  // INAD per 1000 passengers (permille)
-  reliable: boolean;       // PAX >= minPax
   priority: Priority;
 }
 
 // Analysis configuration
 export interface AnalysisConfig {
   minInad: number;                // Minimum INADs for Step 1/2 (default: 6)
-  minPax: number;                 // Minimum PAX for reliable density (default: 5000)
   minDensity: number;             // Minimum density for HIGH_PRIORITY in permille (default: 0.10)
   highPriorityMultiplier: number; // Density must be threshold * this for HIGH_PRIORITY (default: 1.5)
   highPriorityMinInad: number;    // Minimum INADs for HIGH_PRIORITY (default: 10)

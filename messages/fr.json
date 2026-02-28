@@ -82,9 +82,7 @@
     "watchList": "Surveillance",
     "watchListShort": "S",
     "clear": "Conforme",
-    "clearShort": "OK",
-    "unreliable": "Non fiable",
-    "unreliableShort": "N"
+    "clearShort": "OK"
   },
   "steps": {
     "step1": {
@@ -147,8 +145,6 @@
     "and": "ET",
     "minInads": "au moins",
     "notAllCriteria": "Mais pas tous les critères pour \"Critique\" remplis",
-    "paxCount": "Nombre de passagers",
-    "densityUnreliable": "Densité statistiquement non significative",
     "minInadInfo": "Au moins",
     "requiredForAnalysis": "requis pour inclusion dans l'analyse des routes (Niveau 1 & 2)"
   },
@@ -230,7 +226,6 @@
     "sanctionDesc": "Densité ≥ Seuil × 1.5, ET Densité ≥ 0.10‰, ET au moins 10 INAD",
     "watchListDesc": "Densité ≥ Seuil (médiane)",
     "clearDesc": "Densité sous le seuil",
-    "unreliableDesc": "Nombre de passagers inférieur à 5'000 - Densité statistiquement non significative",
     "excludedCodes": "Motifs de refus exclus",
     "excludedCodesDesc": "Les codes de refus d'entrée suivants sont exclus du comptage INAD, car ils représentent des raisons administratives et ne reflètent pas la performance du transporteur :",
     "processingNotes": "Notes sur le traitement des données",

@@ -2,7 +2,7 @@
 
 import type { Priority } from '@/lib/analysis/types';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, Eye, CheckCircle, HelpCircle } from 'lucide-react';
+import { AlertTriangle, Eye, CheckCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface PriorityBadgeProps {
@@ -32,12 +32,6 @@ export function PriorityBadge({ priority, className, showIcon = true }: Priority
       shortLabel: t('clearShort'),
       icon: CheckCircle,
       styles: 'bg-green-50 text-green-900 border-green-600',
-    },
-    UNRELIABLE: {
-      label: t('unreliable'),
-      shortLabel: t('unreliableShort'),
-      icon: HelpCircle,
-      styles: 'bg-neutral-100 text-neutral-600 border-neutral-400',
     },
   } as const;
 

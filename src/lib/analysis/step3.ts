@@ -56,9 +56,6 @@ export function calculateStep3(
     const key = `${route.airline}|${route.lastStop}`;
     const pax = paxLookup.get(key) || 0;
 
-    // Determine reliability based on PAX volume
-    const reliable = pax >= config.minPax;
-
     // Calculate density (INAD per 1000 passengers)
     const density = pax > 0 ? (route.inadCount / pax) * 1000 : null;
 
@@ -68,17 +65,16 @@ export function calculateStep3(
       inadCount: route.inadCount,
       pax,
       density,
-      reliable,
       priority: 'CLEAR' as Priority, // Will be set below
     };
   });
 
-  // Calculate threshold from reliable densities only
-  const reliableDensities = results
-    .filter(r => r.reliable && r.density !== null)
+  // Calculate threshold from all densities
+  const allDensities = results
+    .filter(r => r.density !== null)
     .map(r => r.density as number);
 
-  const threshold = reliableDensities.length > 0 ? median(reliableDensities) : 0;
+  const threshold = allDensities.length > 0 ? median(allDensities) : 0;
 
   // Classify priorities based on threshold
   for (const result of results) {
@@ -89,8 +85,7 @@ export function calculateStep3(
   const priorityOrder: Record<Priority, number> = {
     HIGH_PRIORITY: 0,
     WATCH_LIST: 1,
-    UNRELIABLE: 2,
-    CLEAR: 3,
+    CLEAR: 2,
   };
 
   results.sort((a, b) => {
@@ -110,14 +105,9 @@ function classifyPriority(
   threshold: number,
   config: AnalysisConfig
 ): Priority {
-  // No density means unreliable
+  // No density (no PAX data) = CLEAR
   if (result.density === null) {
-    return 'UNRELIABLE';
-  }
-
-  // Low PAX means unreliable
-  if (!result.reliable) {
-    return 'UNRELIABLE';
+    return 'CLEAR';
   }
 
   const density = result.density;
@@ -150,14 +140,12 @@ export function getStep3Summary(results: Step3Result[], threshold: number) {
   const total = results.length;
   const highPriority = results.filter(r => r.priority === 'HIGH_PRIORITY').length;
   const watchList = results.filter(r => r.priority === 'WATCH_LIST').length;
-  const unreliable = results.filter(r => r.priority === 'UNRELIABLE').length;
   const clear = results.filter(r => r.priority === 'CLEAR').length;
 
   return {
     totalRoutes: total,
     highPriority,
     watchList,
-    unreliable,
     clear,
     threshold,
   };

@@ -1,7 +1,7 @@
 'use client';
 
-import { AlertTriangle, Eye, CheckCircle, HelpCircle, Info } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
+import { AlertTriangle, Eye, CheckCircle, Info } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { PublishedClassificationConfig } from '@/lib/analysis/publishTypes';
 
 interface ClassificationCriteriaProps {
@@ -13,8 +13,6 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
   const t = useTranslations('priority');
   const tDocs = useTranslations('docs');
   const tCriteria = useTranslations('criteria');
-  const locale = useLocale();
-  const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   // Calculate actual threshold values
   const highPriorityThreshold = medianThreshold * config.highPriorityMultiplier;
@@ -68,17 +66,6 @@ export function ClassificationCriteria({ config, medianThreshold }: Classificati
           </div>
         </div>
 
-        {/* Unzuverlaessig / Unreliable */}
-        <div className="flex items-start gap-3 p-3 bg-neutral-100 border-2 border-neutral-400">
-          <HelpCircle className="w-5 h-5 text-neutral-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-bold text-neutral-700 text-sm uppercase tracking-wide">{t('unreliable')}</p>
-            <ul className="text-xs text-neutral-600 mt-1 space-y-0.5">
-              <li>{tCriteria('paxCount')} &lt; {config.minPax.toLocaleString(localeFormat)}</li>
-              <li>{tCriteria('densityUnreliable')}</li>
-            </ul>
-          </div>
-        </div>
       </div>
 
       {/* Additional Info */}

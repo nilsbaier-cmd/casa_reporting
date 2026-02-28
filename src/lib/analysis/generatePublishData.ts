@@ -89,11 +89,10 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
   const airlinesAboveThreshold = airlines.filter((a) => a.aboveThreshold).length;
 
   // Routes from Step 3 - convert priority to classification
-  const priorityToClassification = (priority: string): 'sanction' | 'watchList' | 'clear' | 'unreliable' => {
+  const priorityToClassification = (priority: string): 'sanction' | 'watchList' | 'clear' => {
     switch (priority) {
       case 'HIGH_PRIORITY': return 'sanction';
       case 'WATCH_LIST': return 'watchList';
-      case 'UNRELIABLE': return 'unreliable';
       case 'CLEAR': return 'clear';
       default: return 'clear';
     }
@@ -202,7 +201,6 @@ export function generatePublishData(params: GeneratePublishDataParams): Publishe
     },
     classificationConfig: {
       minInad: config.minInad,
-      minPax: config.minPax,
       minDensity: config.minDensity,
       highPriorityMultiplier: config.highPriorityMultiplier,
       highPriorityMinInad: config.highPriorityMinInad,

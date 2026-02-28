@@ -31,7 +31,7 @@ export interface PublishedRoute {
   inadCount: number;
   pax: number;
   density: number | null;
-  classification: 'sanction' | 'watchList' | 'clear' | 'unreliable';
+  classification: 'sanction' | 'watchList' | 'clear';
 }
 
 export interface PublishedAirline {
@@ -55,7 +55,6 @@ export interface PublishedTop10 {
 
 export interface PublishedClassificationConfig {
   minInad: number;           // Minimum INADs for Steps 1 & 2
-  minPax: number;            // Minimum PAX for reliable density calculation
   minDensity: number;        // Minimum density (permille) for HIGH_PRIORITY
   highPriorityMultiplier: number;  // Must be X times threshold for HIGH_PRIORITY
   highPriorityMinInad: number;     // Must have X+ INADs for HIGH_PRIORITY
