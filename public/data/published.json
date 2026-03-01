@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "publishedAt": "2026-02-05T10:03:17.943Z",
+    "publishedAt": "2026-03-01T00:02:00.690Z",
     "semester": "2024 H2",
     "semesterRange": {
       "startMonth": 7,
@@ -670,7 +670,6 @@
   },
   "classificationConfig": {
     "minInad": 6,
-    "minPax": 5000,
     "minDensity": 0.1,
     "highPriorityMultiplier": 1.5,
     "highPriorityMinInad": 10
