@@ -50,7 +50,7 @@ function setLocaleCookieIfMissing(request: NextRequest, response: NextResponse) 
   });
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const session = await verifySessionToken(sessionToken);
