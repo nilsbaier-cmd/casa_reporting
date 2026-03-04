@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Step3Result } from '@/lib/analysis/types';
 import { getStep3Summary } from '@/lib/analysis/step3';
 import { PRIORITY_LABELS } from '@/lib/analysis/constants';
+import { toSafeCsvField } from '@/lib/csv';
 import { useTranslations, useLocale } from 'next-intl';
 
 // Priority order for sorting (above threshold first, then below)
@@ -17,23 +18,24 @@ const PRIORITY_ORDER: Record<string, number> = {
   WATCH_LIST: 1,
   CLEAR: 2,
 };
+const EMPTY_STEP3_RESULTS: Step3Result[] = [];
 
 function exportToCSV(data: Step3Result[], threshold: number) {
   const headers = ['Airline', 'Last Stop', 'INAD Count', 'PAX', 'Density (‰)', 'Priority'];
   const rows = data.map((row) => [
-    row.airline,
-    row.lastStop,
+    toSafeCsvField(row.airline),
+    toSafeCsvField(row.lastStop),
     row.inadCount.toString(),
     row.pax.toString(),
-    row.density?.toFixed(3) || 'N/A',
-    PRIORITY_LABELS[row.priority],
+    toSafeCsvField(row.density?.toFixed(3) || 'N/A'),
+    toSafeCsvField(PRIORITY_LABELS[row.priority]),
   ]);
 
   const csvContent = [
-    headers.join(','),
-    ...rows.map((row) => row.join(',')),
+    headers.join(';'),
+    ...rows.map((row) => row.join(';')),
     '',
-    `Threshold,${threshold.toFixed(3)}‰`,
+    `Threshold;${threshold.toFixed(3)}‰`,
   ].join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -50,27 +52,19 @@ export function Step3Density() {
   const locale = useLocale();
   const { step3Results, threshold, config } = useAnalysisStore();
   const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
-
-  if (!step3Results) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        {t('noData')}
-      </div>
-    );
-  }
-
-  const summary = getStep3Summary(step3Results, threshold || 0);
+  const normalizedResults = step3Results ?? EMPTY_STEP3_RESULTS;
+  const summary = getStep3Summary(normalizedResults, threshold || 0);
 
   // Sort data by priority: above threshold first (HIGH_PRIORITY, WATCH_LIST), then below (CLEAR)
   const sortedResults = useMemo(() => {
-    return [...step3Results].sort((a, b) => {
+    return [...normalizedResults].sort((a, b) => {
       const orderA = PRIORITY_ORDER[a.priority] ?? 99;
       const orderB = PRIORITY_ORDER[b.priority] ?? 99;
       if (orderA !== orderB) return orderA - orderB;
       // Secondary sort by density (descending) within same priority
       return (b.density ?? 0) - (a.density ?? 0);
     });
-  }, [step3Results]);
+  }, [normalizedResults]);
 
   // Find the index of the last "above threshold" row (HIGH_PRIORITY or WATCH_LIST)
   const lastAboveThresholdIndex = useMemo(() => {
@@ -141,6 +135,14 @@ export function Step3Density() {
 
     return classes.join(' ');
   };
+
+  if (!step3Results) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        {t('noData')}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

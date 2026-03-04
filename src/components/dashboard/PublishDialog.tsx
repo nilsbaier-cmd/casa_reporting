@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { generatePublishData } from '@/lib/analysis/generatePublishData';
+import { useAuth } from '@/lib/auth/authContext';
 import {
   Upload,
   CheckCircle,
@@ -18,6 +19,7 @@ export function PublishDialog() {
   const t = useTranslations('publish');
   const locale = useLocale();
   const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
+  const { csrfToken } = useAuth();
 
   const {
     inadData,
@@ -65,6 +67,10 @@ export function PublishDialog() {
   const handlePublishToGitHub = async () => {
     const publishData = generateData();
     if (!publishData) return;
+    if (!csrfToken) {
+      setPublishError('Authentication state expired. Please log in again.');
+      return;
+    }
 
     setIsPublishing(true);
     setPublishError(null);
@@ -75,6 +81,7 @@ export function PublishDialog() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
           data: publishData,

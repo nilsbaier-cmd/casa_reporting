@@ -7,21 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import type { Step2Result } from '@/lib/analysis/types';
 import { getStep2Summary } from '@/lib/analysis/step2';
+import { toSafeCsvField } from '@/lib/csv';
 import { useTranslations } from 'next-intl';
 
 // CSV export with Swiss format (semicolon separator)
 function exportToCSV(data: Step2Result[], minInad: number) {
-  const escapeField = (field: string) => {
-    if (field.includes(';') || field.includes('"') || field.includes('\n')) {
-      return `"${field.replace(/"/g, '""')}"`;
-    }
-    return field;
-  };
-
   const headers = ['Airline', 'Last Stop', 'INAD Count', 'Status'];
   const rows = data.map((row) => [
-    escapeField(row.airline),
-    escapeField(row.lastStop),
+    toSafeCsvField(row.airline),
+    toSafeCsvField(row.lastStop),
     row.inadCount.toString(),
     row.passesThreshold ? 'Check' : 'OK',
   ]);

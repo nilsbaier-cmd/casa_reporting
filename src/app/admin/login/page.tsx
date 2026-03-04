@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
     // Simulate brief loading for UX
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    if (login(password, 'admin')) {
+    if (await login(password, 'admin')) {
       router.push('/admin');
     } else {
       setError(true);

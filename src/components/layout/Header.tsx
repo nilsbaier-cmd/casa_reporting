@@ -61,8 +61,8 @@ export function Header({ activeTab = 'dashboard', onTabChange, isAdmin = false, 
     setMobileMenuOpen(false);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     if (isViewer) {
       router.push('/viewer/login');
     } else {

@@ -6,7 +6,7 @@ A React-based dashboard for analyzing INAD (Inadmissible Passenger) data for car
 
 - **Admin Portal (SEM)**: https://casa-reporting.vercel.app/admin
 - **Viewer Portal (Behörden)**: https://casa-reporting.vercel.app/viewer
-- **Password**: `demo123`
+- **Credentials**: Managed via server-side environment variables (not public client variables)
 
 ## Two-Portal Architecture
 
@@ -131,14 +131,23 @@ npm run start
 Create a `.env.local` file with:
 
 ```
-NEXT_PUBLIC_APP_PASSWORD=demo123
+AUTH_SECRET=replace-with-long-random-secret
+ADMIN_PASSWORD=replace-with-admin-password
+VIEWER_PASSWORD=replace-with-viewer-password
+GITHUB_TOKEN=replace-with-github-token
+# Optional
+# APP_PASSWORD=shared-fallback-password-for-admin
+# GITHUB_REPO=nilsbaier-cmd/casa_reporting
+# GITHUB_BRANCH=main
 ```
+
+Generate a strong `AUTH_SECRET` (example): `openssl rand -base64 32`
 
 ## Deployment on Vercel
 
 1. Push to GitHub repository
 2. Import project on [vercel.com](https://vercel.com)
-3. Add environment variable `NEXT_PUBLIC_APP_PASSWORD`
+3. Add required environment variables from the section above (`AUTH_SECRET`, `ADMIN_PASSWORD`, `VIEWER_PASSWORD`, `GITHUB_TOKEN`)
 4. Deploy
 
 ## Data Files
@@ -173,7 +182,7 @@ The following codes are excluded from INAD counts:
 
 ## Tech Stack
 
-- [Next.js 14](https://nextjs.org/) - React framework
+- [Next.js 16](https://nextjs.org/) - React framework
 - [shadcn/ui](https://ui.shadcn.com/) - UI components
 - [Tailwind CSS](https://tailwindcss.com/) - Styling
 - [Zustand](https://zustand-demo.pmnd.rs/) - State management

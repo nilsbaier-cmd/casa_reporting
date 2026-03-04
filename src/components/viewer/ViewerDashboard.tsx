@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useViewerStore } from '@/stores/viewerStore';
 import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { toSafeCsvField } from '@/lib/csv';
 import {
   Users,
   AlertTriangle,
@@ -35,10 +36,11 @@ export function ViewerDashboard() {
 
   const [activeStep, setActiveStep] = useState<1 | 2 | 3>(3);
 
-  if (!publishedData) return null;
-
-  const { summary, routes, airlines, classificationConfig } = publishedData;
-  const config = classificationConfig || DEFAULT_CLASSIFICATION_CONFIG;
+  const summary = publishedData?.summary;
+  const routes = useMemo(() => publishedData?.routes ?? [], [publishedData]);
+  const airlines = useMemo(() => publishedData?.airlines ?? [], [publishedData]);
+  const semester = publishedData?.metadata.semester ?? 'unknown-semester';
+  const config = publishedData?.classificationConfig || DEFAULT_CLASSIFICATION_CONFIG;
 
   // Classification counts
   const criticalCount = routes.filter((r) => r.classification === 'sanction').length;
@@ -84,20 +86,12 @@ export function ViewerDashboard() {
     );
   }, [tTable]);
 
-  // Helper to escape CSV fields - handles semicolons, quotes, and newlines
-  const escapeCSVField = useCallback((field: string): string => {
-    if (field.includes(';') || field.includes('"') || field.includes('\n')) {
-      return `"${field.replace(/"/g, '""')}"`;
-    }
-    return field;
-  }, []);
-
   // CSV Export for Step 1 (Airlines)
   const handleExportStep1Csv = useCallback(() => {
     const headers = ['Airline', 'Airline Name', 'INADs', 'Status'];
     const rows = airlines.map((row) => [
-      escapeCSVField(row.airline),
-      escapeCSVField(row.airlineName),
+      toSafeCsvField(row.airline),
+      toSafeCsvField(row.airlineName),
       row.inadCount.toString(),
       row.aboveThreshold ? 'Check' : 'OK',
     ]);
@@ -113,20 +107,20 @@ export function ViewerDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `casa-airlines-${publishedData.metadata.semester.replace(' ', '-')}.csv`;
+    link.download = `casa-airlines-${semester.replace(' ', '-')}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, [airlines, config.minInad, publishedData.metadata.semester, escapeCSVField]);
+  }, [airlines, config.minInad, semester]);
 
   // CSV Export for Step 2 (Routes)
   const handleExportStep2Csv = useCallback(() => {
     const headers = ['Airline', 'Airline Name', 'Last Stop', 'INADs', 'Status'];
     const rows = routes.map((row) => [
-      escapeCSVField(row.airline),
-      escapeCSVField(row.airlineName),
-      escapeCSVField(row.lastStop),
+      toSafeCsvField(row.airline),
+      toSafeCsvField(row.airlineName),
+      toSafeCsvField(row.lastStop),
       row.inadCount.toString(),
       row.inadCount >= config.minInad ? 'Check' : 'OK',
     ]);
@@ -142,12 +136,12 @@ export function ViewerDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `casa-routes-step2-${publishedData.metadata.semester.replace(' ', '-')}.csv`;
+    link.download = `casa-routes-step2-${semester.replace(' ', '-')}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, [routes, config.minInad, publishedData.metadata.semester, escapeCSVField]);
+  }, [routes, config.minInad, semester]);
 
   // CSV Export for Step 3 (Routes with density)
   const handleExportCsv = useCallback(() => {
@@ -162,13 +156,13 @@ export function ViewerDashboard() {
     ];
 
     const rows = routes.map((route) => [
-      escapeCSVField(route.airline),
-      escapeCSVField(route.airlineName),
-      escapeCSVField(route.lastStop),
+      toSafeCsvField(route.airline),
+      toSafeCsvField(route.airlineName),
+      toSafeCsvField(route.lastStop),
       route.inadCount.toString(),
       route.pax.toString(),
       route.density !== null ? route.density.toFixed(4) : '',
-      route.classification,
+      toSafeCsvField(route.classification),
     ]);
 
     const csvContent = [
@@ -180,12 +174,12 @@ export function ViewerDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `casa-routes-${publishedData.metadata.semester.replace(' ', '-')}.csv`;
+    link.download = `casa-routes-${semester.replace(' ', '-')}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, [routes, publishedData.metadata.semester, escapeCSVField]);
+  }, [routes, semester]);
 
   // DataTable columns for Step 1 (Airlines)
   const airlineColumns: Column<PublishedAirline>[] = [
@@ -352,6 +346,10 @@ export function ViewerDashboard() {
 
     return classes.join(' ');
   }, [lastAboveThresholdIndex]);
+
+  if (!publishedData || !summary) {
+    return null;
+  }
 
   return (
     <div className="space-y-8">

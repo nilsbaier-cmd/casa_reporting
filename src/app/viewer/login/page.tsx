@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/authContext';
 import { SwissCoat } from '@/components/ui/swiss-coat';
 import { LanguagePicker } from '@/components/ui/LanguagePicker';
-import { Lock, ArrowRight, AlertCircle, Eye, BarChart3 } from 'lucide-react';
+import { ArrowRight, AlertCircle, Eye, BarChart3 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function ViewerLoginPage() {
@@ -25,7 +25,7 @@ export default function ViewerLoginPage() {
     // Simulate brief loading for UX
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    if (login(password, 'viewer')) {
+    if (await login(password, 'viewer')) {
       router.push('/viewer');
     } else {
       setError(true);

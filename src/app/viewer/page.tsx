@@ -11,12 +11,12 @@ import { ViewerTrends } from '@/components/viewer/ViewerTrends';
 import { ViewerPaxTab } from '@/components/viewer/ViewerPaxTab';
 import { ViewerInadTab } from '@/components/viewer/ViewerInadTab';
 import { DocumentationTab } from '@/components/tabs/DocumentationTab';
-import { AlertCircle, Upload, FileJson, BarChart3, Plane, Users, TrendingUp } from 'lucide-react';
+import { AlertCircle, FileJson, BarChart3, Plane, Users, TrendingUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useDropzone } from 'react-dropzone';
 
 export default function ViewerPage() {
-  const { isAuthenticated, isLoading: authLoading, role } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { publishedData, isLoading, error, loadFromFile, loadFromUrl } = useViewerStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');

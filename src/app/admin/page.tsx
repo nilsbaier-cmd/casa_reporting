@@ -24,7 +24,7 @@ import { useTranslations } from 'next-intl';
 
 export default function AdminDashboardPage() {
   const { isAuthenticated, isLoading, role } = useAuth();
-  const { error, step1Results, inadData, bazlData } = useAnalysisStore();
+  const { error, step1Results } = useAnalysisStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [analysisTab, setAnalysisTab] = useState('step1');

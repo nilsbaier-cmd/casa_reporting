@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { defaultLocale, locales, type Locale } from './i18n/config';
+import { SESSION_COOKIE_NAME, verifySessionToken } from './lib/auth/session';
 
 const LOCALE_COOKIE = 'NEXT_LOCALE';
 
@@ -37,19 +38,55 @@ function getPreferredLocale(request: NextRequest): Locale {
   return defaultLocale;
 }
 
-export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
+function setLocaleCookieIfMissing(request: NextRequest, response: NextResponse) {
+  if (request.cookies.has(LOCALE_COOKIE)) return;
 
-  // Only set cookie if not already present
-  if (!request.cookies.has(LOCALE_COOKIE)) {
-    const preferredLocale = getPreferredLocale(request);
-    response.cookies.set(LOCALE_COOKIE, preferredLocale, {
-      maxAge: 60 * 60 * 24 * 365, // 1 year
-      path: '/',
-      sameSite: 'lax',
-    });
+  const preferredLocale = getPreferredLocale(request);
+  response.cookies.set(LOCALE_COOKIE, preferredLocale, {
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+    path: '/',
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  });
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const sessionToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const session = await verifySessionToken(sessionToken);
+  const role = session?.role ?? null;
+
+  const isAdminPath = pathname.startsWith('/admin');
+  const isViewerPath = pathname.startsWith('/viewer');
+  const isAdminLoginPath = pathname === '/admin/login';
+  const isViewerLoginPath = pathname === '/viewer/login';
+
+  if (isAdminLoginPath && role === 'admin') {
+    const response = NextResponse.redirect(new URL('/admin', request.url));
+    setLocaleCookieIfMissing(request, response);
+    return response;
   }
 
+  if (isViewerLoginPath && (role === 'admin' || role === 'viewer')) {
+    const response = NextResponse.redirect(new URL('/viewer', request.url));
+    setLocaleCookieIfMissing(request, response);
+    return response;
+  }
+
+  if (isAdminPath && !isAdminLoginPath && role !== 'admin') {
+    const response = NextResponse.redirect(new URL('/admin/login', request.url));
+    setLocaleCookieIfMissing(request, response);
+    return response;
+  }
+
+  if (isViewerPath && !isViewerLoginPath && role !== 'admin' && role !== 'viewer') {
+    const response = NextResponse.redirect(new URL('/viewer/login', request.url));
+    setLocaleCookieIfMissing(request, response);
+    return response;
+  }
+
+  const response = NextResponse.next();
+  setLocaleCookieIfMissing(request, response);
   return response;
 }
 
