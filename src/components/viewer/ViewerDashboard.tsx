@@ -35,6 +35,9 @@ export function ViewerDashboard() {
   const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   const [activeStep, setActiveStep] = useState<1 | 2 | 3>(3);
+  const [step1Filter, setStep1Filter] = useState<'all' | 'check' | 'ok'>('all');
+  const [step2Filter, setStep2Filter] = useState<'all' | 'check' | 'ok'>('all');
+  const [step3Filter, setStep3Filter] = useState<'all' | 'critical' | 'watch' | 'clear'>('all');
 
   const summary = publishedData?.summary;
   const routes = useMemo(() => publishedData?.routes ?? [], [publishedData]);
@@ -319,19 +322,26 @@ export function ViewerDashboard() {
       return (b.density ?? 0) - (a.density ?? 0);
     });
   }, [routes]);
+  const filteredStep1Airlines = useMemo(() => {
+    if (step1Filter === 'all') return airlines;
+    if (step1Filter === 'check') return airlines.filter((row) => row.aboveThreshold);
+    return airlines.filter((row) => !row.aboveThreshold);
+  }, [airlines, step1Filter]);
 
-  // Find the index of the last "above threshold" row (sanction or watchList) for the separator line
-  const lastAboveThresholdIndex = useMemo(() => {
-    for (let i = sortedRoutes.length - 1; i >= 0; i--) {
-      if (sortedRoutes[i].classification === 'sanction' || sortedRoutes[i].classification === 'watchList') {
-        return i;
-      }
-    }
-    return -1;
-  }, [sortedRoutes]);
+  const filteredStep2Routes = useMemo(() => {
+    if (step2Filter === 'all') return routes;
+    if (step2Filter === 'check') return routes.filter((row) => row.inadCount >= config.minInad);
+    return routes.filter((row) => row.inadCount < config.minInad);
+  }, [config.minInad, routes, step2Filter]);
 
-  // Row class for Step 3 with separator line
-  const getStep3RowClassName = useCallback((row: PublishedRoute, index: number) => {
+  const filteredStep3Routes = useMemo(() => {
+    if (step3Filter === 'all') return sortedRoutes;
+    if (step3Filter === 'critical') return sortedRoutes.filter((row) => row.classification === 'sanction');
+    if (step3Filter === 'watch') return sortedRoutes.filter((row) => row.classification === 'watchList');
+    return sortedRoutes.filter((row) => row.classification === 'clear');
+  }, [sortedRoutes, step3Filter]);
+
+  const getStep3RowClassName = useCallback((row: PublishedRoute) => {
     const classes: string[] = [];
 
     // Background color for critical routes
@@ -339,13 +349,8 @@ export function ViewerDashboard() {
       classes.push('bg-red-50/50');
     }
 
-    // Add separator line after the last above-threshold row
-    if (index === lastAboveThresholdIndex && lastAboveThresholdIndex >= 0) {
-      classes.push('border-b-4 border-b-red-600');
-    }
-
     return classes.join(' ');
-  }, [lastAboveThresholdIndex]);
+  }, []);
 
   if (!publishedData || !summary) {
     return null;
@@ -421,12 +426,12 @@ export function ViewerDashboard() {
       {/* Analysis Steps with Tabs */}
       <section className="bg-white border border-neutral-200">
         {/* Step Tabs */}
-        <div className="border-b border-neutral-200 px-6 py-4">
-          <div className="flex items-center gap-6">
+        <div className="border-b border-neutral-200 px-4 py-4 sm:px-6">
+          <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap">
             <button
               onClick={() => setActiveStep(1)}
               className={cn(
-                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
+                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap',
                 activeStep === 1
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
@@ -437,7 +442,7 @@ export function ViewerDashboard() {
             <button
               onClick={() => setActiveStep(2)}
               className={cn(
-                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
+                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap',
                 activeStep === 2
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
@@ -448,7 +453,7 @@ export function ViewerDashboard() {
             <button
               onClick={() => setActiveStep(3)}
               className={cn(
-                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer',
+                'px-4 py-2 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap',
                 activeStep === 3
                   ? 'bg-blue-100 text-blue-700'
                   : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
@@ -463,7 +468,7 @@ export function ViewerDashboard() {
         {activeStep === 1 && (
           <>
             <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-              <div className="flex items-start justify-between">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-bold text-neutral-900">{tSteps('step1.title')}</h3>
                   <p className="text-sm text-neutral-500 mt-1">
@@ -478,12 +483,31 @@ export function ViewerDashboard() {
                   {tSteps('step1.csvExport')}
                 </button>
               </div>
+              <div className="mt-3 flex items-center gap-2 text-sm">
+                <label htmlFor="viewer-step1-filter" className="text-neutral-600">
+                  {tTable('status')}:
+                </label>
+                <select
+                  id="viewer-step1-filter"
+                  value={step1Filter}
+                  onChange={(event) => setStep1Filter(event.target.value as 'all' | 'check' | 'ok')}
+                  className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
+                >
+                  <option value="all">{tTable('all')}</option>
+                  <option value="check">{tTable('check')}</option>
+                  <option value="ok">{tTable('ok')}</option>
+                </select>
+              </div>
             </div>
             <DataTable
-              data={airlines}
+              data={filteredStep1Airlines}
               columns={airlineColumns}
               getRowKey={(row) => row.airline}
               rowClassName={(row) => row.aboveThreshold ? 'bg-amber-50/50' : ''}
+              searchable
+              searchableKeys={['airline', 'airlineName']}
+              paginate
+              initialPageSize={25}
             />
           </>
         )}
@@ -492,7 +516,7 @@ export function ViewerDashboard() {
         {activeStep === 2 && (
           <>
             <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-              <div className="flex items-start justify-between">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-bold text-neutral-900">{tSteps('step2.title')}</h3>
                   <p className="text-sm text-neutral-500 mt-1">
@@ -507,11 +531,30 @@ export function ViewerDashboard() {
                   {tSteps('step2.csvExport')}
                 </button>
               </div>
+              <div className="mt-3 flex items-center gap-2 text-sm">
+                <label htmlFor="viewer-step2-filter" className="text-neutral-600">
+                  {tTable('status')}:
+                </label>
+                <select
+                  id="viewer-step2-filter"
+                  value={step2Filter}
+                  onChange={(event) => setStep2Filter(event.target.value as 'all' | 'check' | 'ok')}
+                  className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
+                >
+                  <option value="all">{tTable('all')}</option>
+                  <option value="check">{tTable('check')}</option>
+                  <option value="ok">{tTable('ok')}</option>
+                </select>
+              </div>
             </div>
             <DataTable
-              data={routes}
+              data={filteredStep2Routes}
               columns={routeStep2Columns}
               getRowKey={(row) => `${row.airline}-${row.lastStop}`}
+              searchable
+              searchableKeys={['airline', 'airlineName', 'lastStop']}
+              paginate
+              initialPageSize={25}
             />
           </>
         )}
@@ -520,7 +563,7 @@ export function ViewerDashboard() {
         {activeStep === 3 && (
           <>
             <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200">
-              <div className="flex items-start justify-between">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-bold text-neutral-900">{tSteps('step3.title')}</h3>
                   <p className="text-sm text-neutral-500 mt-1">
@@ -535,12 +578,32 @@ export function ViewerDashboard() {
                   {tSteps('step3.csvExport')}
                 </button>
               </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                <label htmlFor="viewer-step3-filter" className="text-neutral-600">
+                  {tTable('status')}:
+                </label>
+                <select
+                  id="viewer-step3-filter"
+                  value={step3Filter}
+                  onChange={(event) => setStep3Filter(event.target.value as 'all' | 'critical' | 'watch' | 'clear')}
+                  className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
+                >
+                  <option value="all">{tTable('all')}</option>
+                  <option value="critical">{tPriority('critical')}</option>
+                  <option value="watch">{tPriority('watchList')}</option>
+                  <option value="clear">{tPriority('clear')}</option>
+                </select>
+              </div>
             </div>
             <DataTable
-              data={sortedRoutes}
+              data={filteredStep3Routes}
               columns={routeColumns}
               getRowKey={(row) => `${row.airline}-${row.lastStop}`}
               rowClassName={getStep3RowClassName}
+              searchable
+              searchableKeys={['airline', 'airlineName', 'lastStop', 'classification']}
+              paginate
+              initialPageSize={25}
             />
           </>
         )}

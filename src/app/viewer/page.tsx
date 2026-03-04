@@ -11,18 +11,20 @@ import { ViewerTrends } from '@/components/viewer/ViewerTrends';
 import { ViewerPaxTab } from '@/components/viewer/ViewerPaxTab';
 import { ViewerInadTab } from '@/components/viewer/ViewerInadTab';
 import { DocumentationTab } from '@/components/tabs/DocumentationTab';
-import { AlertCircle, FileJson, BarChart3, Plane, Users, TrendingUp } from 'lucide-react';
+import { AlertCircle, FileJson, BarChart3, Plane, Users, TrendingUp, RefreshCw, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useDropzone } from 'react-dropzone';
 
 export default function ViewerPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { publishedData, isLoading, error, loadFromFile, loadFromUrl } = useViewerStore();
+  const { publishedData, isLoading, error, dataStatus, loadFromFile, loadFromUrl } = useViewerStore();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const t = useTranslations('viewer');
   const tCommon = useTranslations('common');
   const tHero = useTranslations('hero');
+
+  const dataUrl = process.env.NEXT_PUBLIC_VIEWER_DATA_URL || '/data/published.json';
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -34,12 +36,10 @@ export default function ViewerPage() {
 
   // Try to load data from default URL on mount
   useEffect(() => {
-    // First try environment variable, then fallback to local file
-    const dataUrl = process.env.NEXT_PUBLIC_VIEWER_DATA_URL || '/data/published.json';
-    if (!publishedData && !isLoading) {
+    if (!publishedData && dataStatus === 'idle') {
       loadFromUrl(dataUrl);
     }
-  }, [loadFromUrl, publishedData, isLoading]);
+  }, [loadFromUrl, publishedData, dataStatus, dataUrl]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -73,6 +73,10 @@ export default function ViewerPage() {
     return null;
   }
 
+  const handleReloadPublishedData = () => {
+    loadFromUrl(dataUrl);
+  };
+
   const hasData = publishedData !== null;
 
   // Render content based on active tab
@@ -87,9 +91,39 @@ export default function ViewerPage() {
             <h3 className="text-xl font-bold text-neutral-900 mb-3">
               {t('noData')}
             </h3>
-            <p className="text-neutral-600 mb-6">
-              {t('noDataHint')}
-            </p>
+            {dataStatus === 'notPublished' && (
+              <div className="mb-6 border border-blue-200 bg-blue-50 p-4 text-left">
+                <p className="mb-1 flex items-center gap-2 text-sm font-medium text-blue-900">
+                  <Info className="h-4 w-4" />
+                  {t('notPublishedTitle')}
+                </p>
+                <p className="text-sm text-blue-700">
+                  {t('notPublishedDesc', { url: dataUrl })}
+                </p>
+              </div>
+            )}
+            {dataStatus === 'error' && (
+              <div className="mb-6 border border-red-200 bg-red-50 p-4 text-left">
+                <p className="mb-1 text-sm font-medium text-red-900">{t('loadErrorTitle')}</p>
+                <p className="text-sm text-red-700">{error ?? 'Unbekannter Fehler'}</p>
+              </div>
+            )}
+            {dataStatus !== 'error' && dataStatus !== 'notPublished' && (
+              <p className="text-neutral-600 mb-6">
+                {t('noDataHint')}
+              </p>
+            )}
+
+            <div className="mb-6">
+              <button
+                type="button"
+                onClick={handleReloadPublishedData}
+                className="inline-flex items-center gap-2 border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-50"
+              >
+                <RefreshCw className="h-4 w-4" />
+                {t('reloadPublished')}
+              </button>
+            </div>
 
             {/* File Upload for Viewer */}
             <div

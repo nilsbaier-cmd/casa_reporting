@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { PublishedData } from '@/lib/analysis/publishTypes';
 
+export type ViewerDataStatus = 'idle' | 'loading' | 'loaded' | 'notPublished' | 'error';
+
 interface ViewerState {
   // Published data
   publishedData: PublishedData | null;
@@ -8,6 +10,7 @@ interface ViewerState {
   // Status
   isLoading: boolean;
   error: string | null;
+  dataStatus: ViewerDataStatus;
 
   // Actions
   loadPublishedData: (data: PublishedData) => void;
@@ -22,17 +25,19 @@ export const useViewerStore = create<ViewerState>()((set) => ({
   publishedData: null,
   isLoading: false,
   error: null,
+  dataStatus: 'idle',
 
   // Actions
   loadPublishedData: (data) => {
     set({
       publishedData: data,
       error: null,
+      dataStatus: 'loaded',
     });
   },
 
   loadFromUrl: async (url) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, dataStatus: 'loading' });
 
     try {
       const response = await fetch(url);
@@ -42,7 +47,8 @@ export const useViewerStore = create<ViewerState>()((set) => ({
         set({
           publishedData: null,
           isLoading: false,
-          error: null, // No error, just no data yet
+          error: null,
+          dataStatus: 'notPublished',
         });
         return;
       }
@@ -60,17 +66,19 @@ export const useViewerStore = create<ViewerState>()((set) => ({
       set({
         publishedData: data as PublishedData,
         isLoading: false,
+        dataStatus: 'loaded',
       });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to load data',
         isLoading: false,
+        dataStatus: 'error',
       });
     }
   },
 
   loadFromFile: async (file) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, dataStatus: 'loading' });
 
     try {
       const text = await file.text();
@@ -84,11 +92,13 @@ export const useViewerStore = create<ViewerState>()((set) => ({
       set({
         publishedData: data as PublishedData,
         isLoading: false,
+        dataStatus: 'loaded',
       });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to load file',
         isLoading: false,
+        dataStatus: 'error',
       });
     }
   },
@@ -98,6 +108,7 @@ export const useViewerStore = create<ViewerState>()((set) => ({
       publishedData: null,
       isLoading: false,
       error: null,
+      dataStatus: 'idle',
     });
   },
 

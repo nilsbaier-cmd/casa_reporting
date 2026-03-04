@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +40,14 @@ export function Step2Routes() {
   const t = useTranslations('steps.step2');
   const tTable = useTranslations('table');
   const { step2Results, config } = useAnalysisStore();
+  const [statusFilter, setStatusFilter] = useState<'all' | 'check' | 'ok'>('all');
+  const step2Data = useMemo(() => step2Results ?? [], [step2Results]);
+
+  const filteredResults = useMemo(() => {
+    if (statusFilter === 'all') return step2Data;
+    if (statusFilter === 'check') return step2Data.filter((row) => row.passesThreshold);
+    return step2Data.filter((row) => !row.passesThreshold);
+  }, [statusFilter, step2Data]);
 
   if (!step2Results) {
     return (
@@ -82,7 +91,7 @@ export function Step2Routes() {
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="font-semibold mb-2">{t('title')}</h3>
             <p className="text-sm text-muted-foreground mb-3">
@@ -98,6 +107,21 @@ export function Step2Routes() {
             {t('csvExport')}
           </Button>
         </div>
+        <div className="mb-3 flex items-center gap-2 text-sm">
+          <label htmlFor="step2-status-filter" className="text-neutral-600">
+            {tTable('status')}:
+          </label>
+          <select
+            id="step2-status-filter"
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as 'all' | 'check' | 'ok')}
+            className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
+          >
+            <option value="all">{tTable('all')}</option>
+            <option value="check">{tTable('check')}</option>
+            <option value="ok">{tTable('ok')}</option>
+          </select>
+        </div>
         <div className="flex gap-4 text-sm">
           <span>
             <strong>{summary.totalRoutes}</strong> {t('routesAnalyzed')}
@@ -112,13 +136,17 @@ export function Step2Routes() {
       </div>
 
       <DataTable
-        data={step2Results}
+        data={filteredResults}
         columns={columns}
         getRowKey={(row) => `${row.airline}-${row.lastStop}`}
         rowClassName={(row) =>
           row.passesThreshold ? 'bg-orange-50/50' : ''
         }
         emptyMessage={t('noRoutes')}
+        searchable
+        searchableKeys={['airline', 'lastStop']}
+        paginate
+        initialPageSize={25}
       />
     </div>
   );

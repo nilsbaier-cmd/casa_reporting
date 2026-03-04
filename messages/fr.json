@@ -135,7 +135,14 @@
     "check": "Vérifier",
     "ok": "OK",
     "noData": "Aucune donnée disponible",
-    "rowCount": "{count, plural, =0 {Aucune entrée} =1 {1 entrée} other {# entrées}} au total"
+    "rowCount": "{count, plural, =0 {Aucune entrée} =1 {1 entrée} other {# entrées}} au total",
+    "searchPlaceholder": "Rechercher dans le tableau...",
+    "rowsPerPage": "Lignes par page",
+    "noResults": "Aucun résultat pour la recherche actuelle",
+    "previousPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "pageIndicator": "Page {current} sur {total}",
+    "all": "Tous"
   },
   "criteria": {
     "medianThreshold": "Seuil médian",
@@ -361,7 +368,11 @@
     "airlinesTotal": "Total compagnies",
     "withInads": "avec INAD",
     "routesTotal": "Total routes",
-    "analyzed": "analysées"
+    "analyzed": "analysées",
+    "notPublishedTitle": "Aucune publication trouvée pour le moment",
+    "notPublishedDesc": "Aucun état publié n'a été trouvé sous {url}.",
+    "loadErrorTitle": "Erreur lors du chargement des données publiées",
+    "reloadPublished": "Recharger les données publiées"
   },
   "trends": {
     "title": "Analyse des tendances",
@@ -388,5 +399,18 @@
     "densityTrendDesc": "Refus d'entrée pour 1'000 passagers (‰) par semestre (uniquement semestres avec données OFAC)",
     "refusals": "Refus d'entrée",
     "swapSemesters": "Inverser les semestres"
+  },
+  "landing": {
+    "title": "Tableau de bord CASA Reporting",
+    "subtitle": "Veuillez choisir votre portail pour commencer.",
+    "adminTitle": "Portail Admin (SEM)",
+    "adminDesc": "Téléverser des données, lancer l'analyse et publier les résultats.",
+    "viewerTitle": "Portail Viewer (Autorités)",
+    "viewerDesc": "Consulter, comparer et exporter les résultats publiés.",
+    "openAdmin": "Ouvrir Admin",
+    "openViewer": "Ouvrir Viewer",
+    "continueLast": "Dernier portail utilisé : {portal}",
+    "lastAdmin": "Admin",
+    "lastViewer": "Viewer"
   }
 }

@@ -135,7 +135,14 @@
     "check": "Prüfen",
     "ok": "OK",
     "noData": "Keine Daten verfügbar",
-    "rowCount": "{count, plural, =0 {Keine Einträge} =1 {1 Eintrag} other {# Einträge}} insgesamt"
+    "rowCount": "{count, plural, =0 {Keine Einträge} =1 {1 Eintrag} other {# Einträge}} insgesamt",
+    "searchPlaceholder": "Tabelle durchsuchen...",
+    "rowsPerPage": "Zeilen pro Seite",
+    "noResults": "Keine Treffer für die aktuelle Suche",
+    "previousPage": "Vorherige Seite",
+    "nextPage": "Nächste Seite",
+    "pageIndicator": "Seite {current} von {total}",
+    "all": "Alle"
   },
   "criteria": {
     "medianThreshold": "Median-Schwellenwert",
@@ -361,7 +368,11 @@
     "airlinesTotal": "Airlines Total",
     "withInads": "mit INADs",
     "routesTotal": "Routen Total",
-    "analyzed": "analysiert"
+    "analyzed": "analysiert",
+    "notPublishedTitle": "Noch keine Veröffentlichung gefunden",
+    "notPublishedDesc": "Unter {url} wurde bisher kein publizierter Stand gefunden.",
+    "loadErrorTitle": "Fehler beim Laden der publizierten Daten",
+    "reloadPublished": "Veröffentlichten Stand erneut laden"
   },
   "trends": {
     "title": "Trend-Analyse",
@@ -388,5 +399,18 @@
     "densityTrendDesc": "Einreiseverweigerungen pro 1'000 Passagiere (‰) pro Semester (nur Semester mit BAZL-Daten)",
     "refusals": "Einreiseverweigerungen",
     "swapSemesters": "Semester tauschen"
+  },
+  "landing": {
+    "title": "CASA Reporting Dashboard",
+    "subtitle": "Bitte wählen Sie Ihr Portal für den Einstieg.",
+    "adminTitle": "Admin-Portal (SEM)",
+    "adminDesc": "Daten hochladen, Analyse durchführen und Ergebnisse publizieren.",
+    "viewerTitle": "Viewer-Portal (Behörden)",
+    "viewerDesc": "Publizierte Resultate prüfen, vergleichen und exportieren.",
+    "openAdmin": "Admin öffnen",
+    "openViewer": "Viewer öffnen",
+    "continueLast": "Zuletzt genutzt: {portal}",
+    "lastAdmin": "Admin",
+    "lastViewer": "Viewer"
   }
 }

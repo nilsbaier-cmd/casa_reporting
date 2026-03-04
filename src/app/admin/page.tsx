@@ -111,7 +111,7 @@ export default function AdminDashboardPage() {
                 <div className="bg-white border border-neutral-200">
                   {/* Tab Navigation */}
                   <div className="border-b border-neutral-200">
-                    <nav className="flex" role="tablist" aria-label="Analyse-Schritte">
+                    <nav className="flex overflow-x-auto whitespace-nowrap" role="tablist" aria-label="Analyse-Schritte">
                       {analysisTabs.map((tab) => (
                         <button
                           key={tab.id}
@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
                           aria-controls={`panel-${tab.id}`}
                           onClick={() => setAnalysisTab(tab.id)}
                           className={cn(
-                            'relative px-6 py-4 text-sm font-medium transition-colors',
+                            'relative px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap',
                             'focus:outline-none focus-visible:bg-neutral-100',
                             analysisTab === tab.id
                               ? 'text-red-600'

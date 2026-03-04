@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
@@ -51,6 +51,7 @@ export function Step3Density() {
   const tPriority = useTranslations('priority');
   const locale = useLocale();
   const { step3Results, threshold, config } = useAnalysisStore();
+  const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'watch' | 'clear'>('all');
   const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
   const normalizedResults = step3Results ?? EMPTY_STEP3_RESULTS;
   const summary = getStep3Summary(normalizedResults, threshold || 0);
@@ -66,15 +67,16 @@ export function Step3Density() {
     });
   }, [normalizedResults]);
 
-  // Find the index of the last "above threshold" row (HIGH_PRIORITY or WATCH_LIST)
-  const lastAboveThresholdIndex = useMemo(() => {
-    for (let i = sortedResults.length - 1; i >= 0; i--) {
-      if (sortedResults[i].priority === 'HIGH_PRIORITY' || sortedResults[i].priority === 'WATCH_LIST') {
-        return i;
-      }
+  const filteredResults = useMemo(() => {
+    if (statusFilter === 'all') return sortedResults;
+    if (statusFilter === 'critical') {
+      return sortedResults.filter((row) => row.priority === 'HIGH_PRIORITY');
     }
-    return -1;
-  }, [sortedResults]);
+    if (statusFilter === 'watch') {
+      return sortedResults.filter((row) => row.priority === 'WATCH_LIST');
+    }
+    return sortedResults.filter((row) => row.priority === 'CLEAR');
+  }, [sortedResults, statusFilter]);
 
   const columns: Column<Step3Result>[] = [
     {
@@ -115,7 +117,7 @@ export function Step3Density() {
     },
   ];
 
-  const getRowClassName = (row: Step3Result, index: number) => {
+  const getRowClassName = (row: Step3Result) => {
     const classes: string[] = [];
 
     // Background color based on priority
@@ -126,11 +128,6 @@ export function Step3Density() {
       case 'WATCH_LIST':
         classes.push('bg-orange-50');
         break;
-    }
-
-    // Add separator line after the last above-threshold row
-    if (index === lastAboveThresholdIndex && lastAboveThresholdIndex >= 0) {
-      classes.push('border-b-4 border-b-red-600');
     }
 
     return classes.join(' ');
@@ -147,7 +144,7 @@ export function Step3Density() {
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="font-semibold mb-2">{t('title')}</h3>
             <p className="text-sm text-muted-foreground mb-3">
@@ -161,6 +158,22 @@ export function Step3Density() {
           >
             {t('csvExport')}
           </Button>
+        </div>
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+          <label htmlFor="step3-status-filter" className="text-neutral-600">
+            {tTable('status')}:
+          </label>
+          <select
+            id="step3-status-filter"
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as 'all' | 'critical' | 'watch' | 'clear')}
+            className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
+          >
+            <option value="all">{tTable('all')}</option>
+            <option value="critical">{tPriority('sanction')}</option>
+            <option value="watch">{tPriority('watchList')}</option>
+            <option value="clear">{tPriority('clear')}</option>
+          </select>
         </div>
 
         <div className="flex flex-wrap gap-4 text-sm">
@@ -210,11 +223,15 @@ export function Step3Density() {
       </Card>
 
       <DataTable
-        data={sortedResults}
+        data={filteredResults}
         columns={columns}
         getRowKey={(row) => `${row.airline}-${row.lastStop}`}
         rowClassName={getRowClassName}
         emptyMessage={t('noRoutes')}
+        searchable
+        searchableKeys={['airline', 'lastStop', 'priority']}
+        paginate
+        initialPageSize={25}
       />
     </div>
   );
