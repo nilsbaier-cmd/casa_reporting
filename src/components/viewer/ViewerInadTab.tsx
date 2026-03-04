@@ -28,7 +28,7 @@ export function ViewerInadTab() {
 
   if (!publishedData) return null;
 
-  const { summary, top10, trends, metadata, routes } = publishedData;
+  const { summary, top10, trends, metadata } = publishedData;
 
   // Get previous semester for comparison
   const currentIndex = trends.findIndex(t => t.semester === metadata.semester);

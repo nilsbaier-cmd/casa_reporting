@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { TrendingUp, TrendingDown, Minus, BarChart3, Info, ArrowRightLeft } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -31,6 +31,16 @@ interface SemesterData {
   pax: number;
   inad: number;
   density: number;
+}
+
+function TrendIndicator({ value }: { value: number }) {
+  if (Math.abs(value) < 0.1) {
+    return <Minus className="w-4 h-4 text-neutral-400" />;
+  }
+  if (value > 0) {
+    return <TrendingUp className="w-4 h-4 text-red-600" />;
+  }
+  return <TrendingDown className="w-4 h-4 text-green-600" />;
 }
 
 export function TrendsTab() {
@@ -91,14 +101,10 @@ export function TrendsTab() {
     });
   }, [inadData, bazlData, availableSemesters]);
 
-  // Initialize default comparison (current vs previous semester)
-  useEffect(() => {
-    if (trendData.length >= 2 && !compareSemester1 && !compareSemester2) {
-      // Default: compare last two semesters (previous = semester1, current = semester2)
-      setCompareSemester1(trendData[trendData.length - 2].semester);
-      setCompareSemester2(trendData[trendData.length - 1].semester);
-    }
-  }, [trendData, compareSemester1, compareSemester2]);
+  const defaultSemester1 = trendData.length >= 2 ? trendData[trendData.length - 2].semester : null;
+  const defaultSemester2 = trendData.length >= 1 ? trendData[trendData.length - 1].semester : null;
+  const selectedSemester1 = compareSemester1 ?? defaultSemester1;
+  const selectedSemester2 = compareSemester2 ?? defaultSemester2;
 
   // Filter data for PAX/Density charts (only show semesters with PAX data)
   const paxTrendData = useMemo(() => {
@@ -107,8 +113,8 @@ export function TrendsTab() {
 
   // Get comparison data
   const comparisonData = useMemo(() => {
-    const semester1Data = trendData.find(d => d.semester === compareSemester1);
-    const semester2Data = trendData.find(d => d.semester === compareSemester2);
+    const semester1Data = trendData.find((d) => d.semester === selectedSemester1);
+    const semester2Data = trendData.find((d) => d.semester === selectedSemester2);
 
     if (!semester1Data || !semester2Data) {
       return null;
@@ -126,17 +132,7 @@ export function TrendsTab() {
       inadTrend: calcTrend(semester2Data.inad, semester1Data.inad),
       densityTrend: calcTrend(semester2Data.density, semester1Data.density),
     };
-  }, [trendData, compareSemester1, compareSemester2]);
-
-  const TrendIndicator = ({ value }: { value: number }) => {
-    if (Math.abs(value) < 0.1) {
-      return <Minus className="w-4 h-4 text-neutral-400" />;
-    }
-    if (value > 0) {
-      return <TrendingUp className="w-4 h-4 text-red-600" />;
-    }
-    return <TrendingDown className="w-4 h-4 text-green-600" />;
-  };
+  }, [trendData, selectedSemester1, selectedSemester2]);
 
   if (!inadData || !bazlData) {
     return (
@@ -162,8 +158,8 @@ export function TrendsTab() {
   const latest = trendData[trendData.length - 1];
 
   // Get available options for each dropdown (excluding the other selected value)
-  const semester1Options = trendData.filter(d => d.semester !== compareSemester2);
-  const semester2Options = trendData.filter(d => d.semester !== compareSemester1);
+  const semester1Options = trendData.filter((d) => d.semester !== selectedSemester2);
+  const semester2Options = trendData.filter((d) => d.semester !== selectedSemester1);
 
   return (
     <div className="space-y-8">
@@ -196,7 +192,7 @@ export function TrendsTab() {
               {t('referenceSemester')}
             </label>
             <Select
-              value={compareSemester1 || ''}
+              value={selectedSemester1 || ''}
               onValueChange={setCompareSemester1}
             >
               <SelectTrigger className="w-full border-neutral-300 focus:border-red-600 focus:ring-red-600">
@@ -216,8 +212,8 @@ export function TrendsTab() {
           <button
             type="button"
             onClick={() => {
-              const temp = compareSemester1;
-              setCompareSemester1(compareSemester2);
+              const temp = selectedSemester1;
+              setCompareSemester1(selectedSemester2);
               setCompareSemester2(temp);
             }}
             className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full border border-neutral-300 bg-white hover:bg-neutral-50 hover:border-neutral-400 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
@@ -231,7 +227,7 @@ export function TrendsTab() {
               {t('comparisonSemester')}
             </label>
             <Select
-              value={compareSemester2 || ''}
+              value={selectedSemester2 || ''}
               onValueChange={setCompareSemester2}
             >
               <SelectTrigger className="w-full border-neutral-300 focus:border-red-600 focus:ring-red-600">

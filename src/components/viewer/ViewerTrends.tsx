@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useViewerStore } from '@/stores/viewerStore';
 import { useTranslations, useLocale } from 'next-intl';
 import {
@@ -24,6 +24,32 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+const EMPTY_TRENDS: Array<{
+  semester: string;
+  inadCount: number;
+  paxCount: number;
+  density: number | null;
+}> = [];
+
+function TrendIndicator({
+  value,
+  invertColors = false,
+}: {
+  value: number;
+  invertColors?: boolean;
+}) {
+  if (Math.abs(value) < 0.1) {
+    return <Minus className="w-4 h-4 text-neutral-400" />;
+  }
+  const isPositive = value > 0;
+  const showRed = invertColors ? isPositive : !isPositive;
+
+  if (isPositive) {
+    return <TrendingUp className={`w-4 h-4 ${showRed ? 'text-red-600' : 'text-green-600'}`} />;
+  }
+  return <TrendingDown className={`w-4 h-4 ${showRed ? 'text-red-600' : 'text-green-600'}`} />;
+}
+
 export function ViewerTrends() {
   const { publishedData } = useViewerStore();
   const t = useTranslations('trends');
@@ -34,26 +60,21 @@ export function ViewerTrends() {
   const [compareSemester1, setCompareSemester1] = useState<string | null>(null);
   const [compareSemester2, setCompareSemester2] = useState<string | null>(null);
 
-  // Early return for empty state - but we need to handle hooks properly
-  const trends = publishedData?.trends || [];
+  const trends = useMemo(() => publishedData?.trends ?? EMPTY_TRENDS, [publishedData]);
   const hasTrends = trends.length > 0;
 
   // Filter trends with PAX data for density/pax charts
   const trendsWithPax = useMemo(() => trends.filter((t) => t.paxCount > 0), [trends]);
 
-  // Initialize default comparison (current vs previous semester)
-  useEffect(() => {
-    if (trends.length >= 2 && !compareSemester1 && !compareSemester2) {
-      // Default: compare last two semesters (previous = semester1, current = semester2)
-      setCompareSemester1(trends[trends.length - 2].semester);
-      setCompareSemester2(trends[trends.length - 1].semester);
-    }
-  }, [trends, compareSemester1, compareSemester2]);
+  const defaultSemester1 = trends.length >= 2 ? trends[trends.length - 2].semester : null;
+  const defaultSemester2 = trends.length >= 1 ? trends[trends.length - 1].semester : null;
+  const selectedSemester1 = compareSemester1 ?? defaultSemester1;
+  const selectedSemester2 = compareSemester2 ?? defaultSemester2;
 
   // Get comparison data
   const comparisonData = useMemo(() => {
-    const semester1Data = trends.find(t => t.semester === compareSemester1);
-    const semester2Data = trends.find(t => t.semester === compareSemester2);
+    const semester1Data = trends.find((trend) => trend.semester === selectedSemester1);
+    const semester2Data = trends.find((trend) => trend.semester === selectedSemester2);
 
     if (!semester1Data || !semester2Data) {
       return null;
@@ -73,26 +94,17 @@ export function ViewerTrends() {
         ? calcTrend(semester2Data.density, semester1Data.density)
         : null,
     };
-  }, [trends, compareSemester1, compareSemester2]);
+  }, [trends, selectedSemester1, selectedSemester2]);
 
   // Get available options for each dropdown (excluding the other selected value)
-  const semester1Options = useMemo(() => trends.filter(t => t.semester !== compareSemester2), [trends, compareSemester2]);
-  const semester2Options = useMemo(() => trends.filter(t => t.semester !== compareSemester1), [trends, compareSemester1]);
-
-  const TrendIndicator = ({ value, invertColors = false }: { value: number; invertColors?: boolean }) => {
-    if (Math.abs(value) < 0.1) {
-      return <Minus className="w-4 h-4 text-neutral-400" />;
-    }
-    // For INAD: increase is bad (red), decrease is good (green)
-    // For PAX: default colors (increase is good)
-    const isPositive = value > 0;
-    const showRed = invertColors ? isPositive : !isPositive;
-
-    if (isPositive) {
-      return <TrendingUp className={`w-4 h-4 ${showRed ? 'text-red-600' : 'text-green-600'}`} />;
-    }
-    return <TrendingDown className={`w-4 h-4 ${showRed ? 'text-red-600' : 'text-green-600'}`} />;
-  };
+  const semester1Options = useMemo(
+    () => trends.filter((trend) => trend.semester !== selectedSemester2),
+    [trends, selectedSemester2]
+  );
+  const semester2Options = useMemo(
+    () => trends.filter((trend) => trend.semester !== selectedSemester1),
+    [trends, selectedSemester1]
+  );
 
   if (!hasTrends) {
     return (
@@ -140,7 +152,7 @@ export function ViewerTrends() {
                 {t('referenceSemester')}
               </label>
               <Select
-                value={compareSemester1 || ''}
+                value={selectedSemester1 || ''}
                 onValueChange={setCompareSemester1}
               >
                 <SelectTrigger className="w-full border-neutral-300 focus:border-blue-600 focus:ring-blue-600">
@@ -160,8 +172,8 @@ export function ViewerTrends() {
             <button
               type="button"
               onClick={() => {
-                const temp = compareSemester1;
-                setCompareSemester1(compareSemester2);
+                const temp = selectedSemester1;
+                setCompareSemester1(selectedSemester2);
                 setCompareSemester2(temp);
               }}
               className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full border border-neutral-300 bg-white hover:bg-neutral-50 hover:border-neutral-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
@@ -176,7 +188,7 @@ export function ViewerTrends() {
                 {t('comparisonSemester')}
               </label>
               <Select
-                value={compareSemester2 || ''}
+                value={selectedSemester2 || ''}
                 onValueChange={setCompareSemester2}
               >
                 <SelectTrigger className="w-full border-neutral-300 focus:border-blue-600 focus:ring-blue-600">
