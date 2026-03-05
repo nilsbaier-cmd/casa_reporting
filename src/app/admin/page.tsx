@@ -224,30 +224,21 @@ export default function AdminDashboardPage() {
                 </h2>
               </div>
 
-              <div className="grid lg:grid-cols-12 gap-6 items-start">
-                {/* Semester Selection - Left, compact */}
-                <div className="lg:col-span-3">
-                  <SemesterSelector />
-                </div>
-
-                {/* File Upload - Right, larger */}
-                <div className="lg:col-span-9">
+              <div className="space-y-6">
+                <div
+                  className={cn(
+                    'grid gap-6 items-start',
+                    activeTab === 'dashboard'
+                      ? 'xl:grid-cols-[minmax(0,1fr)_340px]'
+                      : 'grid-cols-1'
+                  )}
+                >
                   <FileUpload />
+                  {activeTab === 'dashboard' && <PublishDialog />}
                 </div>
-              </div>
-            </section>
-          )}
 
-          {/* Publish Section - Only visible on Dashboard when data is loaded */}
-          {activeTab === 'dashboard' && hasResults && (
-            <section aria-labelledby="publish-heading">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-px bg-red-600" aria-hidden="true" />
-                <h2 id="publish-heading" className="text-xs font-bold uppercase tracking-wider text-neutral-500">
-                  {t('publishSection')}
-                </h2>
+                <SemesterSelector />
               </div>
-              <PublishDialog />
             </section>
           )}
 

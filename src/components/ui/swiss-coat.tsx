@@ -7,9 +7,9 @@ interface SwissCoatProps {
 
 export function SwissCoat({ className, size = 'md' }: SwissCoatProps) {
   const sizes = {
-    sm: { width: 24, height: 28 },
-    md: { width: 32, height: 38 },
-    lg: { width: 48, height: 56 },
+    sm: { width: 22, height: 24 },
+    md: { width: 27, height: 30 },
+    lg: { width: 40, height: 44 },
   };
 
   const { width, height } = sizes[size];

@@ -76,7 +76,7 @@ function FileDropZone({
   return (
     <div
       className={cn(
-        'relative bg-white border-2 transition-all cursor-pointer group',
+        'relative h-full min-h-[136px] bg-white border-2 transition-all cursor-pointer group',
         isDragging && 'border-red-600 bg-red-50',
         status === 'idle' && !isDragging && 'border-neutral-200 hover:border-neutral-400',
         status === 'success' && 'border-green-600 bg-green-50',
@@ -270,7 +270,7 @@ export function FileUpload() {
   return (
     <div className="space-y-4">
       {/* File upload zones with optional reset button */}
-      <div className="grid md:grid-cols-[1fr_1fr_auto] gap-4 items-stretch">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch">
         <FileDropZone
           label={t('inadLabel')}
           description={t('inadDescription')}
@@ -301,7 +301,7 @@ export function FileUpload() {
 
         {/* Reset button - always rendered but invisible when no files to maintain layout */}
         <div className={cn(
-          'flex items-center',
+          'flex items-center xl:justify-end',
           !hasFiles && 'invisible'
         )}>
           <button
