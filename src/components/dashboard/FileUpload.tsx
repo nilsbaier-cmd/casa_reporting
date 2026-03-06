@@ -269,8 +269,20 @@ export function FileUpload() {
 
   return (
     <div className="space-y-4">
-      {/* File upload zones with optional reset button */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch">
+      {/* Reset button above cards, right-aligned */}
+      {hasFiles && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleReset}
+            className="text-sm font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
+          >
+            {t('reset')}
+          </button>
+        </div>
+      )}
+
+      {/* File upload zones - two equal columns */}
+      <div className="grid md:grid-cols-2 gap-4 items-stretch">
         <FileDropZone
           label={t('inadLabel')}
           description={t('inadDescription')}
@@ -298,19 +310,6 @@ export function FileUpload() {
           dragOrClickText={t('dragOrClick')}
           processingText={t('processing')}
         />
-
-        {/* Reset button - always rendered but invisible when no files to maintain layout */}
-        <div className={cn(
-          'flex items-center xl:justify-end',
-          !hasFiles && 'invisible'
-        )}>
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 h-fit text-sm font-medium text-neutral-600 hover:text-neutral-900 border border-neutral-300 hover:border-neutral-400 transition-colors whitespace-nowrap"
-          >
-            {t('reset')}
-          </button>
-        </div>
       </div>
 
       {/* Analysis indicator */}

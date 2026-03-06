@@ -225,6 +225,10 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="space-y-6">
+                {/* Semester Selection - full width, single line controls */}
+                <SemesterSelector />
+
+                {/* File Upload + Publish side by side */}
                 <div
                   className={cn(
                     'grid gap-6 items-start',
@@ -236,8 +240,6 @@ export default function AdminDashboardPage() {
                   <FileUpload />
                   {activeTab === 'dashboard' && <PublishDialog />}
                 </div>
-
-                <SemesterSelector />
               </div>
             </section>
           )}

@@ -63,7 +63,11 @@
     "secondHalf": "Zweites Halbjahr",
     "janJun": "Jan - Jun",
     "julDec": "Jul - Dez",
-    "noSearchResults": "Kein Semester gefunden"
+    "current": "Aktuell",
+    "previousPeriod": "Vorsemester",
+    "previousSemester": "Vorheriges Semester",
+    "nextSemester": "Nächstes Semester",
+    "searchPlaceholder": "Semester suchen…"
   },
   "metrics": {
     "title": "Übersicht Kennzahlen",

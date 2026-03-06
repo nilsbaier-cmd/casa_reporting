@@ -63,7 +63,11 @@
     "secondHalf": "Deuxième semestre",
     "janJun": "Jan - Juin",
     "julDec": "Juil - Déc",
-    "noSearchResults": "Aucun semestre trouvé"
+    "current": "Actuel",
+    "previousPeriod": "Sem. préc.",
+    "previousSemester": "Semestre précédent",
+    "nextSemester": "Semestre suivant",
+    "searchPlaceholder": "Rechercher semestre…"
   },
   "metrics": {
     "title": "Aperçu des indicateurs",
