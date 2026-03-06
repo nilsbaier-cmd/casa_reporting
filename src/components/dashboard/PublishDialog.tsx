@@ -105,7 +105,7 @@ export function PublishDialog() {
   };
 
   return (
-    <div className="bg-white border border-neutral-200 p-4">
+    <div className="bg-white border border-neutral-200 p-4 h-full flex flex-col justify-center">
       {/* Error Display */}
       {publishError && (
         <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 mb-3">
