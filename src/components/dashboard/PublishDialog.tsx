@@ -5,10 +5,10 @@ import { useAnalysisStore } from '@/stores/analysisStore';
 import { generatePublishData } from '@/lib/analysis/generatePublishData';
 import { useAuth } from '@/lib/auth/authContext';
 import {
-  Upload,
   CheckCircle,
   AlertTriangle,
   ExternalLink,
+  Github,
   Loader2,
 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -105,153 +105,102 @@ export function PublishDialog() {
   };
 
   return (
-    <div className="relative h-full border-2 border-neutral-200 bg-white">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-neutral-900" aria-hidden="true" />
-      <div className="flex h-full flex-col p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 bg-blue-100 p-3 text-blue-600">
-            <Upload className="w-6 h-6" />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-bold text-neutral-900">{t('title')}</h3>
-            <p className="mt-1 text-sm text-neutral-600">
-              {canPublish ? t('compactReady') : t('compactPending')}
-            </p>
+    <div className="bg-white border border-neutral-200 p-4">
+      {/* Error Display */}
+      {publishError && (
+        <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 mb-3">
+          <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-red-800">{t('publishError')}</p>
+            <p className="text-xs text-red-700">{publishError}</p>
           </div>
         </div>
+      )}
 
-        <div className="mt-5 flex flex-wrap gap-2">
+      {/* Success Message */}
+      {publishSuccess && (
+        <div className="flex items-start gap-3 p-3 bg-green-50 border border-green-200 mb-3">
+          <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-green-800">{t('publishSuccess')}</p>
+            <p className="text-xs text-green-700">{t('publishSuccessHint')}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="bg-blue-50 border border-blue-200 p-4 mb-3">
+          <p className="text-sm font-medium text-blue-900 mb-3">
+            {t('confirmTitle', { semester: selectedSemester?.label ?? '' })}
+          </p>
+          <p className="text-xs text-blue-700 mb-4">{t('confirmDescription')}</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handlePublishToGitHub}
+              disabled={isPublishing}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isPublishing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>{t('publishing')}</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{t('confirmYes')}</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => setShowConfirmDialog(false)}
+              disabled={isPublishing}
+              className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              {t('confirmNo')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Compact horizontal layout */}
+      {!showConfirmDialog && (
+        <div className="flex flex-wrap items-center gap-4">
+          <h3 className="text-sm font-bold text-neutral-900">{t('title')}</h3>
+
           {selectedSemester && (
-            <div className="border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">
-              <p className="font-bold uppercase tracking-wider text-neutral-500">{t('semester')}</p>
-              <p className="mt-1 font-medium text-neutral-900">{selectedSemester.label}</p>
-            </div>
+            <span className="text-sm font-medium text-neutral-600">
+              {selectedSemester.label}
+            </span>
           )}
-          <div
-            className={`px-3 py-2 text-xs font-medium ${
-              canPublish
-                ? 'border border-green-200 bg-green-50 text-green-700'
-                : 'border border-neutral-200 bg-neutral-50 text-neutral-600'
-            }`}
+
+          <button
+            onClick={() => setShowConfirmDialog(true)}
+            disabled={!canPublish || isPublishing}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
-            {canPublish ? t('statusReady') : t('statusPending')}
-          </div>
-        </div>
+            <Github className="w-4 h-4" />
+            <span>{t('publishToGitHub')}</span>
+          </button>
 
-        {publishError && (
-          <div className="mt-4 flex items-start gap-3 border border-red-200 bg-red-50 p-3">
-            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
-            <div>
-              <p className="text-sm font-medium text-red-800">{t('publishError')}</p>
-              <p className="text-xs text-red-700">{publishError}</p>
-            </div>
-          </div>
-        )}
+          <a
+            href="/viewer"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            {t('viewerLink')}
+          </a>
 
-        {publishSuccess && (
-          <div className="mt-4 flex items-start gap-3 border border-green-200 bg-green-50 p-3">
-            <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
-            <div>
-              <p className="text-sm font-medium text-green-800">{t('publishSuccess')}</p>
-              <p className="text-xs text-green-700">{t('publishSuccessHint')}</p>
-            </div>
-          </div>
-        )}
-
-        {showConfirmDialog && (
-          <div className="mt-4 border border-blue-200 bg-blue-50 p-4">
-            <p className="mb-3 text-sm font-medium text-blue-900">
-              {t('confirmTitle', { semester: selectedSemester?.label ?? '' })}
-            </p>
-            <p className="mb-4 text-xs text-blue-700">{t('confirmDescription')}</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={handlePublishToGitHub}
-                disabled={isPublishing}
-                className="inline-flex items-center gap-2 bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isPublishing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{t('publishing')}</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4" />
-                    <span>{t('confirmYes')}</span>
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => setShowConfirmDialog(false)}
-                disabled={isPublishing}
-                className="px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
-              >
-                {t('confirmNo')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-auto pt-5">
-          {!showConfirmDialog && (
-            <>
-              {!canPublish && (
-                <p className="mb-4 text-xs text-neutral-500">
-                  {t('requirementsHint')}
-                </p>
-              )}
-
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative">
-                  <button
-                    onClick={() => setShowConfirmDialog(true)}
-                    disabled={!canPublish || isPublishing}
-                    className="peer inline-flex items-center gap-2 bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    aria-describedby="publish-tooltip"
-                  >
-                    {isPublishing ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>{t('publishing')}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4" />
-                        <span>{t('publishToGitHub')}</span>
-                      </>
-                    )}
-                  </button>
-                  <div
-                    id="publish-tooltip"
-                    role="tooltip"
-                    className="pointer-events-none absolute left-0 top-full z-10 mt-2 w-72 border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 opacity-0 shadow-sm transition-all duration-150 peer-hover:opacity-100 peer-focus-visible:opacity-100"
-                  >
-                    {t('warning')}
-                  </div>
-                </div>
-
-                <a
-                  href="/viewer"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span>{t('viewerLink')}</span>
-                </a>
-              </div>
-
-              {lastPublished && (
-                <p className="mt-3 text-xs text-neutral-500">
-                  {t('lastPublish')}: {lastPublished}
-                </p>
-              )}
-            </>
+          {lastPublished && (
+            <span className="text-xs text-neutral-500">
+              {t('lastPublish')}: {lastPublished}
+            </span>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -26,6 +26,7 @@ interface DataTableProps<T> {
   paginate?: boolean;
   initialPageSize?: number;
   pageSizeOptions?: number[];
+  filterElement?: React.ReactNode;
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -44,6 +45,7 @@ export function DataTable<T>({
   paginate = false,
   initialPageSize = 25,
   pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
+  filterElement,
 }: DataTableProps<T>) {
   const tTable = useTranslations('table');
   const tCommon = useTranslations('common');
@@ -146,7 +148,7 @@ export function DataTable<T>({
 
   return (
     <div>
-      {(searchable || paginate) && (
+      {(searchable || paginate || filterElement) && (
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="relative md:max-w-sm md:flex-1">
             {searchable && (
@@ -166,6 +168,12 @@ export function DataTable<T>({
               </>
             )}
           </div>
+
+          {filterElement && (
+            <div className="flex items-center gap-2">
+              {filterElement}
+            </div>
+          )}
 
           {paginate && (
             <div className="flex items-center gap-2 text-xs text-neutral-600">

@@ -5,7 +5,6 @@ import { useAnalysisStore } from '@/stores/analysisStore';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
 import type { Step2Result } from '@/lib/analysis/types';
 import { getStep2Summary } from '@/lib/analysis/step2';
 import { toSafeCsvField } from '@/lib/csv';
@@ -88,10 +87,28 @@ export function Step2Routes() {
     },
   ];
 
+  const statusFilterElement = (
+    <div className="flex items-center gap-2 text-sm">
+      <label htmlFor="step2-status-filter" className="text-neutral-600">
+        {tTable('status')}:
+      </label>
+      <select
+        id="step2-status-filter"
+        value={statusFilter}
+        onChange={(event) => setStatusFilter(event.target.value as 'all' | 'check' | 'ok')}
+        className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
+      >
+        <option value="all">{tTable('all')}</option>
+        <option value="check">{tTable('check')}</option>
+        <option value="ok">{tTable('ok')}</option>
+      </select>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold mb-2">{t('title')}</h3>
             <p className="text-sm text-muted-foreground mb-3">
@@ -103,24 +120,8 @@ export function Step2Routes() {
             size="sm"
             onClick={() => exportToCSV(step2Results, config.minInad)}
           >
-            <Download className="w-4 h-4 mr-2" />
             {t('csvExport')}
           </Button>
-        </div>
-        <div className="mb-3 flex items-center gap-2 text-sm">
-          <label htmlFor="step2-status-filter" className="text-neutral-600">
-            {tTable('status')}:
-          </label>
-          <select
-            id="step2-status-filter"
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as 'all' | 'check' | 'ok')}
-            className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
-          >
-            <option value="all">{tTable('all')}</option>
-            <option value="check">{tTable('check')}</option>
-            <option value="ok">{tTable('ok')}</option>
-          </select>
         </div>
         <div className="flex gap-4 text-sm">
           <span>
@@ -147,6 +148,7 @@ export function Step2Routes() {
         searchableKeys={['airline', 'lastStop']}
         paginate
         initialPageSize={25}
+        filterElement={statusFilterElement}
       />
     </div>
   );
