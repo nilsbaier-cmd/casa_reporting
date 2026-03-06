@@ -133,6 +133,25 @@ export function Step3Density() {
     return classes.join(' ');
   };
 
+  const statusFilterElement = (
+    <div className="flex items-center gap-2 text-sm">
+      <label htmlFor="step3-status-filter" className="text-neutral-600">
+        {tTable('status')}:
+      </label>
+      <select
+        id="step3-status-filter"
+        value={statusFilter}
+        onChange={(event) => setStatusFilter(event.target.value as 'all' | 'critical' | 'watch' | 'clear')}
+        className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
+      >
+        <option value="all">{tTable('all')}</option>
+        <option value="critical">{tPriority('sanction')}</option>
+        <option value="watch">{tPriority('watchList')}</option>
+        <option value="clear">{tPriority('clear')}</option>
+      </select>
+    </div>
+  );
+
   if (!step3Results) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -144,7 +163,7 @@ export function Step3Density() {
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="font-semibold mb-2">{t('title')}</h3>
             <p className="text-sm text-muted-foreground mb-3">
@@ -159,23 +178,6 @@ export function Step3Density() {
             {t('csvExport')}
           </Button>
         </div>
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-          <label htmlFor="step3-status-filter" className="text-neutral-600">
-            {tTable('status')}:
-          </label>
-          <select
-            id="step3-status-filter"
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as 'all' | 'critical' | 'watch' | 'clear')}
-            className="border border-neutral-300 bg-white px-2 py-1 text-sm focus:outline-none"
-          >
-            <option value="all">{tTable('all')}</option>
-            <option value="critical">{tPriority('sanction')}</option>
-            <option value="watch">{tPriority('watchList')}</option>
-            <option value="clear">{tPriority('clear')}</option>
-          </select>
-        </div>
-
         <div className="flex flex-wrap gap-4 text-sm">
           <span>
             <strong>{summary.totalRoutes}</strong> {t('routes')}
@@ -232,6 +234,7 @@ export function Step3Density() {
         searchableKeys={['airline', 'lastStop', 'priority']}
         paginate
         initialPageSize={25}
+        filterElement={statusFilterElement}
       />
     </div>
   );

@@ -231,7 +231,7 @@ export default function AdminDashboardPage() {
                 {/* File Upload + Publish side by side */}
                 <div
                   className={cn(
-                    'grid gap-6 items-start',
+                    'grid gap-6 items-stretch',
                     activeTab === 'dashboard'
                       ? 'xl:grid-cols-[minmax(0,1fr)_340px]'
                       : 'grid-cols-1'
