@@ -30,12 +30,16 @@ export function ViewerInadTab() {
 
   const { summary, top10, trends, metadata } = publishedData;
 
-  // Get previous semester for comparison
+  // Compare included counts with included counts: trend entries only contain
+  // counted cases, while summary.totalInads also includes excluded refusal
+  // codes — mixing the two inflated the change (+171% instead of +4.5%).
   const currentIndex = trends.findIndex(t => t.semester === metadata.semester);
+  const currentTrend = currentIndex >= 0 ? trends[currentIndex] : null;
   const prevSemester = currentIndex > 0 ? trends[currentIndex - 1] : null;
-  const inadChange = prevSemester
-    ? ((summary.totalInads - prevSemester.inadCount) / prevSemester.inadCount) * 100
-    : null;
+  const inadChange =
+    currentTrend && prevSemester && prevSemester.inadCount > 0
+      ? ((currentTrend.inadCount - prevSemester.inadCount) / prevSemester.inadCount) * 100
+      : null;
 
   // Color palette for charts (blue tones for viewer portal)
   const colors = [

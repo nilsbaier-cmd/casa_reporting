@@ -28,17 +28,21 @@ export function ViewerPaxTab() {
 
   const { summary, trends, metadata, top10 } = publishedData;
 
-  // Calculate average PAX per semester from trends
-  const avgPax = trends.length > 0
-    ? trends.reduce((sum, t) => sum + t.paxCount, 0) / trends.length
+  // Average only over semesters that actually have BAZL data — semesters
+  // with paxCount 0 (no upload) would drag the average down artificially.
+  const trendsWithPax = trends.filter((t) => t.paxCount > 0);
+  const avgPax = trendsWithPax.length > 0
+    ? trendsWithPax.reduce((sum, t) => sum + t.paxCount, 0) / trendsWithPax.length
     : 0;
 
-  // Get previous semester PAX for comparison
+  // Get previous semester PAX for comparison (guard against semesters
+  // without BAZL data, which would yield a division by zero)
   const currentIndex = trends.findIndex(t => t.semester === metadata.semester);
   const prevSemester = currentIndex > 0 ? trends[currentIndex - 1] : null;
-  const paxChange = prevSemester
-    ? ((summary.totalPax - prevSemester.paxCount) / prevSemester.paxCount) * 100
-    : null;
+  const paxChange =
+    prevSemester && prevSemester.paxCount > 0
+      ? ((summary.totalPax - prevSemester.paxCount) / prevSemester.paxCount) * 100
+      : null;
 
   // Color palette for charts (blue tones for viewer)
   const colors = [
