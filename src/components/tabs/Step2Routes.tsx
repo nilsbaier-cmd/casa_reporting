@@ -7,32 +7,22 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Step2Result } from '@/lib/analysis/types';
 import { getStep2Summary } from '@/lib/analysis/step2';
-import { toSafeCsvField } from '@/lib/csv';
+import { downloadCsv } from '@/lib/csv';
 import { useTranslations } from 'next-intl';
 
 // CSV export with Swiss format (semicolon separator)
 function exportToCSV(data: Step2Result[], minInad: number) {
-  const headers = ['Airline', 'Last Stop', 'INAD Count', 'Status'];
-  const rows = data.map((row) => [
-    toSafeCsvField(row.airline),
-    toSafeCsvField(row.lastStop),
-    row.inadCount.toString(),
-    row.passesThreshold ? 'Check' : 'OK',
-  ]);
-
-  const csvContent = [
-    headers.join(';'),
-    ...rows.map((row) => row.join(';')),
-    '',
-    `Min INAD Threshold;${minInad}`,
-  ].join('\n');
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `casa-routes-step2-${new Date().toISOString().split('T')[0]}.csv`;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  downloadCsv(
+    `casa-routes-step2-${new Date().toISOString().split('T')[0]}.csv`,
+    ['Airline', 'Last Stop', 'INAD Count', 'Status'],
+    data.map((row) => [
+      row.airline,
+      row.lastStop,
+      row.inadCount,
+      row.passesThreshold ? 'Check' : 'OK',
+    ]),
+    [['Min INAD Threshold', minInad]]
+  );
 }
 
 export function Step2Routes() {
