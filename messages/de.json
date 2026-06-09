@@ -351,6 +351,7 @@
     "dataLoaded": "Daten geladen: {semester}",
     "publishedOn": "Publiziert am {date}",
     "totalInads": "Total INADs",
+    "includedNote": "davon {count} berücksichtigt",
     "sanctions": "Kritisch",
     "watchList": "Beobachtung",
     "compliant": "Konform",
@@ -413,7 +414,16 @@
     "densityTrend": "Dichte-Entwicklung",
     "densityTrendDesc": "Einreiseverweigerungen pro 1'000 Passagiere (‰) pro Semester (nur Semester mit BAZL-Daten)",
     "refusals": "Einreiseverweigerungen",
-    "swapSemesters": "Semester tauschen"
+    "swapSemesters": "Semester tauschen",
+    "vsPrevious": "vs. Vorsemester",
+    "noPaxData": "Keine PAX-Daten"
+  },
+  "charts": {
+    "densityTitle": "Dichte-Verteilung nach Route",
+    "densitySubtitle": "INAD-Dichte (‰) pro Route mit Klassifikations-Schwellenwerten",
+    "densityTopNote": "Top {count} Routen nach Dichte",
+    "median": "Median",
+    "critical": "Kritisch ab"
   },
   "landing": {
     "title": "CASA Reporting Dashboard",

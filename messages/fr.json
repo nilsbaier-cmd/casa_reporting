@@ -351,6 +351,7 @@
     "dataLoaded": "Données chargées : {semester}",
     "publishedOn": "Publié le {date}",
     "totalInads": "Total INAD",
+    "includedNote": "dont {count} pris en compte",
     "sanctions": "Critique",
     "watchList": "Surveillance",
     "compliant": "Conforme",
@@ -413,7 +414,16 @@
     "densityTrend": "Évolution de la densité",
     "densityTrendDesc": "Refus d'entrée pour 1'000 passagers (‰) par semestre (uniquement semestres avec données OFAC)",
     "refusals": "Refus d'entrée",
-    "swapSemesters": "Inverser les semestres"
+    "swapSemesters": "Inverser les semestres",
+    "vsPrevious": "vs semestre précédent",
+    "noPaxData": "Pas de données PAX"
+  },
+  "charts": {
+    "densityTitle": "Répartition de la densité par route",
+    "densitySubtitle": "Densité INAD (‰) par route avec seuils de classification",
+    "densityTopNote": "Top {count} routes par densité",
+    "median": "Médiane",
+    "critical": "Critique dès"
   },
   "landing": {
     "title": "Tableau de bord CASA Reporting",
