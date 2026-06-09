@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { Plane, MapPin, TrendingUp, Users } from 'lucide-react';
+import { CHART_COLORS_RED, CHART_TOOLTIP_STYLE } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import {
   BarChart,
@@ -69,11 +70,8 @@ export function PaxTab() {
     return { topLastStops, topAirlines, totalPax, uniqueRoutes };
   }, [bazlData, selectedSemester]);
 
-  // Color palette for charts
-  const colors = [
-    '#DC2626', '#E53935', '#EF5350', '#F44336', '#E57373',
-    '#EF9A9A', '#FFCDD2', '#B71C1C', '#C62828', '#D32F2F',
-  ];
+  // Shared chart theme: red scale for the admin portal
+  const colors = CHART_COLORS_RED;
 
   if (!bazlData) {
     return (
@@ -184,11 +182,7 @@ export function PaxTab() {
                   />
                   <Tooltip
                     formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('passengers')]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="pax" radius={[0, 2, 2, 0]}>
                     {topLastStops.map((_, index) => (
@@ -232,11 +226,7 @@ export function PaxTab() {
                   />
                   <Tooltip
                     formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('passengers')]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="pax" radius={[0, 2, 2, 0]}>
                     {topAirlines.map((_, index) => (

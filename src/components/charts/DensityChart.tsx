@@ -14,14 +14,23 @@ import {
   Cell,
 } from 'recharts';
 import { ChartWrapper } from '@/components/ui/ChartWrapper';
+import {
+  CLASSIFICATION_BAR_COLORS,
+  CLASSIFICATION_COLORS,
+  CHART_AXIS_TICK,
+  CHART_GRID_STROKE,
+  CHART_REFERENCE_NEUTRAL,
+  PORTAL_ACCENT,
+} from '@/lib/utils';
 
 /**
  * Horizontal density chart for Prüfstufe 3, shared between Admin and Viewer.
- * Routes are colored by classification; dashed reference lines mark the
- * median threshold and the high-priority limit so the classification logic
- * becomes visible instead of living only in table badges.
+ * Routes are colored by classification using the shared chart theme (pale
+ * fill + saturated stroke, mirroring the badge components); dashed reference
+ * lines mark the median threshold and the high-priority limit so the
+ * classification logic becomes visible instead of living only in badges.
  */
-export type DensityLevel = 'high' | 'watch' | 'clear';
+export type DensityClassification = keyof typeof CLASSIFICATION_COLORS;
 
 export interface DensityChartRoute {
   /** e.g. "LX → DUB" */
@@ -29,7 +38,7 @@ export interface DensityChartRoute {
   density: number;
   inadCount: number;
   pax: number;
-  level: DensityLevel;
+  classification: DensityClassification;
 }
 
 interface DensityChartProps {
@@ -40,12 +49,6 @@ interface DensityChartProps {
   highPriorityThreshold: number;
 }
 
-const LEVEL_COLORS: Record<DensityLevel, string> = {
-  high: '#DC2626',
-  watch: '#D97706',
-  clear: '#16A34A',
-};
-
 const MAX_BARS = 20;
 
 // recharts 3 injects active/payload at render time; its TooltipProps type
@@ -53,7 +56,7 @@ const MAX_BARS = 20;
 interface DensityTooltipProps {
   active?: boolean;
   payload?: ReadonlyArray<{ payload?: unknown }>;
-  levelLabels: Record<DensityLevel, string>;
+  classificationLabels: Record<DensityClassification, string>;
   localeFormat: string;
   inadLabel: string;
   paxLabel: string;
@@ -62,7 +65,7 @@ interface DensityTooltipProps {
 function DensityTooltip({
   active,
   payload,
-  levelLabels,
+  classificationLabels,
   localeFormat,
   inadLabel,
   paxLabel,
@@ -76,9 +79,9 @@ function DensityTooltip({
       <p className="text-neutral-600">
         <span
           className="inline-block w-2 h-2 mr-1.5"
-          style={{ backgroundColor: LEVEL_COLORS[route.level] }}
+          style={{ backgroundColor: CLASSIFICATION_COLORS[route.classification] }}
         />
-        {levelLabels[route.level]}
+        {classificationLabels[route.classification]}
       </p>
       <p className="text-neutral-600 mt-1">
         {route.density.toFixed(4)}‰ · {route.inadCount} {inadLabel} ·{' '}
@@ -103,9 +106,9 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
   if (chartRoutes.length === 0) return null;
 
   const truncated = routes.length > MAX_BARS;
-  const levelLabels: Record<DensityLevel, string> = {
-    high: tPriority('sanction'),
-    watch: tPriority('watchList'),
+  const classificationLabels: Record<DensityClassification, string> = {
+    sanction: tPriority('sanction'),
+    watchList: tPriority('watchList'),
     clear: tPriority('clear'),
   };
 
@@ -131,25 +134,25 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
             layout="vertical"
             margin={{ top: 28, right: 40, left: 30, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" horizontal={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} horizontal={false} />
             <XAxis
               type="number"
               domain={[0, Number((maxDensity * 1.15).toFixed(2))]}
               tickFormatter={(value: number) => value.toFixed(2) + '‰'}
-              tick={{ fontSize: 11, fill: '#737373' }}
+              tick={CHART_AXIS_TICK}
             />
             <YAxis
               type="category"
               dataKey="label"
               width={110}
-              tick={{ fontSize: 11, fill: '#404040' }}
+              tick={{ ...CHART_AXIS_TICK, fill: '#404040' }}
               tickLine={false}
             />
             <Tooltip
               cursor={{ fill: '#f5f5f5' }}
               content={
                 <DensityTooltip
-                  levelLabels={levelLabels}
+                  classificationLabels={classificationLabels}
                   localeFormat={localeFormat}
                   inadLabel={tTable('inads')}
                   paxLabel={tTable('pax')}
@@ -159,12 +162,12 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
             {threshold > 0 && (
               <ReferenceLine
                 x={threshold}
-                stroke="#2563EB"
+                stroke={CHART_REFERENCE_NEUTRAL}
                 strokeDasharray="6 4"
                 label={{
                   value: `${t('median')} ${threshold.toFixed(3)}‰`,
                   position: 'top',
-                  fill: '#2563EB',
+                  fill: CHART_REFERENCE_NEUTRAL,
                   fontSize: 11,
                 }}
               />
@@ -172,19 +175,23 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
             {highPriorityThreshold > threshold && (
               <ReferenceLine
                 x={highPriorityThreshold}
-                stroke="#DC2626"
+                stroke={PORTAL_ACCENT.red}
                 strokeDasharray="6 4"
                 label={{
                   value: `${t('critical')} ${highPriorityThreshold.toFixed(3)}‰`,
                   position: 'top',
-                  fill: '#DC2626',
+                  fill: PORTAL_ACCENT.red,
                   fontSize: 11,
                 }}
               />
             )}
-            <Bar dataKey="density" radius={[0, 2, 2, 0]} maxBarSize={22}>
+            <Bar dataKey="density" radius={[0, 2, 2, 0]} maxBarSize={22} strokeWidth={1.5}>
               {chartRoutes.map((route) => (
-                <Cell key={route.label} fill={LEVEL_COLORS[route.level]} />
+                <Cell
+                  key={route.label}
+                  fill={CLASSIFICATION_BAR_COLORS[route.classification].fill}
+                  stroke={CLASSIFICATION_BAR_COLORS[route.classification].stroke}
+                />
               ))}
             </Bar>
           </BarChart>
@@ -193,13 +200,16 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
 
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-neutral-600">
-        {(Object.keys(LEVEL_COLORS) as DensityLevel[]).map((level) => (
+        {(Object.keys(CLASSIFICATION_BAR_COLORS) as DensityClassification[]).map((level) => (
           <span key={level} className="inline-flex items-center gap-1.5">
             <span
-              className="inline-block w-2.5 h-2.5"
-              style={{ backgroundColor: LEVEL_COLORS[level] }}
+              className="inline-block w-2.5 h-2.5 border"
+              style={{
+                backgroundColor: CLASSIFICATION_BAR_COLORS[level].fill,
+                borderColor: CLASSIFICATION_BAR_COLORS[level].stroke,
+              }}
             />
-            {levelLabels[level]}
+            {classificationLabels[level]}
           </span>
         ))}
       </div>

@@ -17,6 +17,12 @@ import {
 import { TrendingUp, TrendingDown, Minus, Info, ArrowRightLeft } from 'lucide-react';
 import { ChartWrapper } from '@/components/ui/ChartWrapper';
 import {
+  PORTAL_ACCENT,
+  CHART_TOOLTIP_STYLE,
+  CHART_AXIS_TICK,
+  CHART_GRID_STROKE,
+} from '@/lib/utils';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -43,24 +49,17 @@ const ACCENTS: Record<
   { stroke: string; focusSelect: string; focusButton: string }
 > = {
   red: {
-    stroke: '#DC2626',
+    stroke: PORTAL_ACCENT.red,
     focusSelect: 'border-neutral-300 focus:border-red-600 focus:ring-red-600',
     focusButton: 'focus:ring-red-600',
   },
   blue: {
-    stroke: '#2563EB',
+    stroke: PORTAL_ACCENT.blue,
     focusSelect: 'border-neutral-300 focus:border-blue-600 focus:ring-blue-600',
     focusButton: 'focus:ring-blue-600',
   },
 };
 
-const TOOLTIP_CONTENT_STYLE = {
-  backgroundColor: '#fff',
-  border: '1px solid #e5e5e5',
-  borderRadius: 0,
-} as const;
-
-const AXIS_TICK = { fontSize: 11, fill: '#737373' } as const;
 
 /** Semester labels look like "2024 H1" — derive the month-range suffix. */
 function semesterPeriod(label: string, janJun: string, julDec: string): string {
@@ -109,7 +108,7 @@ function DeltaTooltip({
       : null;
 
   return (
-    <div style={TOOLTIP_CONTENT_STYLE} className="px-3 py-2 text-sm shadow-md">
+    <div style={CHART_TOOLTIP_STYLE} className="px-3 py-2 text-sm shadow-md">
       <p className="font-bold text-neutral-900">{label}</p>
       <p className="text-neutral-600">
         {seriesLabel}: <span className="font-semibold text-neutral-900">{format(value)}</span>
@@ -161,7 +160,7 @@ export function TrendCharts({ data, accent }: TrendChartsProps) {
   const gradientId = `trendGradient-${accent}`;
 
   const xAxis = (
-    <XAxis dataKey="semester" tick={AXIS_TICK} angle={-45} textAnchor="end" height={60} />
+    <XAxis dataKey="semester" tick={CHART_AXIS_TICK} angle={-45} textAnchor="end" height={60} />
   );
 
   return (
@@ -181,9 +180,9 @@ export function TrendCharts({ data, accent }: TrendChartsProps) {
                   <stop offset="95%" stopColor={stroke} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               {xAxis}
-              <YAxis tick={{ ...AXIS_TICK, fontSize: 12 }} />
+              <YAxis tick={{ ...CHART_AXIS_TICK, fontSize: 12 }} />
               <Tooltip
                 content={
                   <DeltaTooltip
@@ -234,11 +233,11 @@ export function TrendCharts({ data, accent }: TrendChartsProps) {
                     <stop offset="95%" stopColor={stroke} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 {xAxis}
                 <YAxis
                   tickFormatter={(value: number) => (value / 1_000_000).toFixed(1) + 'M'}
-                  tick={{ ...AXIS_TICK, fontSize: 12 }}
+                  tick={{ ...CHART_AXIS_TICK, fontSize: 12 }}
                 />
                 <Tooltip
                   content={
@@ -285,11 +284,11 @@ export function TrendCharts({ data, accent }: TrendChartsProps) {
                 syncId="casa-trends"
                 margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 {xAxis}
                 <YAxis
                   tickFormatter={(value: number) => value.toFixed(2) + '‰'}
-                  tick={{ ...AXIS_TICK, fontSize: 12 }}
+                  tick={{ ...CHART_AXIS_TICK, fontSize: 12 }}
                   domain={['auto', 'auto']}
                 />
                 <Tooltip

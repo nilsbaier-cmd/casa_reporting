@@ -16,6 +16,7 @@ import {
   Line,
 } from 'recharts';
 import { ChartWrapper } from '@/components/ui/ChartWrapper';
+import { CHART_COLORS, CHART_TOOLTIP_STYLE } from '@/lib/utils';
 
 export function ViewerPaxTab() {
   const { publishedData } = useViewerStore();
@@ -44,11 +45,8 @@ export function ViewerPaxTab() {
       ? ((summary.totalPax - prevSemester.paxCount) / prevSemester.paxCount) * 100
       : null;
 
-  // Color palette for charts (blue tones for viewer)
-  const colors = [
-    '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE',
-    '#1D4ED8', '#1E40AF', '#1E3A8A', '#3730A3', '#4F46E5',
-  ];
+  // Shared chart theme: blue scale for the viewer portal
+  const colors = CHART_COLORS;
 
   // Prepare data for PAX trend line chart
   const trendChartData = [...trends].map(t => ({
@@ -155,11 +153,7 @@ export function ViewerPaxTab() {
                     typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                     tPax('passengers'),
                   ]}
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e5e5',
-                    borderRadius: 0,
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
                 <Line
                   type="monotone"
@@ -207,11 +201,7 @@ export function ViewerPaxTab() {
                       typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                       t('inads'),
                     ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="count" radius={[0, 2, 2, 0]}>
                     {top10LastStopsData.map((_, index) => (
@@ -254,11 +244,7 @@ export function ViewerPaxTab() {
                       typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                       (props as { payload?: { fullName?: string } }).payload?.fullName || t('inads'),
                     ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="count" radius={[0, 2, 2, 0]}>
                     {top10AirlinesData.map((_, index) => (

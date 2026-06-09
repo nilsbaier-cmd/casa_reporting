@@ -18,6 +18,7 @@ import {
   Pie,
 } from 'recharts';
 import { ChartWrapper } from '@/components/ui/ChartWrapper';
+import { CHART_COLORS, INAD_SPLIT_COLORS, CHART_TOOLTIP_STYLE } from '@/lib/utils';
 
 export function ViewerInadTab() {
   const { publishedData } = useViewerStore();
@@ -41,14 +42,9 @@ export function ViewerInadTab() {
       ? ((currentTrend.inadCount - prevSemester.inadCount) / prevSemester.inadCount) * 100
       : null;
 
-  // Color palette for charts (blue tones for viewer portal)
-  const colors = [
-    '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE',
-    '#1D4ED8', '#1E40AF', '#1E3A8A', '#3730A3', '#4F46E5',
-  ];
-
-  // Pie chart colors for included/excluded distribution
-  const pieColors = ['#DC2626', '#737373'];
+  // Shared chart theme: blue scale for the viewer portal
+  const colors = CHART_COLORS;
+  const pieColors = [INAD_SPLIT_COLORS.included, INAD_SPLIT_COLORS.excluded];
 
   // Prepare data for INAD trend line chart
   const trendChartData = [...trends].map(t => ({
@@ -172,11 +168,7 @@ export function ViewerInadTab() {
                     typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                     tInad('cases'),
                   ]}
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e5e5',
-                    borderRadius: 0,
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -229,11 +221,7 @@ export function ViewerInadTab() {
                     typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                     name === 'inads' ? t('inads') : t('density'),
                   ]}
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e5e5',
-                    borderRadius: 0,
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
                 <Line
                   type="monotone"
@@ -279,11 +267,7 @@ export function ViewerInadTab() {
                     typeof value === 'number' ? `${value.toFixed(4)}‰` : '–',
                     t('density'),
                   ]}
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e5e5',
-                    borderRadius: 0,
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
                 <Line
                   type="monotone"
@@ -331,11 +315,7 @@ export function ViewerInadTab() {
                       typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                       t('inads'),
                     ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="count" radius={[0, 2, 2, 0]}>
                     {top10LastStopsData.map((_, index) => (
@@ -378,11 +358,7 @@ export function ViewerInadTab() {
                       typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                       (props as { payload?: { fullName?: string } }).payload?.fullName || t('inads'),
                     ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="count" radius={[0, 2, 2, 0]}>
                     {top10AirlinesData.map((_, index) => (

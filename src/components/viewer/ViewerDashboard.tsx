@@ -268,7 +268,6 @@ export function ViewerDashboard() {
 
   // Chart data for the density visualization (step 3)
   const densityChartRoutes = useMemo((): DensityChartRoute[] => {
-    const levelMap = { sanction: 'high', watchList: 'watch', clear: 'clear' } as const;
     return routes
       .filter((route) => route.density !== null)
       .map((route) => ({
@@ -276,7 +275,7 @@ export function ViewerDashboard() {
         density: route.density as number,
         inadCount: route.inadCount,
         pax: route.pax,
-        level: levelMap[route.classification],
+        classification: route.classification,
       }));
   }, [routes]);
 

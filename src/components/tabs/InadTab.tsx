@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { FileWarning, MapPin, Users, Globe } from 'lucide-react';
+import { CHART_COLORS_RED, INAD_SPLIT_COLORS, CHART_TOOLTIP_STYLE } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import {
   BarChart,
@@ -104,13 +105,9 @@ export function InadTab() {
     };
   }, [inadData, selectedSemester]);
 
-  // Color palette for charts
-  const redColors = [
-    '#DC2626', '#E53935', '#EF5350', '#F44336', '#E57373',
-    '#EF9A9A', '#FFCDD2', '#B71C1C', '#C62828', '#D32F2F',
-  ];
-
-  const pieColors = ['#DC2626', '#737373'];
+  // Shared chart theme: red scale for the admin portal
+  const redColors = CHART_COLORS_RED;
+  const pieColors = [INAD_SPLIT_COLORS.included, INAD_SPLIT_COLORS.excluded];
 
   if (!inadData) {
     return (
@@ -221,11 +218,7 @@ export function InadTab() {
                 </Pie>
                 <Tooltip
                   formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('cases')]}
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e5e5',
-                    borderRadius: 0,
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -281,11 +274,7 @@ export function InadTab() {
                   />
                   <Tooltip
                     formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('inadCases')]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="count" radius={[0, 2, 2, 0]}>
                     {topLastStops.map((_, index) => (
@@ -328,11 +317,7 @@ export function InadTab() {
                   />
                   <Tooltip
                     formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('inadCases')]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="count" radius={[0, 2, 2, 0]}>
                     {topAirlines.map((_, index) => (
@@ -378,11 +363,7 @@ export function InadTab() {
                     `${typeof value === 'number' ? value.toLocaleString(localeFormat) : '–'} ${t('cases')}${(props as { payload: { excluded: boolean } }).payload.excluded ? ` (${t('excluded').toLowerCase()})` : ''}`,
                     t('count'),
                   ]}
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e5e5',
-                    borderRadius: 0,
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
                 <Bar dataKey="value" radius={[2, 2, 0, 0]}>
                   {byRefusalCode.map((entry, index) => (

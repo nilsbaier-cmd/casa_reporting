@@ -37,9 +37,9 @@ function exportToCSV(data: Step3Result[], threshold: number) {
   );
 }
 
-const PRIORITY_TO_LEVEL = {
-  HIGH_PRIORITY: 'high',
-  WATCH_LIST: 'watch',
+const PRIORITY_TO_CLASSIFICATION = {
+  HIGH_PRIORITY: 'sanction',
+  WATCH_LIST: 'watchList',
   CLEAR: 'clear',
 } as const;
 
@@ -73,7 +73,7 @@ export function Step3Density() {
         density: row.density as number,
         inadCount: row.inadCount,
         pax: row.pax,
-        level: PRIORITY_TO_LEVEL[row.priority],
+        classification: PRIORITY_TO_CLASSIFICATION[row.priority],
       }));
   }, [normalizedResults]);
 
