@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import {
+  BarChart,
   LineChart,
   Line,
   XAxis,
@@ -13,6 +14,10 @@ import {
   AreaChart,
   Area,
   Brush,
+  ComposedChart,
+  Bar,
+  Cell,
+  ReferenceLine,
 } from 'recharts';
 import { TrendingUp, TrendingDown, Minus, Info, ArrowRightLeft } from 'lucide-react';
 import { ChartWrapper } from '@/components/ui/ChartWrapper';
@@ -21,6 +26,9 @@ import {
   CHART_TOOLTIP_STYLE,
   CHART_AXIS_TICK,
   CHART_GRID_STROKE,
+  CHART_REFERENCE_NEUTRAL,
+  PORTAL_BAR_COLORS,
+  CLASSIFICATION_BAR_COLORS,
 } from '@/lib/utils';
 import {
   Select,
@@ -46,15 +54,17 @@ export type TrendAccent = 'red' | 'blue';
 
 const ACCENTS: Record<
   TrendAccent,
-  { stroke: string; focusSelect: string; focusButton: string }
+  { stroke: string; barFill: string; focusSelect: string; focusButton: string }
 > = {
   red: {
     stroke: PORTAL_ACCENT.red,
+    barFill: PORTAL_BAR_COLORS.red.fill,
     focusSelect: 'border-neutral-300 focus:border-red-600 focus:ring-red-600',
     focusButton: 'focus:ring-red-600',
   },
   blue: {
     stroke: PORTAL_ACCENT.blue,
+    barFill: PORTAL_BAR_COLORS.blue.fill,
     focusSelect: 'border-neutral-300 focus:border-blue-600 focus:ring-blue-600',
     focusButton: 'focus:ring-blue-600',
   },
@@ -140,7 +150,7 @@ export function TrendCharts({ data, accent }: TrendChartsProps) {
   const t = useTranslations('trends');
   const locale = useLocale();
   const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
-  const { stroke } = ACCENTS[accent];
+  const { stroke, barFill } = ACCENTS[accent];
 
   // One series for all three charts: semesters without BAZL data keep their
   // x-position but render as gaps (null), so the x-axes line up and the
@@ -154,6 +164,23 @@ export function TrendCharts({ data, accent }: TrendChartsProps) {
     [data]
   );
   const hasPaxData = useMemo(() => data.some((d) => d.paxCount > 0), [data]);
+
+  // Year-over-year change per semester (vs. the same half one year earlier),
+  // which removes the strong seasonal H1/H2 pattern from the comparison.
+  const yoyData = useMemo(() => {
+    const byLabel = new Map(data.map((d) => [d.semester, d]));
+    return data
+      .map((d) => {
+        const [yearStr, half] = d.semester.split(' ');
+        const prev = byLabel.get(`${Number(yearStr) - 1} ${half}`);
+        if (!prev || prev.inadCount === 0) return null;
+        return {
+          semester: d.semester,
+          change: ((d.inadCount - prev.inadCount) / prev.inadCount) * 100,
+        };
+      })
+      .filter((d): d is { semester: string; change: number } => d !== null);
+  }, [data]);
 
   // Brush is only useful once the series is long enough to feel crowded.
   const showBrush = data.length > 8;
@@ -322,6 +349,136 @@ export function TrendCharts({ data, accent }: TrendChartsProps) {
                   />
                 )}
               </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartWrapper>
+      )}
+
+      {/* INAD vs. traffic volume: dual-axis combination of both measures.
+          Shows whether INAD development merely follows traffic growth or
+          diverges from it — the actual risk signal for the business. */}
+      {hasPaxData && (
+        <ChartWrapper title={t('inadVsPax')} subtitle={t('inadVsPaxDesc')}>
+          <div className={showBrush ? 'h-80' : 'h-72'}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
+                data={chartData}
+                syncId="casa-trends"
+                margin={{ top: 10, right: 10, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                {xAxis}
+                <YAxis
+                  yAxisId="inad"
+                  tick={{ ...CHART_AXIS_TICK, fontSize: 12 }}
+                  label={{
+                    value: t('refusals'),
+                    angle: -90,
+                    position: 'insideLeft',
+                    style: { fontSize: 11, fill: '#737373' },
+                  }}
+                />
+                <YAxis
+                  yAxisId="pax"
+                  orientation="right"
+                  tickFormatter={(value: number) => (value / 1_000_000).toFixed(1) + 'M'}
+                  tick={{ ...CHART_AXIS_TICK, fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value, name) => [
+                    typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                    name === 'inadCount' ? t('refusals') : t('passengers'),
+                  ]}
+                />
+                <Bar
+                  yAxisId="inad"
+                  dataKey="inadCount"
+                  fill={barFill}
+                  stroke={stroke}
+                  strokeWidth={1}
+                  maxBarSize={18}
+                />
+                <Line
+                  yAxisId="pax"
+                  type="monotone"
+                  dataKey="paxCount"
+                  stroke={CHART_REFERENCE_NEUTRAL}
+                  strokeWidth={2}
+                  dot={false}
+                />
+                {showBrush && (
+                  <Brush
+                    dataKey="semester"
+                    height={24}
+                    stroke={stroke}
+                    travellerWidth={8}
+                    fill="#fafafa"
+                    startIndex={0}
+                    endIndex={chartData.length - 1}
+                  />
+                )}
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-neutral-600">
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                className="inline-block w-2.5 h-2.5 border"
+                style={{ backgroundColor: barFill, borderColor: stroke }}
+              />
+              {t('refusals')}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                className="inline-block w-4 h-0.5"
+                style={{ backgroundColor: CHART_REFERENCE_NEUTRAL }}
+              />
+              {t('passengers')}
+            </span>
+          </div>
+        </ChartWrapper>
+      )}
+
+      {/* Year-over-year change: same half vs. previous year, so the strong
+          seasonal H1/H2 pattern does not distort the comparison. */}
+      {yoyData.length >= 3 && (
+        <ChartWrapper title={t('yoyChange')} subtitle={t('yoyChangeDesc')}>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={yoyData} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                <XAxis
+                  dataKey="semester"
+                  tick={CHART_AXIS_TICK}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis
+                  tickFormatter={(value: number) => `${value > 0 ? '+' : ''}${value.toFixed(0)}%`}
+                  tick={{ ...CHART_AXIS_TICK, fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  formatter={(value) => [
+                    typeof value === 'number'
+                      ? `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
+                      : '–',
+                    t('yoyTooltipLabel'),
+                  ]}
+                />
+                <ReferenceLine y={0} stroke={CHART_REFERENCE_NEUTRAL} />
+                <Bar dataKey="change" maxBarSize={18} radius={[2, 2, 0, 0]} strokeWidth={1}>
+                  {yoyData.map((entry) => (
+                    <Cell
+                      key={entry.semester}
+                      fill={entry.change > 0 ? CLASSIFICATION_BAR_COLORS.sanction.fill : CLASSIFICATION_BAR_COLORS.clear.fill}
+                      stroke={entry.change > 0 ? CLASSIFICATION_BAR_COLORS.sanction.stroke : CLASSIFICATION_BAR_COLORS.clear.stroke}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </ChartWrapper>

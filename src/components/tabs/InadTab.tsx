@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { FileWarning, MapPin, Users, Globe } from 'lucide-react';
-import { CHART_COLORS_RED, INAD_SPLIT_COLORS, CHART_TOOLTIP_STYLE } from '@/lib/utils';
+import { CHART_COLORS_RED, INAD_SPLIT_COLORS, CHART_TOOLTIP_STYLE, CHART_AXIS_TICK, CHART_GRID_STROKE } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import {
   BarChart,
@@ -29,7 +29,7 @@ export function InadTab() {
   const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   // Calculate aggregated data for the selected semester
-  const { topLastStops, topAirlines, totalInad, includedInad, excludedInad, byRefusalCode } = useMemo(() => {
+  const { topLastStops, topAirlines, totalInad, includedInad, excludedInad, byRefusalCode, byMonth } = useMemo(() => {
     if (!inadData || !selectedSemester) {
       return {
         topLastStops: [],
@@ -38,6 +38,7 @@ export function InadTab() {
         includedInad: 0,
         excludedInad: 0,
         byRefusalCode: [],
+        byMonth: [],
       };
     }
 
@@ -95,6 +96,16 @@ export function InadTab() {
       .sort((a, b) => b.value - a.value)
       .slice(0, 10);
 
+    // Monthly course within the semester (stacked included/excluded)
+    const byMonth = Array.from({ length: 6 }, (_, i) => {
+      const month = startMonth + i;
+      return {
+        month,
+        included: filtered.filter((r) => r.month === month && r.included).length,
+        excluded: filtered.filter((r) => r.month === month && !r.included).length,
+      };
+    });
+
     return {
       topLastStops,
       topAirlines,
@@ -102,12 +113,16 @@ export function InadTab() {
       includedInad: included.length,
       excludedInad: excluded.length,
       byRefusalCode,
+      byMonth,
     };
   }, [inadData, selectedSemester]);
 
   // Shared chart theme: red scale for the admin portal
   const redColors = CHART_COLORS_RED;
   const pieColors = [INAD_SPLIT_COLORS.included, INAD_SPLIT_COLORS.excluded];
+
+  const monthLabel = (month: number) =>
+    new Date(2000, month - 1, 1).toLocaleDateString(localeFormat, { month: 'short' });
 
   if (!inadData) {
     return (
@@ -188,6 +203,56 @@ export function InadTab() {
           </p>
         </div>
       </div>
+
+      {/* Monthly course within the semester */}
+      <ChartWrapper title={t('monthlyTitle')} subtitle={t('monthlySubtitle')}>
+        {byMonth.some((m) => m.included + m.excluded > 0) ? (
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={byMonth} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                <XAxis dataKey="month" tickFormatter={monthLabel} tick={CHART_AXIS_TICK} />
+                <YAxis tick={{ ...CHART_AXIS_TICK, fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  labelFormatter={(value) => monthLabel(Number(value))}
+                  formatter={(value, name) => [
+                    typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                    name === 'included' ? t('includedLabel') : t('excludedLabel'),
+                  ]}
+                />
+                <Bar
+                  dataKey="included"
+                  stackId="inad"
+                  fill={INAD_SPLIT_COLORS.included}
+                  maxBarSize={40}
+                />
+                <Bar
+                  dataKey="excluded"
+                  stackId="inad"
+                  fill={INAD_SPLIT_COLORS.excluded}
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={40}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-64 flex items-center justify-center text-neutral-400">
+            {t('noDataAvailable')}
+          </div>
+        )}
+        <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-neutral-600">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block w-2.5 h-2.5" style={{ backgroundColor: INAD_SPLIT_COLORS.included }} />
+            {t('includedLabel')}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-block w-2.5 h-2.5" style={{ backgroundColor: INAD_SPLIT_COLORS.excluded }} />
+            {t('excludedLabel')}
+          </span>
+        </div>
+      </ChartWrapper>
 
       {/* Included vs Excluded Pie Chart */}
       <ChartWrapper

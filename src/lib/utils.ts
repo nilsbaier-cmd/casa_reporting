@@ -62,6 +62,13 @@ export const CLASSIFICATION_BAR_COLORS = {
   clear: { fill: '#BBF7D0', stroke: '#16A34A' },
 } as const;
 
+/** Portal-accent colors for large filled bar areas (pale 200-fill +
+ *  saturated 600-stroke), analog to CLASSIFICATION_BAR_COLORS. */
+export const PORTAL_BAR_COLORS = {
+  red: { fill: '#FECACA', stroke: '#DC2626' },
+  blue: { fill: '#BFDBFE', stroke: '#2563EB' },
+} as const;
+
 /** Included vs. excluded INAD split (red-600 / neutral-500) */
 export const INAD_SPLIT_COLORS = {
   included: '#DC2626',
