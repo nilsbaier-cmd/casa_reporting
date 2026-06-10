@@ -132,7 +132,7 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
           <BarChart
             data={chartRoutes}
             layout="vertical"
-            margin={{ top: 28, right: 40, left: 30, bottom: 5 }}
+            margin={{ top: 44, right: 40, left: 30, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} horizontal={false} />
             <XAxis
@@ -159,6 +159,9 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
                 />
               }
             />
+            {/* The two labels sit on separate rows: when an outlier route
+                stretches the x-domain, both reference lines crowd together
+                and same-row labels would overlap (e.g. semester 2022 H2). */}
             {threshold > 0 && (
               <ReferenceLine
                 x={threshold}
@@ -180,6 +183,7 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
                 label={{
                   value: `${t('critical')} ${highPriorityThreshold.toFixed(3)}‰`,
                   position: 'top',
+                  dy: -16,
                   fill: PORTAL_ACCENT.red,
                   fontSize: 11,
                 }}
