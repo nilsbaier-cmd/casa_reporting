@@ -137,8 +137,10 @@ export function DensityChart({ routes, threshold, highPriorityThreshold }: Densi
             <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} horizontal={false} />
             <XAxis
               type="number"
-              domain={[0, Number((maxDensity * 1.15).toFixed(2))]}
-              tickFormatter={(value: number) => value.toFixed(2) + '‰'}
+              domain={[0, maxDensity * 1.15]}
+              tickFormatter={(value: number) =>
+                (value < 0.01 ? value.toFixed(4) : value.toFixed(2)) + '‰'
+              }
               tick={CHART_AXIS_TICK}
             />
             <YAxis

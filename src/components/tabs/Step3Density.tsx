@@ -208,7 +208,12 @@ export function Step3Density() {
       <DensityChart
         routes={densityChartRoutes}
         threshold={threshold || 0}
-        highPriorityThreshold={(threshold || 0) * config.highPriorityMultiplier}
+        // Classification additionally requires density >= minDensity, so the
+        // effective density cutoff for "Kritisch" is the larger of the two.
+        highPriorityThreshold={Math.max(
+          (threshold || 0) * config.highPriorityMultiplier,
+          config.minDensity
+        )}
       />
 
       {/* Klassifizierungskriterien */}

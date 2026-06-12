@@ -586,7 +586,12 @@ export function ViewerDashboard() {
         <DensityChart
           routes={densityChartRoutes}
           threshold={summary.medianDensity}
-          highPriorityThreshold={summary.medianDensity * config.highPriorityMultiplier}
+          // Classification additionally requires density >= minDensity, so the
+          // effective density cutoff for "Kritisch" is the larger of the two.
+          highPriorityThreshold={Math.max(
+            summary.medianDensity * config.highPriorityMultiplier,
+            config.minDensity
+          )}
         />
       )}
 
