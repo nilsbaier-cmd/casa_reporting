@@ -14,7 +14,6 @@ import {
 
 export function SemesterSelector() {
   const t = useTranslations('semester');
-  const tCommon = useTranslations('common');
   const {
     availableSemesters,
     selectedSemester,

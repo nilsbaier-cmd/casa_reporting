@@ -4,7 +4,8 @@ import { useState, useMemo, useCallback } from 'react';
 import { useViewerStore } from '@/stores/viewerStore';
 import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { toSafeCsvField } from '@/lib/csv';
+import { downloadCsv } from '@/lib/csv';
+import { DensityChart, type DensityChartRoute } from '@/components/charts/DensityChart';
 import {
   Users,
   AlertTriangle,
@@ -91,97 +92,50 @@ export function ViewerDashboard() {
 
   // CSV Export for Step 1 (Airlines)
   const handleExportStep1Csv = useCallback(() => {
-    const headers = ['Airline', 'Airline Name', 'INADs', 'Status'];
-    const rows = airlines.map((row) => [
-      toSafeCsvField(row.airline),
-      toSafeCsvField(row.airlineName),
-      row.inadCount.toString(),
-      row.aboveThreshold ? 'Check' : 'OK',
-    ]);
-
-    const csvContent = [
-      headers.join(';'),
-      ...rows.map((row) => row.join(';')),
-      '',
-      `Min INAD Threshold;${config.minInad}`,
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `casa-airlines-${semester.replace(' ', '-')}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadCsv(
+      `casa-airlines-${semester.replace(' ', '-')}.csv`,
+      ['Airline', 'Airline Name', 'INADs', 'Status'],
+      airlines.map((row) => [
+        row.airline,
+        row.airlineName,
+        row.inadCount,
+        row.aboveThreshold ? 'Check' : 'OK',
+      ]),
+      [['Min INAD Threshold', config.minInad]]
+    );
   }, [airlines, config.minInad, semester]);
 
   // CSV Export for Step 2 (Routes)
   const handleExportStep2Csv = useCallback(() => {
-    const headers = ['Airline', 'Airline Name', 'Last Stop', 'INADs', 'Status'];
-    const rows = routes.map((row) => [
-      toSafeCsvField(row.airline),
-      toSafeCsvField(row.airlineName),
-      toSafeCsvField(row.lastStop),
-      row.inadCount.toString(),
-      row.inadCount >= config.minInad ? 'Check' : 'OK',
-    ]);
-
-    const csvContent = [
-      headers.join(';'),
-      ...rows.map((row) => row.join(';')),
-      '',
-      `Min INAD Threshold;${config.minInad}`,
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `casa-routes-step2-${semester.replace(' ', '-')}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadCsv(
+      `casa-routes-step2-${semester.replace(' ', '-')}.csv`,
+      ['Airline', 'Airline Name', 'Last Stop', 'INADs', 'Status'],
+      routes.map((row) => [
+        row.airline,
+        row.airlineName,
+        row.lastStop,
+        row.inadCount,
+        row.inadCount >= config.minInad ? 'Check' : 'OK',
+      ]),
+      [['Min INAD Threshold', config.minInad]]
+    );
   }, [routes, config.minInad, semester]);
 
   // CSV Export for Step 3 (Routes with density)
   const handleExportCsv = useCallback(() => {
-    const headers = [
-      'Airline',
-      'Airline Name',
-      'Last Stop',
-      'INADs',
-      'PAX',
-      'Density (permille)',
-      'Classification',
-    ];
-
-    const rows = routes.map((route) => [
-      toSafeCsvField(route.airline),
-      toSafeCsvField(route.airlineName),
-      toSafeCsvField(route.lastStop),
-      route.inadCount.toString(),
-      route.pax.toString(),
-      route.density !== null ? route.density.toFixed(4) : '',
-      toSafeCsvField(route.classification),
-    ]);
-
-    const csvContent = [
-      headers.join(';'),
-      ...rows.map((row) => row.join(';')),
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `casa-routes-${semester.replace(' ', '-')}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadCsv(
+      `casa-routes-${semester.replace(' ', '-')}.csv`,
+      ['Airline', 'Airline Name', 'Last Stop', 'INADs', 'PAX', 'Density (permille)', 'Classification'],
+      routes.map((route) => [
+        route.airline,
+        route.airlineName,
+        route.lastStop,
+        route.inadCount,
+        route.pax,
+        route.density !== null ? route.density.toFixed(4) : '',
+        route.classification,
+      ])
+    );
   }, [routes, semester]);
 
   // DataTable columns for Step 1 (Airlines)
@@ -312,6 +266,19 @@ export function ViewerDashboard() {
     },
   ];
 
+  // Chart data for the density visualization (step 3)
+  const densityChartRoutes = useMemo((): DensityChartRoute[] => {
+    return routes
+      .filter((route) => route.density !== null)
+      .map((route) => ({
+        label: `${route.airline} → ${route.lastStop}`,
+        density: route.density as number,
+        inadCount: route.inadCount,
+        pax: route.pax,
+        classification: route.classification,
+      }));
+  }, [routes]);
+
   // Sort routes by classification priority then density - memoized for performance
   const sortedRoutes = useMemo(() => {
     return [...routes].sort((a, b) => {
@@ -372,6 +339,11 @@ export function ViewerDashboard() {
           <p className="text-3xl font-bold text-neutral-900">
             {summary.totalInads.toLocaleString(localeFormat)}
           </p>
+          {summary.includedInads > 0 && summary.includedInads !== summary.totalInads && (
+            <p className="text-xs text-neutral-500 mt-1">
+              {t('includedNote', { count: summary.includedInads.toLocaleString(localeFormat) })}
+            </p>
+          )}
         </div>
 
         <div className="bg-white border border-neutral-200 p-5">
@@ -608,6 +580,20 @@ export function ViewerDashboard() {
           </>
         )}
       </section>
+
+      {/* Density visualization for step 3 */}
+      {activeStep === 3 && (
+        <DensityChart
+          routes={densityChartRoutes}
+          threshold={summary.medianDensity}
+          // Classification additionally requires density >= minDensity, so the
+          // effective density cutoff for "Kritisch" is the larger of the two.
+          highPriorityThreshold={Math.max(
+            summary.medianDensity * config.highPriorityMultiplier,
+            config.minDensity
+          )}
+        />
+      )}
 
       {/* Classification Criteria Section */}
       <ClassificationCriteria config={config} medianThreshold={summary.medianDensity} />

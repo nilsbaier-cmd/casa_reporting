@@ -9,7 +9,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Step3Result } from '@/lib/analysis/types';
 import { getStep3Summary } from '@/lib/analysis/step3';
 import { PRIORITY_LABELS } from '@/lib/analysis/constants';
-import { toSafeCsvField } from '@/lib/csv';
+import { downloadCsv } from '@/lib/csv';
+import { DensityChart, type DensityChartRoute } from '@/components/charts/DensityChart';
 import { useTranslations, useLocale } from 'next-intl';
 
 // Priority order for sorting (above threshold first, then below)
@@ -21,29 +22,26 @@ const PRIORITY_ORDER: Record<string, number> = {
 const EMPTY_STEP3_RESULTS: Step3Result[] = [];
 
 function exportToCSV(data: Step3Result[], threshold: number) {
-  const headers = ['Airline', 'Last Stop', 'INAD Count', 'PAX', 'Density (‰)', 'Priority'];
-  const rows = data.map((row) => [
-    toSafeCsvField(row.airline),
-    toSafeCsvField(row.lastStop),
-    row.inadCount.toString(),
-    row.pax.toString(),
-    toSafeCsvField(row.density?.toFixed(3) || 'N/A'),
-    toSafeCsvField(PRIORITY_LABELS[row.priority]),
-  ]);
-
-  const csvContent = [
-    headers.join(';'),
-    ...rows.map((row) => row.join(';')),
-    '',
-    `Threshold;${threshold.toFixed(3)}‰`,
-  ].join('\n');
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `inad_analysis_step3_${new Date().toISOString().split('T')[0]}.csv`;
-  link.click();
+  downloadCsv(
+    `inad_analysis_step3_${new Date().toISOString().split('T')[0]}.csv`,
+    ['Airline', 'Last Stop', 'INAD Count', 'PAX', 'Density (‰)', 'Priority'],
+    data.map((row) => [
+      row.airline,
+      row.lastStop,
+      row.inadCount,
+      row.pax,
+      row.density?.toFixed(3) ?? 'N/A',
+      PRIORITY_LABELS[row.priority],
+    ]),
+    [['Threshold', `${threshold.toFixed(3)}‰`]]
+  );
 }
+
+const PRIORITY_TO_CLASSIFICATION = {
+  HIGH_PRIORITY: 'sanction',
+  WATCH_LIST: 'watchList',
+  CLEAR: 'clear',
+} as const;
 
 export function Step3Density() {
   const t = useTranslations('steps.step3');
@@ -65,6 +63,18 @@ export function Step3Density() {
       // Secondary sort by density (descending) within same priority
       return (b.density ?? 0) - (a.density ?? 0);
     });
+  }, [normalizedResults]);
+
+  const densityChartRoutes = useMemo((): DensityChartRoute[] => {
+    return normalizedResults
+      .filter((row) => row.density !== null)
+      .map((row) => ({
+        label: `${row.airline} → ${row.lastStop}`,
+        density: row.density as number,
+        inadCount: row.inadCount,
+        pax: row.pax,
+        classification: PRIORITY_TO_CLASSIFICATION[row.priority],
+      }));
   }, [normalizedResults]);
 
   const filteredResults = useMemo(() => {
@@ -193,6 +203,18 @@ export function Step3Density() {
           </span>
         </div>
       </div>
+
+      {/* Dichte-Visualisierung mit Schwellenwert-Linien */}
+      <DensityChart
+        routes={densityChartRoutes}
+        threshold={threshold || 0}
+        // Classification additionally requires density >= minDensity, so the
+        // effective density cutoff for "Kritisch" is the larger of the two.
+        highPriorityThreshold={Math.max(
+          (threshold || 0) * config.highPriorityMultiplier,
+          config.minDensity
+        )}
+      />
 
       {/* Klassifizierungskriterien */}
       <Card>

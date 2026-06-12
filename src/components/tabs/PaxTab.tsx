@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useAnalysisStore } from '@/stores/analysisStore';
 import { Plane, MapPin, TrendingUp, Users } from 'lucide-react';
+import { CHART_COLORS_RED, CHART_TOOLTIP_STYLE, CHART_AXIS_TICK, CHART_GRID_STROKE, PORTAL_BAR_COLORS } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
 import {
   BarChart,
@@ -23,9 +24,9 @@ export function PaxTab() {
   const localeFormat = locale === 'fr' ? 'fr-CH' : 'de-CH';
 
   // Calculate aggregated data for the selected semester
-  const { topLastStops, topAirlines, totalPax, uniqueRoutes } = useMemo(() => {
+  const { topLastStops, topAirlines, totalPax, uniqueRoutes, paxByMonth } = useMemo(() => {
     if (!bazlData || !selectedSemester) {
-      return { topLastStops: [], topAirlines: [], totalPax: 0, uniqueRoutes: 0 };
+      return { topLastStops: [], topAirlines: [], totalPax: 0, uniqueRoutes: 0, paxByMonth: [] };
     }
 
     // Filter by semester
@@ -66,14 +67,25 @@ export function PaxTab() {
     // Unique routes (airline + airport combinations)
     const uniqueRoutes = new Set(filtered.map((r) => `${r.airline}-${r.airport}`)).size;
 
-    return { topLastStops, topAirlines, totalPax, uniqueRoutes };
+    // Monthly passenger volume within the semester
+    const paxByMonth = Array.from({ length: 6 }, (_, i) => {
+      const month = startMonth + i;
+      return {
+        month,
+        pax: filtered
+          .filter((r) => r.month === month)
+          .reduce((sum, r) => sum + r.pax, 0),
+      };
+    });
+
+    return { topLastStops, topAirlines, totalPax, uniqueRoutes, paxByMonth };
   }, [bazlData, selectedSemester]);
 
-  // Color palette for charts
-  const colors = [
-    '#DC2626', '#E53935', '#EF5350', '#F44336', '#E57373',
-    '#EF9A9A', '#FFCDD2', '#B71C1C', '#C62828', '#D32F2F',
-  ];
+  // Shared chart theme: red scale for the admin portal
+  const colors = CHART_COLORS_RED;
+
+  const monthLabel = (month: number) =>
+    new Date(2000, month - 1, 1).toLocaleDateString(localeFormat, { month: 'short' });
 
   if (!bazlData) {
     return (
@@ -155,6 +167,44 @@ export function PaxTab() {
         </div>
       </div>
 
+      {/* Monthly course within the semester */}
+      <ChartWrapper title={t('monthlyTitle')} subtitle={t('monthlySubtitle')}>
+        {paxByMonth.some((m) => m.pax > 0) ? (
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={paxByMonth} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                <XAxis dataKey="month" tickFormatter={monthLabel} tick={CHART_AXIS_TICK} />
+                <YAxis
+                  tickFormatter={(value: number) => `${(value / 1_000_000).toFixed(1)}M`}
+                  tick={{ ...CHART_AXIS_TICK, fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  labelFormatter={(value) => monthLabel(Number(value))}
+                  formatter={(value) => [
+                    typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
+                    t('passengers'),
+                  ]}
+                />
+                <Bar
+                  dataKey="pax"
+                  fill={PORTAL_BAR_COLORS.red.fill}
+                  stroke={PORTAL_BAR_COLORS.red.stroke}
+                  strokeWidth={1}
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={40}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-64 flex items-center justify-center text-neutral-400">
+            {t('noDataAvailable')}
+          </div>
+        )}
+      </ChartWrapper>
+
       {/* Charts Grid */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Top 10 Last Stops */}
@@ -184,11 +234,7 @@ export function PaxTab() {
                   />
                   <Tooltip
                     formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('passengers')]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="pax" radius={[0, 2, 2, 0]}>
                     {topLastStops.map((_, index) => (
@@ -232,11 +278,7 @@ export function PaxTab() {
                   />
                   <Tooltip
                     formatter={(value) => [typeof value === 'number' ? value.toLocaleString(localeFormat) : '–', t('passengers')]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="pax" radius={[0, 2, 2, 0]}>
                     {topAirlines.map((_, index) => (

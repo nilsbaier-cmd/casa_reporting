@@ -16,6 +16,7 @@ import {
   Line,
 } from 'recharts';
 import { ChartWrapper } from '@/components/ui/ChartWrapper';
+import { CHART_COLORS, CHART_TOOLTIP_STYLE } from '@/lib/utils';
 
 export function ViewerPaxTab() {
   const { publishedData } = useViewerStore();
@@ -28,23 +29,24 @@ export function ViewerPaxTab() {
 
   const { summary, trends, metadata, top10 } = publishedData;
 
-  // Calculate average PAX per semester from trends
-  const avgPax = trends.length > 0
-    ? trends.reduce((sum, t) => sum + t.paxCount, 0) / trends.length
+  // Average only over semesters that actually have BAZL data — semesters
+  // with paxCount 0 (no upload) would drag the average down artificially.
+  const trendsWithPax = trends.filter((t) => t.paxCount > 0);
+  const avgPax = trendsWithPax.length > 0
+    ? trendsWithPax.reduce((sum, t) => sum + t.paxCount, 0) / trendsWithPax.length
     : 0;
 
-  // Get previous semester PAX for comparison
+  // Get previous semester PAX for comparison (guard against semesters
+  // without BAZL data, which would yield a division by zero)
   const currentIndex = trends.findIndex(t => t.semester === metadata.semester);
   const prevSemester = currentIndex > 0 ? trends[currentIndex - 1] : null;
-  const paxChange = prevSemester
-    ? ((summary.totalPax - prevSemester.paxCount) / prevSemester.paxCount) * 100
-    : null;
+  const paxChange =
+    prevSemester && prevSemester.paxCount > 0
+      ? ((summary.totalPax - prevSemester.paxCount) / prevSemester.paxCount) * 100
+      : null;
 
-  // Color palette for charts (blue tones for viewer)
-  const colors = [
-    '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE',
-    '#1D4ED8', '#1E40AF', '#1E3A8A', '#3730A3', '#4F46E5',
-  ];
+  // Shared chart theme: blue scale for the viewer portal
+  const colors = CHART_COLORS;
 
   // Prepare data for PAX trend line chart
   const trendChartData = [...trends].map(t => ({
@@ -151,11 +153,7 @@ export function ViewerPaxTab() {
                     typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                     tPax('passengers'),
                   ]}
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e5e5',
-                    borderRadius: 0,
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
                 <Line
                   type="monotone"
@@ -203,11 +201,7 @@ export function ViewerPaxTab() {
                       typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                       t('inads'),
                     ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="count" radius={[0, 2, 2, 0]}>
                     {top10LastStopsData.map((_, index) => (
@@ -250,11 +244,7 @@ export function ViewerPaxTab() {
                       typeof value === 'number' ? value.toLocaleString(localeFormat) : '–',
                       (props as { payload?: { fullName?: string } }).payload?.fullName || t('inads'),
                     ]}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e5e5',
-                      borderRadius: 0,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                   <Bar dataKey="count" radius={[0, 2, 2, 0]}>
                     {top10AirlinesData.map((_, index) => (

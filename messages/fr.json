@@ -194,7 +194,9 @@
     "casesExcluded": "Cas (exclus)",
     "count": "Nombre",
     "routes": "Routes",
-    "grayBarsNote": "Les barres grises indiquent les codes exclus (raisons administratives)"
+    "grayBarsNote": "Les barres grises indiquent les codes exclus (raisons administratives)",
+    "monthlyTitle": "Évolution mensuelle",
+    "monthlySubtitle": "Cas INAD par mois dans le semestre sélectionné, empilés selon pris en compte et exclus"
   },
   "pax": {
     "title": "Aperçu des données PAX",
@@ -211,7 +213,9 @@
     "top10LastStopsSubtitle": "Par nombre de passagers (dernière escale)",
     "top10Airlines": "Top 10 compagnies aériennes",
     "top10AirlinesSubtitle": "Par nombre de passagers",
-    "noDataAvailable": "Aucune donnée disponible"
+    "noDataAvailable": "Aucune donnée disponible",
+    "monthlyTitle": "Évolution mensuelle",
+    "monthlySubtitle": "Passagers par mois dans le semestre sélectionné"
   },
   "docs": {
     "title": "CASA Tableau de bord",
@@ -351,6 +355,7 @@
     "dataLoaded": "Données chargées : {semester}",
     "publishedOn": "Publié le {date}",
     "totalInads": "Total INAD",
+    "includedNote": "dont {count} pris en compte",
     "sanctions": "Critique",
     "watchList": "Surveillance",
     "compliant": "Conforme",
@@ -413,7 +418,21 @@
     "densityTrend": "Évolution de la densité",
     "densityTrendDesc": "Refus d'entrée pour 1'000 passagers (‰) par semestre (uniquement semestres avec données OFAC)",
     "refusals": "Refus d'entrée",
-    "swapSemesters": "Inverser les semestres"
+    "swapSemesters": "Inverser les semestres",
+    "vsPrevious": "vs semestre précédent",
+    "noPaxData": "Pas de données PAX",
+    "inadVsPax": "INAD vs volume de trafic",
+    "inadVsPaxDesc": "Refus d'entrée (barres, gauche) et passagers (ligne, droite) en comparaison — montre si l'évolution INAD suit la croissance du trafic ou s'en écarte",
+    "yoyChange": "Variation vs semestre de l’année précédente",
+    "yoyChangeDesc": "Variation INAD par rapport au même semestre de l'année précédente — corrigée des variations saisonnières (S1 vs S1, S2 vs S2)",
+    "yoyTooltipLabel": "vs semestre année précédente"
+  },
+  "charts": {
+    "densityTitle": "Répartition de la densité par route",
+    "densitySubtitle": "Densité INAD (‰) par route avec seuils de classification",
+    "densityTopNote": "Top {count} routes par densité",
+    "median": "Médiane",
+    "critical": "Critique dès"
   },
   "landing": {
     "title": "Tableau de bord CASA Reporting",

@@ -194,7 +194,9 @@
     "casesExcluded": "Fälle (ausgeschlossen)",
     "count": "Anzahl",
     "routes": "Routen",
-    "grayBarsNote": "Graue Balken zeigen ausgeschlossene Codes an (administrative Gründe)"
+    "grayBarsNote": "Graue Balken zeigen ausgeschlossene Codes an (administrative Gründe)",
+    "monthlyTitle": "Monatsverlauf",
+    "monthlySubtitle": "INAD-Fälle pro Monat im gewählten Semester, gestapelt nach berücksichtigt und ausgeschlossen"
   },
   "pax": {
     "title": "PAX-Daten Übersicht",
@@ -211,7 +213,9 @@
     "top10LastStopsSubtitle": "Nach Anzahl Passagiere (Last Stop)",
     "top10Airlines": "Top 10 Airlines",
     "top10AirlinesSubtitle": "Nach Anzahl Passagiere",
-    "noDataAvailable": "Keine Daten verfügbar"
+    "noDataAvailable": "Keine Daten verfügbar",
+    "monthlyTitle": "Monatsverlauf",
+    "monthlySubtitle": "Passagiere pro Monat im gewählten Semester"
   },
   "docs": {
     "title": "CASA Reporting Dashboard",
@@ -351,6 +355,7 @@
     "dataLoaded": "Daten geladen: {semester}",
     "publishedOn": "Publiziert am {date}",
     "totalInads": "Total INADs",
+    "includedNote": "davon {count} berücksichtigt",
     "sanctions": "Kritisch",
     "watchList": "Beobachtung",
     "compliant": "Konform",
@@ -413,7 +418,21 @@
     "densityTrend": "Dichte-Entwicklung",
     "densityTrendDesc": "Einreiseverweigerungen pro 1'000 Passagiere (‰) pro Semester (nur Semester mit BAZL-Daten)",
     "refusals": "Einreiseverweigerungen",
-    "swapSemesters": "Semester tauschen"
+    "swapSemesters": "Semester tauschen",
+    "vsPrevious": "vs. Vorsemester",
+    "noPaxData": "Keine PAX-Daten",
+    "inadVsPax": "INAD vs. Verkehrsvolumen",
+    "inadVsPaxDesc": "Einreiseverweigerungen (Balken, links) und Passagiere (Linie, rechts) im Vergleich — zeigt, ob die INAD-Entwicklung dem Verkehrswachstum folgt oder davon abweicht",
+    "yoyChange": "Veränderung zum Vorjahressemester",
+    "yoyChangeDesc": "INAD-Veränderung gegenüber demselben Halbjahr des Vorjahres — saisonbereinigt (H1 vs. H1, H2 vs. H2)",
+    "yoyTooltipLabel": "vs. Vorjahressemester"
+  },
+  "charts": {
+    "densityTitle": "Dichte-Verteilung nach Route",
+    "densitySubtitle": "INAD-Dichte (‰) pro Route mit Klassifikations-Schwellenwerten",
+    "densityTopNote": "Top {count} Routen nach Dichte",
+    "median": "Median",
+    "critical": "Kritisch ab"
   },
   "landing": {
     "title": "CASA Reporting Dashboard",
